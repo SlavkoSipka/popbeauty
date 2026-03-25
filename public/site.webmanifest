@@ -1,0 +1,17 @@
+{
+  "name": "Pop Beauty",
+  "short_name": "Pop Beauty",
+  "description": "Prirodna kozmetika — čisti botanički sastojci, slow beauty.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#FAFAF8",
+  "theme_color": "#6B7D5E",
+  "icons": [
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

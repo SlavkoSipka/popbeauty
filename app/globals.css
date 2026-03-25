@@ -1,26 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-white: #FAFAF8;
+  --color-off-white: #F4F2EE;
+  --color-silver-light: #E8E6E1;
+  --color-silver-mid: #C8C5BE;
+  --color-silver-dark: #9E9B94;
+  --color-sage-pale: #E8EDE5;
+  --color-sage-light: #D1DAC9;
+  --color-sage-mid: #A8B89A;
+  --color-sage-dark: #6B7D5E;
+  --color-ink: #1C1C1A;
+  --color-ink-soft: #3D3D38;
+
+  --font-display: 'Cormorant Garamond', serif;
+  --font-body: 'Jost', sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+* {
+  border-radius: 0 !important;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+  background-color: var(--color-white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 300;
+}
+
+/* Scroll Reveal Animations */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 600ms ease-out, transform 600ms ease-out;
+}
+
+[data-reveal].revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Animated underline for links */
+.link-underline {
+  position: relative;
+  text-decoration: none;
+}
+
+.link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 200ms ease;
+}
+
+.link-underline:hover::after {
+  transform: scaleX(1);
+}
+
+/* Scroll indicator breathing animation */
+@keyframes breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.scroll-indicator {
+  animation: breathe 2s ease-in-out infinite;
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--color-sage-dark);
+  outline-offset: 2px;
+}
+
+/* Pill badge exception for border-radius */
+.pill {
+  border-radius: 100px !important;
+}
+
+/* Tab active state */
+.tab-active {
+  border-bottom: 2px solid var(--color-ink);
+}
+
+.tab-inactive {
+  border-bottom: 2px solid var(--color-silver-mid);
+}
+
+/* Section padding responsive */
+@media (max-width: 767px) {
+  .section-padding {
+    padding-top: 60px;
+    padding-bottom: 60px;
+  }
 }
