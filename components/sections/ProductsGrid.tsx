@@ -21,7 +21,7 @@ export default function ProductsGrid() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-silver-light">
+        <div className="flex flex-col gap-3 md:grid md:grid-cols-2 md:gap-[1px] md:bg-silver-light">
           {products.map((product, i) => (
             <div key={product.slug} data-reveal="true" data-reveal-delay={String(i * 100)}>
               <ProductCard
@@ -31,6 +31,7 @@ export default function ProductsGrid() {
                 description={product.description}
                 slug={product.slug}
                 image={product.image}
+                price={product.price}
                 bgColor={i === 0 ? 'white' : 'sage-pale'}
               />
             </div>

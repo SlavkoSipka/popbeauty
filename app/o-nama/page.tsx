@@ -101,7 +101,7 @@ export default function ONamaPage() {
                 },
                 {
                   title: 'Jednostavnost',
-                  text: 'Dva proizvoda, jedan ritual. Vjerujemo da efektivna njega ne mora biti komplikovana.',
+                  text: 'Dva proizvoda, jedan ritual. Verujemo da efektivna njega ne mora biti komplikovana.',
                 },
                 {
                   title: 'Odgovornost',
