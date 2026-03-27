@@ -1,26 +1,20 @@
-'use client';
+import type { Metadata } from 'next';
+import HomePageClient from './HomePageClient';
 
-import { useScrollReveal } from '@/lib/animations';
-import Hero from '@/components/sections/Hero';
-import BrandStatement from '@/components/sections/BrandStatement';
-import ProductsGrid from '@/components/sections/ProductsGrid';
-import IngredientsSection from '@/components/sections/IngredientsSection';
-import RitualSection from '@/components/sections/RitualSection';
-import TestimonialsSection from '@/components/sections/TestimonialsSection';
-import NewsletterSection from '@/components/sections/NewsletterSection';
+const description =
+  'Prirodni kozmetički brand sa dva seruma za lice. Čisti botanički sastojci, transparentna formulacija, slow beauty pristup.';
+
+export const metadata: Metadata = {
+  title: { absolute: 'Pop Beauty — Prirodna kozmetika' },
+  description,
+  alternates: { canonical: '/' },
+  openGraph: {
+    title: 'Pop Beauty — Prirodna kozmetika',
+    description,
+    url: '/',
+  },
+};
 
 export default function Home() {
-  useScrollReveal();
-
-  return (
-    <main>
-      <Hero />
-      <BrandStatement />
-      <ProductsGrid />
-      <IngredientsSection />
-      <RitualSection />
-      <TestimonialsSection />
-      <NewsletterSection />
-    </main>
-  );
+  return <HomePageClient />;
 }

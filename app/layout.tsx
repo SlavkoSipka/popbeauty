@@ -1,9 +1,12 @@
 import type { Metadata, Viewport } from 'next';
+import { GoogleAnalytics } from '@next/third-parties/google';
 import { Cormorant_Garamond, Jost } from 'next/font/google';
 import Navigation from '@/components/layout/Navigation';
 import Footer from '@/components/layout/Footer';
 import CartDrawerLazy from '@/components/cart/CartDrawerLazy';
+import JsonLdOrganization from '@/components/seo/JsonLdOrganization';
 import { CartProvider } from '@/lib/cart-context';
+import { getSiteUrl } from '@/lib/site-url';
 import './globals.css';
 
 const cormorant = Cormorant_Garamond({
@@ -25,10 +28,51 @@ export const viewport: Viewport = {
   themeColor: '#6B7D5E',
 };
 
+const siteUrl = getSiteUrl();
+const siteDescription =
+  'Prirodni kozmetički brand sa dva seruma za lice. Čisti botanički sastojci, transparentna formulacija, slow beauty pristup.';
+const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
+const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
+
 export const metadata: Metadata = {
-  title: 'Pop Beauty — Prirodna kozmetika',
-  description: 'Prirodni kozmetički brand sa dva seruma za lice. Čisti botanički sastojci, transparentna formulacija, slow beauty pristup.',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: 'Pop Beauty — Prirodna kozmetika',
+    template: '%s | Pop Beauty',
+  },
+  description: siteDescription,
+  applicationName: 'Pop Beauty',
   manifest: '/site.webmanifest',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'bs_BA',
+    url: '/',
+    siteName: 'Pop Beauty',
+    title: 'Pop Beauty — Prirodna kozmetika',
+    description: siteDescription,
+    images: [
+      {
+        url: '/android-chrome-512x512.png',
+        width: 512,
+        height: 512,
+        alt: 'Pop Beauty',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Pop Beauty — Prirodna kozmetika',
+    description: siteDescription,
+    images: ['/android-chrome-512x512.png'],
+  },
+  ...(googleVerification
+    ? { verification: { google: googleVerification } }
+    : {}),
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -46,6 +90,7 @@ export default function RootLayout({
   return (
     <html lang="bs" className={`${cormorant.variable} ${jost.variable}`}>
       <body className="min-h-screen flex flex-col bg-white text-ink antialiased">
+        <JsonLdOrganization />
         <CartProvider>
           <Navigation />
           <CartDrawerLazy />
@@ -54,6 +99,7 @@ export default function RootLayout({
           </div>
           <Footer />
         </CartProvider>
+        {gaMeasurementId ? <GoogleAnalytics gaId={gaMeasurementId} /> : null}
       </body>
     </html>
   );
