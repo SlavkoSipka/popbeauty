@@ -105,7 +105,7 @@ SELECT slug, base_price_rsd, name
 FROM public.products
 ORDER BY slug;
 
-SELECT id, site_discount_percent, updated_at
+SELECT id, site_discount_percent, bundle_discount_percent, updated_at
 FROM public.site_settings
 WHERE id = 1;
 

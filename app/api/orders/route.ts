@@ -55,16 +55,23 @@ export async function POST(request: Request) {
   // ── Fetch DB products + site settings ──
   const [{ data: dbProducts }, { data: settingsRow }] = await Promise.all([
     admin.from('products').select('slug, name, base_price_rsd, image_path, volume'),
-    admin.from('site_settings').select('site_discount_percent').eq('id', 1).maybeSingle(),
+    admin
+      .from('site_settings')
+      .select('site_discount_percent, bundle_discount_percent')
+      .eq('id', 1)
+      .maybeSingle(),
   ]);
 
   if (!dbProducts || dbProducts.length === 0) {
     return NextResponse.json({ error: 'Nema proizvoda u bazi.' }, { status: 500 });
   }
 
-  const siteDiscountPercent = Number(
-    (settingsRow as { site_discount_percent?: number | string } | null)?.site_discount_percent ?? 0,
-  );
+  const settings = settingsRow as {
+    site_discount_percent?: number | string;
+    bundle_discount_percent?: number | string;
+  } | null;
+  const siteDiscountPercent = Number(settings?.site_discount_percent ?? 0);
+  const bundleDiscountPercent = Number(settings?.bundle_discount_percent ?? 10);
 
   // ── Parse + validate cart lines against DB products ──
   const lines = parseCartLinesFromBody(body.lineItems, dbProducts as DbProduct[]);
@@ -118,6 +125,7 @@ export async function POST(request: Request) {
       basePriceRsd: l.basePriceRsd,
     })),
     siteDiscountPercent,
+    bundleDiscountPercent: Number.isFinite(bundleDiscountPercent) ? bundleDiscountPercent : 10,
     referralDiscountPercent: customerDiscountPercent,
   });
 

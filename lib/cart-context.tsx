@@ -27,6 +27,8 @@ type StoredShape = {
   referralDiscountPercent: number | null;
 };
 
+export type CartLineInput = { slug: string; name: string; price: string; image: string };
+
 type CartContextValue = {
   items: CartLine[];
   itemCount: number;
@@ -34,7 +36,9 @@ type CartContextValue = {
   openCart: () => void;
   closeCart: () => void;
   toggleCart: () => void;
-  addItem: (p: { slug: string; name: string; price: string; image: string }) => void;
+  addItem: (p: CartLineInput) => void;
+  /** Tačno po 1 kom oba proizvoda — ostale stavke u korpi ostaju; ova dva slug-a se zamene. */
+  addBundlePair: (a: CartLineInput, b: CartLineInput) => void;
   removeLine: (slug: string) => void;
   setQuantity: (slug: string, quantity: number) => void;
   clearCart: () => void;
@@ -110,21 +114,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const closeCart = useCallback(() => setIsOpen(false), []);
   const toggleCart = useCallback(() => setIsOpen((o) => !o), []);
 
-  const addItem = useCallback(
-    (p: { slug: string; name: string; price: string; image: string }) => {
-      setItems((prev) => {
-        const i = prev.findIndex((x) => x.slug === p.slug);
-        if (i >= 0) {
-          const next = [...prev];
-          next[i] = { ...next[i], quantity: next[i].quantity + 1 };
-          return next;
-        }
-        return [...prev, { ...p, quantity: 1 }];
-      });
-      setIsOpen(true);
-    },
-    [],
-  );
+  const addItem = useCallback((p: CartLineInput) => {
+    setItems((prev) => {
+      const i = prev.findIndex((x) => x.slug === p.slug);
+      if (i >= 0) {
+        const next = [...prev];
+        next[i] = { ...next[i], quantity: next[i].quantity + 1 };
+        return next;
+      }
+      return [...prev, { ...p, quantity: 1 }];
+    });
+    setIsOpen(true);
+  }, []);
+
+  const addBundlePair = useCallback((a: CartLineInput, b: CartLineInput) => {
+    setItems((prev) => {
+      const rest = prev.filter((x) => x.slug !== a.slug && x.slug !== b.slug);
+      return [...rest, { ...a, quantity: 1 }, { ...b, quantity: 1 }];
+    });
+    setIsOpen(true);
+  }, []);
 
   const removeLine = useCallback((slug: string) => {
     setItems((prev) => prev.filter((x) => x.slug !== slug));
@@ -159,12 +168,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       items, itemCount, isOpen, openCart, closeCart, toggleCart,
-      addItem, removeLine, setQuantity, clearCart,
+      addItem, addBundlePair, removeLine, setQuantity, clearCart,
       setReferral, clearReferral, referralCode, referralDiscountPercent,
     }),
     [
       items, itemCount, isOpen, openCart, closeCart, toggleCart,
-      addItem, removeLine, setQuantity, clearCart,
+      addItem, addBundlePair, removeLine, setQuantity, clearCart,
       setReferral, clearReferral, referralCode, referralDiscountPercent,
     ],
   );

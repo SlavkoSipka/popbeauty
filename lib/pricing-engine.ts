@@ -4,14 +4,14 @@
  * Waterfall:
  *   1. Subtotal = SUM(base_price * qty)
  *   2. Product discount (mutually exclusive):
- *      - Bundle 10% if BOTH slugs present
+ *      - Bundle % if BOTH slugs present (bundle_discount_percent iz site_settings)
  *      - Site discount % otherwise (if > 0)
  *   3. Referral discount (per-creator customer_discount_percent) on top of #2
  *   4. Promo kod (discount_codes) — procenat na iznos posle referral popusta
  *   5. Creator commission = commission_percent% of final total (handled outside this module)
  */
 
-export const BUNDLE_DISCOUNT_PERCENT = 10;
+/** Slugovi koji čine paket (oba moraju biti u korpi sa qty > 0). */
 export const BUNDLE_SLUGS = ['uljani-serum', 'vodeni-serum'] as const;
 
 export type PricingLine = {
@@ -23,6 +23,8 @@ export type PricingLine = {
 export type PricingInput = {
   lines: PricingLine[];
   siteDiscountPercent: number;
+  /** Procenat paketnog popusta (iz site_settings) kad su oba seruma u korpi. */
+  bundleDiscountPercent: number;
   referralDiscountPercent: number;
   /** Promo kod iz discount_codes (0 = nema). Primenjuje se na iznos posle referral popusta. */
   promoDiscountPercent?: number;
@@ -49,7 +51,11 @@ function round2(n: number): number {
 }
 
 export function computePricing(input: PricingInput): PricingResult {
-  const { lines, siteDiscountPercent, referralDiscountPercent } = input;
+  const { lines, siteDiscountPercent, bundleDiscountPercent, referralDiscountPercent } = input;
+  const bundlePct = Math.min(
+    100,
+    Math.max(0, Number(bundleDiscountPercent) || 0),
+  );
   const promoDiscountPercent =
     input.promoDiscountPercent != null && input.promoDiscountPercent > 0
       ? input.promoDiscountPercent
@@ -67,7 +73,7 @@ export function computePricing(input: PricingInput): PricingResult {
 
   if (isBundle) {
     discountType = 'bundle';
-    discountPercent = BUNDLE_DISCOUNT_PERCENT;
+    discountPercent = bundlePct;
   } else if (siteDiscountPercent > 0) {
     discountType = 'site';
     discountPercent = siteDiscountPercent;

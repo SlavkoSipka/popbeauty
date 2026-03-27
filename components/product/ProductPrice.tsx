@@ -2,7 +2,6 @@
 
 import { formatRsd } from '@/lib/price';
 import { usePricingData } from '@/lib/use-pricing-data';
-import { BUNDLE_DISCOUNT_PERCENT } from '@/lib/pricing-engine';
 
 type Props = {
   slug: string;
@@ -10,7 +9,7 @@ type Props = {
 };
 
 export default function ProductPrice({ slug, fallbackPrice }: Props) {
-  const { priceMap, siteDiscountPercent, loaded } = usePricingData();
+  const { priceMap, siteDiscountPercent, bundleDiscountPercent, loaded } = usePricingData();
 
   if (!loaded) {
     return (
@@ -41,7 +40,7 @@ export default function ProductPrice({ slug, fallbackPrice }: Props) {
           </span>
         </div>
         <p className="font-body font-[300] text-[11px] text-sage-mid mt-1">
-          Oba seruma zajedno? Paketni popust {BUNDLE_DISCOUNT_PERCENT}% na ukupnu cenu.
+          Oba seruma zajedno? Paketni popust {bundleDiscountPercent}% na ukupnu cenu.
         </p>
       </div>
     );
@@ -53,7 +52,7 @@ export default function ProductPrice({ slug, fallbackPrice }: Props) {
         {formatRsd(basePrice)}
       </span>
       <p className="font-body font-[300] text-[11px] text-silver-mid mt-1">
-        Oba seruma zajedno? Paketni popust {BUNDLE_DISCOUNT_PERCENT}% na ukupnu cenu.
+        Oba seruma zajedno? Paketni popust {bundleDiscountPercent}% na ukupnu cenu.
       </p>
     </div>
   );

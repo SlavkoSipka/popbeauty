@@ -13,7 +13,7 @@ export default function CartDrawer() {
     items, itemCount, isOpen, closeCart, removeLine, setQuantity,
     setReferral, clearReferral, referralCode, referralDiscountPercent,
   } = useCart();
-  const { priceMap, siteDiscountPercent, loaded } = usePricingData();
+  const { priceMap, siteDiscountPercent, bundleDiscountPercent, loaded } = usePricingData();
 
   const [codeInput, setCodeInput] = useState('');
   const [codeError, setCodeError] = useState<string | null>(null);
@@ -37,9 +37,10 @@ export default function CartDrawer() {
         basePriceRsd: priceMap.get(l.slug) ?? 0,
       })),
       siteDiscountPercent,
+      bundleDiscountPercent,
       referralDiscountPercent: referralDiscountPercent ?? 0,
     });
-  }, [items, priceMap, siteDiscountPercent, loaded, referralDiscountPercent]);
+  }, [items, priceMap, siteDiscountPercent, bundleDiscountPercent, loaded, referralDiscountPercent]);
 
   async function applyCode() {
     const raw = codeInput.trim();

@@ -1,21 +1,22 @@
 'use client';
 
-import { useScrollReveal } from '@/lib/animations';
+import Image from 'next/image';
 import Link from 'next/link';
+import { useScrollReveal } from '@/lib/animations';
 
 export default function ONamaPage() {
   useScrollReveal();
 
   return (
     <main>
-      {/* Hero */}
+      {/* Hero — na mobilnom širok band; na desktopu nizak pojas */}
       <section className="relative">
-        <div className="aspect-[5/2] w-full bg-sage-light" />
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[rgba(28,28,26,0.5)] to-transparent p-6 md:p-16">
-          <div className="mx-auto max-w-[1280px]">
+        <div className="aspect-[5/2] w-full bg-sage-light md:aspect-auto md:h-[5.5rem] lg:h-24" />
+        <div className="absolute inset-0 flex items-end bg-gradient-to-t from-[rgba(28,28,26,0.45)] to-transparent p-6 pb-5 md:items-center md:justify-start md:from-[rgba(28,28,26,0.35)] md:to-transparent md:p-6 md:py-0">
+          <div className="mx-auto w-full max-w-[1280px] px-0 md:px-6">
             <h1
               data-reveal="true"
-              className="font-display font-[300] text-[clamp(36px,5vw,64px)] text-white"
+              className="font-display font-[300] text-[clamp(36px,5vw,64px)] text-white md:text-[clamp(26px,3.5vw,36px)]"
             >
               O nama
             </h1>
@@ -74,7 +75,18 @@ export default function ONamaPage() {
 
           {/* Block 2 — Testing & community */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-32">
-            <div data-reveal="true" className="order-2 md:order-1 aspect-[4/3] bg-off-white" />
+            <div
+              data-reveal="true"
+              className="order-2 md:order-1 relative aspect-[4/3] overflow-hidden bg-off-white"
+            >
+              <Image
+                src="/put.webp"
+                alt="Teodora — testiranje i razvoj Pop Beauty formula na prijateljicama"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </div>
             <div className="order-1 md:order-2">
               <span
                 data-reveal="true"
@@ -145,7 +157,19 @@ export default function ONamaPage() {
                 koje koža prepoznaje i koristi.
               </p>
             </div>
-            <div data-reveal="true" data-reveal-delay="100" className="aspect-[4/3] bg-sage-pale" />
+            <div
+              data-reveal="true"
+              data-reveal-delay="100"
+              className="relative aspect-[4/3] overflow-hidden bg-sage-pale"
+            >
+              <Image
+                src="/oba.webp"
+                alt="Pop Beauty — uljani i vodeni serum, ritual od dva koraka"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </div>
           </div>
 
           {/* Values */}

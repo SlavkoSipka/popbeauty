@@ -11,6 +11,7 @@ import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import ReviewCard from '@/components/ui/ReviewCard';
 import ProductPrice from '@/components/product/ProductPrice';
+import ProductBundleCta from '@/components/product/ProductBundleCta';
 
 const product = products[0];
 const otherProduct = products[1];
@@ -114,6 +115,21 @@ export default function UljaniSerumPage() {
                   Dodaj u korpu
                 </Button>
               </div>
+
+              <ProductBundleCta
+                lineUljani={{
+                  slug: products[0].slug,
+                  name: products[0].name,
+                  price: products[0].price,
+                  image: products[0].image,
+                }}
+                lineVodeni={{
+                  slug: products[1].slug,
+                  name: products[1].name,
+                  price: products[1].price,
+                  image: products[1].image,
+                }}
+              />
 
               <div data-reveal="true" data-reveal-delay="450" className="flex gap-6 justify-center">
                 {['Prirodno', 'Vegan', 'Cruelty-free'].map((label) => (

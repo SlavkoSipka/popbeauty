@@ -77,4 +77,6 @@ export type DbProduct = {
 
 export type DbSiteSettings = {
   site_discount_percent: number;
+  /** Posle migracije; ako nema u redu, tretira se kao 10. */
+  bundle_discount_percent?: number;
 };

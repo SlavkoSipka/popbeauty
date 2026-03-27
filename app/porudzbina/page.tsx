@@ -19,7 +19,7 @@ export default function PorudzbinaPage() {
     referralCode, referralDiscountPercent,
     setReferral, clearReferral,
   } = useCart();
-  const { priceMap, siteDiscountPercent, loaded } = usePricingData();
+  const { priceMap, siteDiscountPercent, bundleDiscountPercent, loaded } = usePricingData();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,9 +48,10 @@ export default function PorudzbinaPage() {
         basePriceRsd: priceMap.get(l.slug) ?? 0,
       })),
       siteDiscountPercent,
+      bundleDiscountPercent,
       referralDiscountPercent: referralDiscountPercent ?? 0,
     });
-  }, [items, priceMap, siteDiscountPercent, loaded, referralDiscountPercent]);
+  }, [items, priceMap, siteDiscountPercent, bundleDiscountPercent, loaded, referralDiscountPercent]);
 
   const totalForApi = pricing?.totalRsd ?? 0;
 

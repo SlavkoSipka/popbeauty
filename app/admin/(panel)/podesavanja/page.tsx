@@ -8,13 +8,22 @@ export default async function AdminPodesavanjaPage() {
 
   const { data } = await supabase
     .from('site_settings')
-    .select('site_discount_percent')
+    .select('site_discount_percent, bundle_discount_percent')
     .eq('id', 1)
     .maybeSingle();
 
-  const siteDiscount = Number(
-    (data as { site_discount_percent?: number | string } | null)?.site_discount_percent ?? 0,
-  );
+  const row = data as {
+    site_discount_percent?: number | string;
+    bundle_discount_percent?: number | string;
+  } | null;
 
-  return <AdminPodesavanjaClient initialSiteDiscount={siteDiscount} />;
+  const siteDiscount = Number(row?.site_discount_percent ?? 0);
+  const bundleDiscount = Number(row?.bundle_discount_percent ?? 10);
+
+  return (
+    <AdminPodesavanjaClient
+      initialSiteDiscount={siteDiscount}
+      initialBundleDiscount={Number.isFinite(bundleDiscount) ? bundleDiscount : 10}
+    />
+  );
 }
