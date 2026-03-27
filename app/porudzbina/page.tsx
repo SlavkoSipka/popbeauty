@@ -120,27 +120,32 @@ export default function PorudzbinaPage() {
     }
   };
 
+  const fieldInputClass =
+    'w-full border border-silver-light bg-transparent px-3 py-2 font-body font-[300] text-[13px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none transition-colors duration-200 md:px-4 md:py-3 md:text-[14px]';
+  const fieldLabelClass =
+    'block font-body font-[400] text-[10px] uppercase tracking-[0.12em] text-ink mb-1 md:mb-2 md:text-[11px] md:tracking-[0.14em]';
+
   return (
     <main>
-      <section className="py-[80px] md:py-[120px] section-padding">
-        <div className="mx-auto max-w-[960px] px-6">
+      <section className="py-10 max-md:pt-16 md:py-[120px] section-padding">
+        <div className="mx-auto max-w-[960px] px-4 md:px-6">
           <span
             data-reveal="true"
-            className="block font-body font-[300] text-[11px] uppercase tracking-[0.2em] text-silver-dark mb-6 text-center"
+            className="block font-body font-[300] text-[10px] uppercase tracking-[0.2em] text-silver-dark mb-4 text-center md:mb-6 md:text-[11px]"
           >
             Pop Beauty
           </span>
           <h1
             data-reveal="true"
             data-reveal-delay="100"
-            className="font-display font-[300] text-[clamp(32px,5vw,48px)] text-ink text-center mb-4"
+            className="font-display font-[300] text-[clamp(26px,6vw,48px)] text-ink text-center mb-3 md:mb-4"
           >
             Porudžbina i dostava
           </h1>
           <p
             data-reveal="true"
             data-reveal-delay="200"
-            className="font-body font-[300] text-[15px] leading-[1.8] text-silver-dark text-center mb-14 max-w-[520px] mx-auto"
+            className="font-body font-[300] text-[13px] leading-[1.65] text-silver-dark text-center mb-8 max-w-[520px] mx-auto md:text-[15px] md:leading-[1.8] md:mb-14"
           >
             Plaćanje pouzećem. Unesite podatke za slanje — potvrdićemo porudžbinu putem emaila ili telefona.
           </p>
@@ -149,9 +154,9 @@ export default function PorudzbinaPage() {
             <div
               data-reveal="true"
               data-reveal-delay="300"
-              className="text-center py-16 border border-silver-light max-w-[480px] mx-auto"
+              className="text-center py-12 border border-silver-light max-w-[480px] mx-auto md:py-16"
             >
-              <p className="font-body font-[300] text-[15px] text-silver-dark mb-8">
+              <p className="font-body font-[300] text-[14px] text-silver-dark mb-6 md:mb-8 md:text-[15px]">
                 Korpa je prazna. Dodajte proizvode pre nego što nastavite.
               </p>
               <Link
@@ -165,15 +170,15 @@ export default function PorudzbinaPage() {
             <div
               data-reveal="true"
               data-reveal-delay="300"
-              className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-12 lg:gap-16 items-start"
+              className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8 lg:gap-16 items-start"
             >
-              <form onSubmit={handleSubmit} className="space-y-6 order-2 lg:order-1">
+              <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6 order-2 lg:order-1">
                 {/* Promo kod (= kreatorov referral) */}
-                <div className="border border-silver-light p-5 md:p-6 bg-off-white/40">
-                  <label className="block font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink mb-2">
+                <div className="border border-silver-light p-4 md:p-6 bg-off-white/40">
+                  <label className={fieldLabelClass}>
                     Promo kod
                   </label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1.5 md:gap-2">
                     <input
                       type="text"
                       value={codeInput}
@@ -181,13 +186,13 @@ export default function PorudzbinaPage() {
                       onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void applyCode(); } }}
                       placeholder="Unesi kod"
                       autoCapitalize="characters"
-                      className="min-w-0 flex-1 border border-silver-light bg-white px-4 py-3 font-body font-[300] text-[14px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none transition-colors duration-200 uppercase"
+                      className="min-w-0 flex-1 border border-silver-light bg-white px-3 py-2 font-body font-[300] text-[13px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none transition-colors duration-200 uppercase md:px-4 md:py-3 md:text-[14px]"
                     />
                     <button
                       type="button"
                       onClick={() => void applyCode()}
                       disabled={codeChecking}
-                      className="shrink-0 border border-ink bg-transparent px-4 py-3 font-body font-[400] text-[11px] uppercase tracking-[0.12em] text-ink hover:bg-ink hover:text-white transition-colors disabled:opacity-50"
+                      className="shrink-0 border border-ink bg-transparent px-3 py-2 font-body font-[400] text-[10px] uppercase tracking-[0.1em] text-ink hover:bg-ink hover:text-white transition-colors disabled:opacity-50 md:px-4 md:py-3 md:text-[11px] md:tracking-[0.12em]"
                     >
                       {codeChecking ? '…' : 'Proveri'}
                     </button>
@@ -219,147 +224,163 @@ export default function PorudzbinaPage() {
                   ) : null}
                 </div>
 
-                <h2 className="font-display font-[300] text-[20px] text-ink mb-2 pt-2">
+                <h2 className="font-display font-[300] text-[17px] text-ink mb-1.5 pt-1 md:mb-2 md:pt-2 md:text-[20px]">
                   Podaci za dostavu
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-6">
                   <div>
-                    <label className="block font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink mb-2">
+                    <label className={fieldLabelClass} htmlFor="checkout-firstName">
                       Ime
                     </label>
                     <input
+                      id="checkout-firstName"
                       type="text"
                       name="firstName"
                       required
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                       autoComplete="given-name"
-                      className="w-full border border-silver-light bg-transparent px-4 py-3 font-body font-[300] text-[14px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none transition-colors duration-200"
+                      className={fieldInputClass}
                       placeholder="Ime"
                     />
                   </div>
                   <div>
-                    <label className="block font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink mb-2">
+                    <label className={fieldLabelClass} htmlFor="checkout-lastName">
                       Prezime
                     </label>
                     <input
+                      id="checkout-lastName"
                       type="text"
                       name="lastName"
                       required
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       autoComplete="family-name"
-                      className="w-full border border-silver-light bg-transparent px-4 py-3 font-body font-[300] text-[14px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none transition-colors duration-200"
+                      className={fieldInputClass}
                       placeholder="Prezime"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink mb-2">
+                  <label className={fieldLabelClass} htmlFor="checkout-email">
                     Email
                   </label>
                   <input
+                    id="checkout-email"
                     type="email"
                     name="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="email"
-                    className="w-full border border-silver-light bg-transparent px-4 py-3 font-body font-[300] text-[14px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none transition-colors duration-200"
+                    className={fieldInputClass}
                     placeholder="vaš@email.com"
                   />
                 </div>
                 <div>
-                  <label className="block font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink mb-2">
+                  <label className={fieldLabelClass} htmlFor="checkout-phone">
                     Telefon
                   </label>
                   <input
+                    id="checkout-phone"
                     type="tel"
                     name="phone"
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     autoComplete="tel"
-                    className="w-full border border-silver-light bg-transparent px-4 py-3 font-body font-[300] text-[14px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none transition-colors duration-200"
+                    className={fieldInputClass}
                     placeholder="+381 …"
                   />
                 </div>
                 <div>
-                  <label className="block font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink mb-2">
+                  <label className={fieldLabelClass} htmlFor="checkout-address">
                     Adresa (ulica i broj)
                   </label>
                   <input
+                    id="checkout-address"
                     type="text"
                     name="address"
                     required
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     autoComplete="street-address"
-                    className="w-full border border-silver-light bg-transparent px-4 py-3 font-body font-[300] text-[14px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none transition-colors duration-200"
+                    className={fieldInputClass}
                     placeholder="Ulica i broj"
                   />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-6">
                   <div>
-                    <label className="block font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink mb-2">
+                    <label className={fieldLabelClass} htmlFor="checkout-city">
                       Grad
                     </label>
                     <input
+                      id="checkout-city"
                       type="text"
                       name="city"
                       required
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                       autoComplete="address-level2"
-                      className="w-full border border-silver-light bg-transparent px-4 py-3 font-body font-[300] text-[14px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none transition-colors duration-200"
+                      className={fieldInputClass}
                       placeholder="Grad"
                     />
                   </div>
                   <div>
-                    <label className="block font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink mb-2">
+                    <label className={fieldLabelClass} htmlFor="checkout-postal">
                       Poštanski broj
                     </label>
                     <input
+                      id="checkout-postal"
                       type="text"
                       name="postal"
                       required
                       value={postal}
                       onChange={(e) => setPostal(e.target.value)}
                       autoComplete="postal-code"
-                      className="w-full border border-silver-light bg-transparent px-4 py-3 font-body font-[300] text-[14px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none transition-colors duration-200"
+                      className={fieldInputClass}
                       placeholder="npr. 11000"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink mb-2">
+                  <label className={fieldLabelClass} htmlFor="checkout-note">
                     Napomena{' '}
                     <span className="font-[300] normal-case tracking-normal text-silver-mid">
                       (opciono)
                     </span>
                   </label>
                   <textarea
+                    id="checkout-note"
                     name="note"
-                    rows={3}
+                    rows={2}
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
-                    className="w-full border border-silver-light bg-transparent px-4 py-3 font-body font-[300] text-[14px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none transition-colors duration-200 resize-none"
+                    className={`${fieldInputClass} resize-none md:min-h-[5.5rem]`}
                     placeholder="Npr. vreme dostave, dodatne napomene…"
                   />
                 </div>
                 {error ? (
-                  <p className="font-body font-[300] text-[13px] text-red-800" role="alert">
+                  <p className="font-body font-[300] text-[12px] text-red-800 md:text-[13px]" role="alert">
                     {error}
                   </p>
                 ) : null}
-                <Button variant="filled" type="submit" fullWidth disabled={loading || !loaded}>
+                <Button
+                  variant="filled"
+                  type="submit"
+                  fullWidth
+                  disabled={loading || !loaded}
+                  className="py-2 text-[10px] tracking-[0.12em] md:py-[10px] md:text-[11px] md:tracking-[0.14em]"
+                >
                   {loading ? 'Šaljem…' : 'Pošalji porudžbinu'}
                 </Button>
               </form>
 
-              <aside className="order-1 lg:order-2 border border-silver-light p-6 lg:sticky lg:top-28">
-                <h2 className="font-display font-[300] text-[18px] text-ink mb-6">Pregled korpe</h2>
-                <ul className="flex flex-col gap-5 mb-6">
+              <aside className="order-1 lg:order-2 border border-silver-light p-4 md:p-6 lg:sticky lg:top-28">
+                <h2 className="font-display font-[300] text-[16px] text-ink mb-4 md:mb-6 md:text-[18px]">
+                  Pregled korpe
+                </h2>
+                <ul className="flex flex-col gap-3 mb-4 md:mb-6 md:gap-5">
                   {items.map((line) => (
                     <li key={line.slug} className="flex gap-3">
                       <div className="relative h-16 w-14 shrink-0 overflow-hidden bg-sage-pale">
@@ -372,17 +393,17 @@ export default function PorudzbinaPage() {
                         />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-body font-[400] text-[14px] text-ink leading-snug">
+                        <p className="font-body font-[400] text-[13px] text-ink leading-snug md:text-[14px]">
                           {line.name}
                         </p>
-                        <p className="font-body font-[300] text-[12px] text-silver-dark mt-0.5">
+                        <p className="font-body font-[300] text-[11px] text-silver-dark mt-0.5 md:text-[12px]">
                           {loaded
                             ? displayUnitPriceForLine(line, priceMap)
                             : displayUnitPriceForLine(line)}{' '}
                           × {line.quantity}
                         </p>
                       </div>
-                      <p className="font-body font-[400] text-[13px] text-ink tabular-nums shrink-0">
+                      <p className="font-body font-[400] text-[12px] text-ink tabular-nums shrink-0 md:text-[13px]">
                         {loaded
                           ? formatRsd(lineSubtotalRsd(line, priceMap))
                           : formatRsd(lineSubtotalRsd(line))}
@@ -391,24 +412,24 @@ export default function PorudzbinaPage() {
                   ))}
                 </ul>
 
-                <div className="border-t border-silver-light pt-4 space-y-2">
+                <div className="border-t border-silver-light pt-3 space-y-1.5 md:space-y-2 md:pt-4">
                   {pricing && pricing.discountType && (
                     <>
                       <div className="flex justify-between gap-2">
-                        <span className="font-body font-[300] text-[12px] text-silver-dark">
+                        <span className="font-body font-[300] text-[11px] text-silver-dark md:text-[12px]">
                           Bez popusta
                         </span>
-                        <span className="font-body font-[300] text-[13px] text-silver-dark tabular-nums line-through">
+                        <span className="font-body font-[300] text-[12px] text-silver-dark tabular-nums line-through md:text-[13px]">
                           {formatRsd(pricing.subtotalRsd)}
                         </span>
                       </div>
                       <div className="flex justify-between gap-2">
-                        <span className="font-body font-[300] text-[12px] text-sage-mid">
+                        <span className="font-body font-[300] text-[11px] text-sage-mid md:text-[12px]">
                           {pricing.discountType === 'bundle'
                             ? `Paket popust −${pricing.discountPercent}%`
                             : `Popust −${pricing.discountPercent}%`}
                         </span>
-                        <span className="font-body font-[300] text-[12px] text-sage-mid tabular-nums">
+                        <span className="font-body font-[300] text-[11px] text-sage-mid tabular-nums md:text-[12px]">
                           −{formatRsd(pricing.discountAmountRsd)}
                         </span>
                       </div>
@@ -416,19 +437,19 @@ export default function PorudzbinaPage() {
                   )}
                   {pricing && pricing.referralDiscountPercent > 0 && (
                     <div className="flex justify-between gap-2">
-                      <span className="font-body font-[300] text-[12px] text-sage-dark">
+                      <span className="font-body font-[300] text-[11px] text-sage-dark md:text-[12px]">
                         Promo kod −{pricing.referralDiscountPercent}%
                       </span>
-                      <span className="font-body font-[300] text-[12px] text-sage-dark tabular-nums">
+                      <span className="font-body font-[300] text-[11px] text-sage-dark tabular-nums md:text-[12px]">
                         −{formatRsd(pricing.referralDiscountRsd)}
                       </span>
                     </div>
                   )}
-                  <div className="flex items-end justify-between gap-4 pt-2">
-                    <span className="font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink">
+                  <div className="flex items-end justify-between gap-3 pt-1.5 md:gap-4 md:pt-2">
+                    <span className="font-body font-[400] text-[10px] uppercase tracking-[0.12em] text-ink md:text-[11px] md:tracking-[0.14em]">
                       Ukupno
                     </span>
-                    <span className="font-display font-[400] text-[22px] text-ink tabular-nums leading-none">
+                    <span className="font-display font-[400] text-[19px] text-ink tabular-nums leading-none md:text-[22px]">
                       {pricing ? formatRsd(pricing.totalRsd) : '…'}
                     </span>
                   </div>

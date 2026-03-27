@@ -75,19 +75,19 @@ export default function CartDrawer() {
       />
 
       <div
-        className={`fixed top-0 right-0 z-[110] flex h-full w-full max-w-md flex-col border-l border-silver-light bg-white shadow-[-8px_0_32px_rgba(28,28,26,0.08)] transition-transform duration-300 ease-out ${
+        className={`fixed top-0 right-0 z-[110] flex h-[100dvh] max-h-[100dvh] min-h-0 w-full max-w-md flex-col border-l border-silver-light bg-white shadow-[-8px_0_32px_rgba(28,28,26,0.08)] transition-transform duration-300 ease-out ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         role="dialog"
         aria-modal="true"
         aria-label="Korpa"
       >
-        <div className="flex items-center justify-between border-b border-silver-light px-6 py-5">
-          <h2 className="font-display font-[300] text-[22px] text-ink">Korpa</h2>
+        <div className="flex shrink-0 items-center justify-between border-b border-silver-light px-4 py-3.5 md:px-6 md:py-5">
+          <h2 className="font-display font-[300] text-[18px] text-ink md:text-[22px]">Korpa</h2>
           <button
             type="button"
             onClick={closeCart}
-            className="flex h-10 w-10 items-center justify-center text-ink hover:opacity-60"
+            className="flex h-9 w-9 items-center justify-center text-ink hover:opacity-60 md:h-10 md:w-10"
             aria-label="Zatvori korpu"
           >
             <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1">
@@ -97,43 +97,43 @@ export default function CartDrawer() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 md:px-6 md:py-6">
           {itemCount === 0 ? (
             <div className="py-8 text-center">
-              <p className="font-body font-[300] text-[15px] text-silver-dark mb-8">
+              <p className="font-body font-[300] text-[14px] text-silver-dark mb-6 md:text-[15px] md:mb-8">
                 Korpa je prazna. Dodaj proizvode sa stranica seruma.
               </p>
               <Link
                 href="/#proizvodi"
                 onClick={closeCart}
-                className="inline-flex items-center justify-center border border-ink bg-ink text-white px-6 py-[10px] font-body font-[400] text-[11px] uppercase tracking-[0.14em] hover:bg-transparent hover:text-ink transition-colors duration-200"
+                className="inline-flex items-center justify-center border border-ink bg-ink text-white px-4 py-2 font-body font-[400] text-[10px] uppercase tracking-[0.12em] hover:bg-transparent hover:text-ink transition-colors duration-200 md:px-6 md:py-[10px] md:text-[11px] md:tracking-[0.14em]"
               >
                 Pogledaj proizvode
               </Link>
             </div>
           ) : (
             <>
-              <p className="font-body font-[300] text-[12px] text-silver-mid mb-6">
+              <p className="font-body font-[300] text-[11px] text-silver-mid mb-4 md:mb-6 md:text-[12px]">
                 {itemCount}{' '}
                 {itemCount === 1 ? 'stavka' : itemCount < 5 ? 'stavke' : 'stavki'}
               </p>
-              <ul className="flex flex-col gap-6">
+              <ul className="flex flex-col gap-4 md:gap-6">
                 {items.map((line) => (
                   <li
                     key={line.slug}
-                    className="flex gap-4 border-b border-silver-light pb-6 last:border-0"
+                    className="flex gap-3 border-b border-silver-light pb-4 last:border-0 md:gap-4 md:pb-6"
                   >
                     <Link
                       href={`/proizvodi/${line.slug}`}
                       onClick={closeCart}
-                      className="relative h-24 w-[4.5rem] shrink-0 overflow-hidden bg-sage-pale"
+                      className="relative h-20 w-16 shrink-0 overflow-hidden bg-sage-pale md:h-24 md:w-[4.5rem]"
                     >
                       <Image
                         src={line.image}
                         alt={line.name}
                         fill
                         className="object-contain object-center p-1"
-                        sizes="72px"
+                        sizes="(max-width: 768px) 64px, 72px"
                       />
                     </Link>
                     <div className="flex min-w-0 flex-1 flex-col justify-between gap-2">
@@ -141,7 +141,7 @@ export default function CartDrawer() {
                         <Link
                           href={`/proizvodi/${line.slug}`}
                           onClick={closeCart}
-                          className="font-display font-[400] text-[17px] text-ink link-underline"
+                          className="font-display font-[400] text-[15px] text-ink link-underline md:text-[17px]"
                         >
                           {line.name}
                         </Link>
@@ -163,23 +163,23 @@ export default function CartDrawer() {
                           ) : null}
                         </div>
                       </div>
-                      <div className="flex flex-wrap items-center gap-3">
-                        <div className="flex items-center gap-2 border border-silver-light">
+                      <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                        <div className="flex items-center border border-silver-light">
                           <button
                             type="button"
                             aria-label="Smanji količinu"
-                            className="px-2.5 py-1 font-body text-[14px] text-ink hover:bg-off-white"
+                            className="flex h-8 w-8 items-center justify-center font-body text-[16px] leading-none text-ink hover:bg-off-white md:h-auto md:w-auto md:px-2.5 md:py-1 md:text-[14px]"
                             onClick={() => setQuantity(line.slug, line.quantity - 1)}
                           >
                             −
                           </button>
-                          <span className="min-w-[1.75rem] text-center font-body font-[400] text-[13px]">
+                          <span className="min-w-[1.35rem] text-center font-body font-[400] text-[12px] md:min-w-[1.75rem] md:text-[13px]">
                             {line.quantity}
                           </span>
                           <button
                             type="button"
                             aria-label="Povećaj količinu"
-                            className="px-2.5 py-1 font-body text-[14px] text-ink hover:bg-off-white"
+                            className="flex h-8 w-8 items-center justify-center font-body text-[16px] leading-none text-ink hover:bg-off-white md:h-auto md:w-auto md:px-2.5 md:py-1 md:text-[14px]"
                             onClick={() => setQuantity(line.slug, line.quantity + 1)}
                           >
                             +
@@ -187,7 +187,7 @@ export default function CartDrawer() {
                         </div>
                         <button
                           type="button"
-                          className="font-body font-[300] text-[11px] text-silver-mid underline underline-offset-2 hover:text-ink"
+                          className="font-body font-[300] text-[10px] text-silver-mid underline underline-offset-2 hover:text-ink md:text-[11px]"
                           onClick={() => removeLine(line.slug)}
                         >
                           Ukloni
@@ -202,13 +202,13 @@ export default function CartDrawer() {
         </div>
 
         {items.length > 0 && (
-          <div className="border-t border-silver-light px-6 py-5">
+          <div className="mt-auto shrink-0 border-t border-silver-light bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-6px_24px_rgba(28,28,26,0.06)] md:px-6 md:py-5 md:pb-5 md:shadow-none">
             {/* Promo kod (= kreatorov referral kod) */}
-            <div className="mb-5 border-b border-silver-light pb-5">
-              <label className="block font-body font-[400] text-[10px] uppercase tracking-[0.14em] text-ink mb-1.5">
+            <div className="mb-3 border-b border-silver-light pb-3 md:mb-5 md:pb-5">
+              <label className="block font-body font-[400] text-[9px] uppercase tracking-[0.12em] text-ink mb-1 md:text-[10px] md:tracking-[0.14em] md:mb-1.5">
                 Promo kod
               </label>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5 md:gap-2">
                 <input
                   type="text"
                   value={codeInput}
@@ -216,13 +216,13 @@ export default function CartDrawer() {
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void applyCode(); } }}
                   placeholder="Unesi kod"
                   autoCapitalize="characters"
-                  className="min-w-0 flex-1 border border-silver-light bg-white px-3 py-2.5 font-body font-[300] text-[13px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none uppercase"
+                  className="min-w-0 flex-1 border border-silver-light bg-white px-2.5 py-2 font-body font-[300] text-[12px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none uppercase md:px-3 md:py-2.5 md:text-[13px]"
                 />
                 <button
                   type="button"
                   onClick={() => void applyCode()}
                   disabled={checking}
-                  className="shrink-0 border border-ink bg-transparent px-3 py-2 font-body font-[400] text-[10px] uppercase tracking-[0.1em] text-ink hover:bg-ink hover:text-white transition-colors disabled:opacity-50"
+                  className="shrink-0 border border-ink bg-transparent px-2.5 py-2 font-body font-[400] text-[9px] uppercase tracking-[0.08em] text-ink hover:bg-ink hover:text-white transition-colors disabled:opacity-50 md:px-3 md:text-[10px] md:tracking-[0.1em]"
                 >
                   {checking ? '…' : 'Primeni'}
                 </button>
@@ -250,7 +250,7 @@ export default function CartDrawer() {
             </div>
 
             {/* Cena */}
-            <div className="mb-5 space-y-2 border-b border-silver-light pb-5">
+            <div className="mb-3 space-y-1.5 border-b border-silver-light pb-3 md:mb-5 md:space-y-2 md:pb-5">
               {pricing && pricing.discountType && (
                 <>
                   <div className="flex items-baseline justify-between gap-4">
@@ -283,27 +283,27 @@ export default function CartDrawer() {
                   </span>
                 </div>
               )}
-              <div className="flex items-end justify-between gap-4">
-                <span className="font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink">
+              <div className="flex items-end justify-between gap-3">
+                <span className="font-body font-[400] text-[10px] uppercase tracking-[0.12em] text-ink md:text-[11px] md:tracking-[0.14em]">
                   Ukupno
                 </span>
-                <span className="font-display font-[400] text-[22px] text-ink tabular-nums leading-none">
+                <span className="font-display font-[400] text-[19px] text-ink tabular-nums leading-none md:text-[22px]">
                   {pricing ? formatRsd(pricing.totalRsd) : formatRsd(0)}
                 </span>
               </div>
             </div>
             {pricing?.isBundle && (
-              <p className="font-body font-[300] text-[11px] text-sage-mid mb-3 leading-relaxed">
+              <p className="font-body font-[300] text-[10px] text-sage-mid mb-2 leading-relaxed md:mb-3 md:text-[11px]">
                 Paketna cena za oba seruma — ušteda {formatRsd(pricing.discountAmountRsd)}.
               </p>
             )}
-            <p className="font-body font-[300] text-[11px] text-silver-mid mb-4 leading-relaxed">
+            <p className="font-body font-[300] text-[10px] text-silver-mid mb-3 leading-relaxed md:mb-4 md:text-[11px]">
               Plaćanje pouzećem. Dostava se dogovara nakon slanja porudžbine.
             </p>
             <Link
               href="/porudzbina"
               onClick={closeCart}
-              className="inline-flex w-full items-center justify-center border border-ink bg-ink px-6 py-[12px] font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-white transition-colors duration-200 ease-in-out hover:bg-transparent hover:text-ink"
+              className="inline-flex w-full items-center justify-center border border-ink bg-ink px-4 py-2.5 font-body font-[400] text-[10px] uppercase tracking-[0.12em] text-white transition-colors duration-200 ease-in-out hover:bg-transparent hover:text-ink md:px-6 md:py-[12px] md:text-[11px] md:tracking-[0.14em]"
             >
               Nastavi — podaci za dostavu
             </Link>

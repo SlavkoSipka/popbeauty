@@ -2,7 +2,11 @@ import { formatRsd } from '@/lib/price';
 
 const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY ?? '';
 const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID ?? '';
-const orderTemplateId = process.env.EMAILJS_ORDER_TEMPLATE_ID ?? '';
+/** Server env (preferred). PUBLIC fallback: isti rizik kao newsletter template u browseru. */
+const orderTemplateId =
+  process.env.EMAILJS_ORDER_TEMPLATE_ID?.trim() ||
+  process.env.NEXT_PUBLIC_EMAILJS_ORDER_TEMPLATE_ID?.trim() ||
+  '';
 
 const EMAILJS_SEND_URL = 'https://api.emailjs.com/api/v1.0/email/send';
 
@@ -46,7 +50,12 @@ export type OrderEmailPayload = {
  * Ne baca grešku ako nije podešeno — pozivatelj može await bez try ako želi.
  */
 export async function sendOrderNotificationEmail(payload: OrderEmailPayload): Promise<void> {
-  if (!isOrderEmailJsConfigured()) return;
+  if (!isOrderEmailJsConfigured()) {
+    console.warn(
+      '[emailjs-order] Preskačem slanje: nije kompletna konfiguracija (NEXT_PUBLIC_EMAILJS_PUBLIC_KEY, NEXT_PUBLIC_EMAILJS_SERVICE_ID, EMAILJS_ORDER_TEMPLATE_ID ili NEXT_PUBLIC_EMAILJS_ORDER_TEMPLATE_ID).',
+    );
+    return;
+  }
 
   const {
     orderId,
