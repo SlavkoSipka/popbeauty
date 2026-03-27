@@ -2,14 +2,55 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Button from '@/components/ui/Button';
 import BrandLogo from '@/components/layout/BrandLogo';
+import { useCart } from '@/lib/cart-context';
 
 const navLinks = [
   { href: '/o-nama', label: 'O nama' },
   { href: '/ritual', label: 'Ritual' },
-  { href: '/proizvodi/uljani-serum', label: 'Proizvodi' },
+  { href: '/#proizvodi', label: 'Proizvodi' },
 ];
+
+function CartNavButton({
+  className = '',
+  onBeforeOpen,
+}: {
+  className?: string;
+  onBeforeOpen?: () => void;
+}) {
+  const { itemCount, openCart } = useCart();
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        onBeforeOpen?.();
+        openCart();
+      }}
+      className={`relative inline-flex items-center justify-center text-ink hover:opacity-70 transition-opacity ${className}`}
+      aria-label={`Korpa${itemCount > 0 ? `, ${itemCount} stavki` : ''}`}
+    >
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <path d="M6 9V6a6 6 0 0 1 12 0v3" />
+        <path d="M4 9h16l-1.2 12H5.2L4 9z" />
+      </svg>
+      {itemCount > 0 ? (
+        <span className="absolute -top-1.5 -right-2 flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-ink px-[5px] font-body font-[500] text-[10px] leading-none text-white">
+          {itemCount > 99 ? '99+' : itemCount}
+        </span>
+      ) : null}
+    </button>
+  );
+}
 
 export default function Navigation() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -35,12 +76,14 @@ export default function Navigation() {
           </div>
 
           {/* Right */}
-          <div className="flex items-center gap-4">
-            <div className="hidden md:block">
-              <Button variant="outlined" href="/proizvodi/uljani-serum">
-                Kupi
-              </Button>
-            </div>
+          <div className="flex items-center gap-4 md:gap-5">
+            <Link
+              href="/prijava"
+              className="hidden sm:inline-flex font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink-soft hover:text-ink transition-colors link-underline"
+            >
+              Prijava
+            </Link>
+            <CartNavButton />
 
             {/* Mobile hamburger */}
             <button
@@ -99,10 +142,18 @@ export default function Navigation() {
               {link.label}
             </Link>
           ))}
-          <div className="mt-4 pt-6 border-t border-silver-light">
-            <Button variant="filled" href="/proizvodi/uljani-serum" fullWidth>
-              Kupi
-            </Button>
+          <Link
+            href="/prijava"
+            onClick={() => setMobileOpen(false)}
+            className="font-body font-[400] text-[13px] uppercase tracking-[0.14em] text-ink-soft"
+          >
+            Prijava
+          </Link>
+          <div className="mt-4 pt-6 border-t border-silver-light flex items-center justify-between gap-4">
+            <span className="font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink-soft">
+              Korpa
+            </span>
+            <CartNavButton onBeforeOpen={() => setMobileOpen(false)} />
           </div>
         </div>
       </div>

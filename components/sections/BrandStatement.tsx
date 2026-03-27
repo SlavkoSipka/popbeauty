@@ -44,7 +44,7 @@ export default function BrandStatement() {
           data-reveal-delay="100"
           className="font-display font-[300] italic text-[clamp(28px,4vw,44px)] leading-[1.4] text-ink mb-12"
         >
-          Verujemo da koža ne treba mnogo — treba joj pravo. Dva proizvoda, šest aktivnih sastojaka, nula kompromisa.
+          Verujemo da koži nije potrebno mnogo — treba joj ispravno. Dva proizvoda, šest aktivnih sastojaka, nula kompromisa.
         </p>
 
         <div

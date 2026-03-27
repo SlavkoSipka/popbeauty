@@ -1,13 +1,16 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useScrollReveal } from '@/lib/animations';
+import { useCart } from '@/lib/cart-context';
 import { products } from '@/lib/data/products';
 import { testimonials } from '@/lib/data/testimonials';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import ReviewCard from '@/components/ui/ReviewCard';
+import ProductPrice from '@/components/product/ProductPrice';
 
 const product = products[1];
 const otherProduct = products[0];
@@ -19,6 +22,7 @@ type Tab = 'opis' | 'sastojci' | 'upotreba';
 
 export default function VodeniSerumPage() {
   useScrollReveal();
+  const { addItem } = useCart();
   const [activeTab, setActiveTab] = useState<Tab>('opis');
 
   const tabs: { key: Tab; label: string }[] = [
@@ -34,17 +38,21 @@ export default function VodeniSerumPage() {
         <div className="mx-auto max-w-[1280px] px-6">
           <div className="grid grid-cols-1 md:grid-cols-[55fr_45fr] gap-8 md:gap-16">
             {/* Left — Images */}
-            <div className="md:sticky md:top-24 md:self-start">
-              <div data-reveal="true" className="aspect-[3/4] w-full bg-sage-pale mb-4" />
-              <div className="grid grid-cols-3 gap-4" data-reveal="true" data-reveal-delay="100">
-                <div className="aspect-square bg-sage-light" />
-                <div className="aspect-square bg-off-white" />
-                <div className="aspect-square bg-sage-light" />
+            <div>
+              <div data-reveal="true" className="relative aspect-[3/4] w-full overflow-hidden bg-sage-pale">
+                <Image
+                  src={product.image}
+                  alt={product.name}
+                  fill
+                  className="object-contain object-center"
+                  sizes="(max-width: 768px) 100vw, 55vw"
+                  priority
+                />
               </div>
             </div>
 
             {/* Right — Info */}
-            <div className="md:pl-8 lg:pl-16">
+            <div className="md:sticky md:top-24 md:self-start md:pl-8 lg:pl-16">
               <nav data-reveal="true" className="mb-6">
                 <span className="font-body font-[300] text-[11px] text-silver-mid">
                   <Link href="/" className="link-underline">Početna</Link>
@@ -77,13 +85,9 @@ export default function VodeniSerumPage() {
 
               <div data-reveal="true" data-reveal-delay="250" className="w-full h-[1px] bg-silver-light mb-6" />
 
-              <p
-                data-reveal="true"
-                data-reveal-delay="300"
-                className="font-display font-[400] text-[28px] text-ink mb-6"
-              >
-                {product.price}
-              </p>
+              <div data-reveal="true" data-reveal-delay="300" className="mb-6">
+                <ProductPrice slug={product.slug} fallbackPrice={product.price} />
+              </div>
 
               <p
                 data-reveal="true"
@@ -94,8 +98,20 @@ export default function VodeniSerumPage() {
               </p>
 
               <div data-reveal="true" data-reveal-delay="400" className="mb-6">
-                <Button variant="filled" fullWidth className="h-[52px]">
-                  Dodaj u košaricu
+                <Button
+                  variant="filled"
+                  fullWidth
+                  className="h-[52px]"
+                  onClick={() =>
+                    addItem({
+                      slug: product.slug,
+                      name: product.name,
+                      price: product.price,
+                      image: product.image,
+                    })
+                  }
+                >
+                  Dodaj u korpu
                 </Button>
               </div>
 
@@ -151,18 +167,28 @@ export default function VodeniSerumPage() {
             )}
 
             {activeTab === 'sastojci' && (
-              <div className="space-y-6">
-                {product.ingredients.map((ing) => (
-                  <div key={ing.name} className="border-b border-silver-light pb-6 last:border-0">
-                    <div className="flex items-baseline gap-3 mb-2">
-                      <h4 className="font-display font-[400] text-[18px] text-ink">{ing.name}</h4>
-                      {ing.latin && (
-                        <span className="font-body font-[300] italic text-[12px] text-silver-mid">{ing.latin}</span>
-                      )}
+              <div>
+                <div className="space-y-6 mb-10">
+                  {product.ingredients.map((ing) => (
+                    <div key={ing.name} className="border-b border-silver-light pb-6 last:border-0">
+                      <div className="flex items-baseline gap-3 mb-2">
+                        <h4 className="font-display font-[400] text-[18px] text-ink">{ing.name}</h4>
+                        {ing.latin && (
+                          <span className="font-body font-[300] italic text-[12px] text-silver-mid">{ing.latin}</span>
+                        )}
+                      </div>
+                      <p className="font-body font-[300] text-[14px] text-silver-dark leading-[1.7]">{ing.benefit}</p>
                     </div>
-                    <p className="font-body font-[300] text-[14px] text-silver-dark leading-[1.7]">{ing.benefit}</p>
-                  </div>
-                ))}
+                  ))}
+                </div>
+                <div className="border-t border-silver-light pt-8">
+                  <span className="block font-body font-[400] text-[10px] uppercase tracking-[0.16em] text-silver-dark mb-3">
+                    INCI
+                  </span>
+                  <p className="font-body font-[300] text-[12px] leading-[1.9] text-silver-mid">
+                    {product.inci}
+                  </p>
+                </div>
               </div>
             )}
 
@@ -199,7 +225,15 @@ export default function VodeniSerumPage() {
                 Pogledaj →
               </Link>
             </div>
-            <div className="w-full md:w-[200px] aspect-[3/4] bg-sage-pale shrink-0" />
+            <div className="relative w-full min-h-0 md:w-[200px] md:shrink-0 aspect-[3/4] overflow-hidden bg-sage-pale">
+              <Image
+                src="/zuti.webp"
+                alt={otherProduct.name}
+                fill
+                className="object-contain object-center"
+                sizes="(max-width: 768px) 100vw, 200px"
+              />
+            </div>
           </div>
         </div>
       </section>

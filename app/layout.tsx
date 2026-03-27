@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import { Cormorant_Garamond, Jost } from 'next/font/google';
 import Navigation from '@/components/layout/Navigation';
 import Footer from '@/components/layout/Footer';
+import CartDrawerLazy from '@/components/cart/CartDrawerLazy';
+import { CartProvider } from '@/lib/cart-context';
 import './globals.css';
 
 const cormorant = Cormorant_Garamond({
@@ -44,11 +46,14 @@ export default function RootLayout({
   return (
     <html lang="bs" className={`${cormorant.variable} ${jost.variable}`}>
       <body className="min-h-screen flex flex-col bg-white text-ink antialiased">
-        <Navigation />
-        <div className="flex-1 pt-20">
-          {children}
-        </div>
-        <Footer />
+        <CartProvider>
+          <Navigation />
+          <CartDrawerLazy />
+          <div className="flex-1 pt-20">
+            {children}
+          </div>
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );

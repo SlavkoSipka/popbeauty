@@ -26,40 +26,93 @@ export default function ONamaPage() {
       {/* Story sections */}
       <section className="py-[120px] section-padding">
         <div className="mx-auto max-w-[1280px] px-6">
-          {/* Block 1 */}
+          {/* Block 1 — Teodora's story */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-32">
             <div>
               <span
                 data-reveal="true"
                 className="block font-body font-[300] text-[11px] uppercase tracking-[0.2em] text-silver-dark mb-6"
               >
-                Naša priča
+                Kako je sve počelo
               </span>
               <h2
                 data-reveal="true"
                 data-reveal-delay="100"
                 className="font-display font-[300] text-[clamp(28px,4vw,40px)] leading-[1.3] text-ink mb-6"
               >
-                Počeli smo sa pitanjem: šta koža zaista treba?
+                Jer sam prvo to napravila za sebe.
               </h2>
               <p
                 data-reveal="true"
                 data-reveal-delay="200"
+                className="font-body font-[300] text-[15px] leading-[1.8] text-silver-dark mb-4"
+              >
+                Ja sam Teodora. Dok sam odrastala, moja koža je bila moj najveći neprijatelj — stalne iritacije,
+                crvenilo, nesigurnost. Probala sam sve što je tržište nudilo. Ništa nije zaista pomoglo.
+              </p>
+              <p
+                data-reveal="true"
+                data-reveal-delay="250"
+                className="font-body font-[300] text-[15px] leading-[1.8] text-silver-dark mb-4"
+              >
+                U jednom trenutku sam prestala da tražim savršen proizvod i počela da ga pravim.
+                Čitala sam, istraživala, učila o sastojcima — ne da bih postala kozmetičar, nego
+                zato što sam želela da pomognem svom licu. To mi je bilo lično.
+              </p>
+              <p
+                data-reveal="true"
+                data-reveal-delay="300"
                 className="font-body font-[300] text-[15px] leading-[1.8] text-silver-dark"
               >
-                Umjesto beskonačne rutine od deset koraka, željeli smo stvoriti nešto
-                jednostavno ali efektivno. Dva proizvoda koji rade u savršenoj sinergiji
-                — uljani i vodeni serum koji zajedno pokrivaju sve potrebe zdrave kože.
-                Bez marketinškog fluba, bez nepotrebnih koraka.
+                Odrasla sam u kući gde se veruje da ono što radiš za druge ima smisla tek ako si
+                to prvo prošao sam. Moj tata je sveštenik i taj princip me vodio i ovde — prvo sam
+                napravila nešto što zaista deluje na mojoj koži, pa tek onda to podelila sa svetom.
               </p>
             </div>
             <div data-reveal="true" data-reveal-delay="100" className="aspect-[4/3] bg-sage-pale" />
           </div>
 
-          {/* Block 2 */}
+          {/* Block 2 — Testing & community */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-32">
             <div data-reveal="true" className="order-2 md:order-1 aspect-[4/3] bg-off-white" />
             <div className="order-1 md:order-2">
+              <span
+                data-reveal="true"
+                className="block font-body font-[300] text-[11px] uppercase tracking-[0.2em] text-silver-dark mb-6"
+              >
+                Testirano na prijateljicama
+              </span>
+              <h2
+                data-reveal="true"
+                data-reveal-delay="100"
+                className="font-display font-[300] text-[clamp(28px,4vw,40px)] leading-[1.3] text-ink mb-6"
+              >
+                Svaka formula je prošla pravi test.
+              </h2>
+              <p
+                data-reveal="true"
+                data-reveal-delay="200"
+                className="font-body font-[300] text-[15px] leading-[1.8] text-silver-dark mb-4"
+              >
+                Pre nego što je ijedan proizvod dobio etiketu, prošao je mesece testiranja. Najpre na meni,
+                pa na drugaricama — svaka sa drugačijim tipom kože, drugačijim problemima, drugačijim očekivanjima.
+                Masna koža, suva koža, osetljiva koža, kombinovana. Svaka povratna informacija je menjala formulu
+                dok nije postala nešto što zaista pomaže svima.
+              </p>
+              <p
+                data-reveal="true"
+                data-reveal-delay="250"
+                className="font-body font-[300] text-[15px] leading-[1.8] text-silver-dark"
+              >
+                Nisam htela da napravim još jedan proizvod koji lepo izgleda na polici.
+                Htela sam nešto što ćeš koristiti do poslednje kapi — jer zaista primetiš razliku.
+              </p>
+            </div>
+          </div>
+
+          {/* Block 3 — Philosophy */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-32">
+            <div>
               <span
                 data-reveal="true"
                 className="block font-body font-[300] text-[11px] uppercase tracking-[0.2em] text-silver-dark mb-6"
@@ -71,18 +124,28 @@ export default function ONamaPage() {
                 data-reveal-delay="100"
                 className="font-display font-[300] text-[clamp(28px,4vw,40px)] leading-[1.3] text-ink mb-6"
               >
-                Manje proizvoda, više rezultata
+                Manje koraka, više brige.
               </h2>
               <p
                 data-reveal="true"
                 data-reveal-delay="200"
+                className="font-body font-[300] text-[15px] leading-[1.8] text-silver-dark mb-4"
+              >
+                Rutina od deset proizvoda nije nega — to je zamor. Pop Beauty postoji jer verujem da
+                koži ne treba mnogo. Treba joj ispravno. Dva seruma, šest do sedam pažljivo odabranih
+                sastojaka u svakom, i iskrena namera da pomogne.
+              </p>
+              <p
+                data-reveal="true"
+                data-reveal-delay="250"
                 className="font-body font-[300] text-[15px] leading-[1.8] text-silver-dark"
               >
-                Slow beauty nije trend — to je pristup. Svaki sastojak u našim formulama je pažljivo
-                odabran, svaka koncentracija testirana. Ne pravimo proizvode da bismo punili police,
-                već da bismo riješili konkretne potrebe kože na najčistiji mogući način.
+                Svaki sastojak u formuli je tu s razlogom. Nema punjača, nema marketinških trikova,
+                nema sastojaka koji zvuče lepo a ne rade ništa. Samo čiste, aktivne supstance
+                koje koža prepoznaje i koristi.
               </p>
             </div>
+            <div data-reveal="true" data-reveal-delay="100" className="aspect-[4/3] bg-sage-pale" />
           </div>
 
           {/* Values */}
@@ -91,21 +154,21 @@ export default function ONamaPage() {
               data-reveal="true"
               className="font-display font-[300] text-[clamp(28px,4vw,40px)] text-ink-soft text-center mb-16"
             >
-              Naše vrijednosti
+              Naše vrednosti
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               {[
                 {
-                  title: 'Transparentnost',
-                  text: 'Svaki sastojak ima razlog. Objavljujemo kompletne INCI liste i izvore svih sirovina.',
+                  title: 'Iskrenost',
+                  text: 'Svaki sastojak ima razlog. Objavljujemo kompletne INCI liste jer verujem da zaslužuješ da znaš šta stavljaš na lice.',
                 },
                 {
                   title: 'Jednostavnost',
-                  text: 'Dva proizvoda, jedan ritual. Verujemo da efektivna njega ne mora biti komplikovana.',
+                  text: 'Dva proizvoda, jedan ritual. Efektivna nega ne mora da bude komplikovana — i ne treba da te zamara.',
                 },
                 {
                   title: 'Odgovornost',
-                  text: 'Cruelty-free, veganski, bez sintetičkih mirisa. Ambalaža je reciklabilna i minimalna.',
+                  text: 'Cruelty-free, veganski, bez sintetičkih mirisa. Napravila sam ovo jer verujem da prirodni sastojci mogu više od hemijskih.',
                 },
               ].map((v, i) => (
                 <div key={v.title} data-reveal="true" data-reveal-delay={String(i * 100)}>

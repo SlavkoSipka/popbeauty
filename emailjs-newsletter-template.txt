@@ -1,0 +1,24 @@
+EmailJS — šablon za newsletter (Content → Email Templates → Create new)
+
+Imena promenljivih u kodu moraju da se poklope sa šablonom ({{subscriber_email}} itd.).
+
+--- Predmet poruke (Subject) ---
+[Pop Beauty] Nova prijava na newsletter
+
+--- Sadržaj (Content) — primer za HTML ili plain text ---
+
+Nova prijava za newsletter sa sajta.
+
+Email pretplatnika: {{subscriber_email}}
+
+Izvor forme: {{source}}
+Sajt: {{site}}
+
+---
+U EmailJS Dashboard:
+1. Email Services — poveži Gmail (ili drugi) i zapiši Service ID.
+2. Email Templates — kreiraj šablon sa gornjim telom; u Content koristi {{subscriber_email}}.
+3. Account → API keys — Public Key (klijentski).
+4. U .env.local kopiraj: NEXT_PUBLIC_EMAILJS_PUBLIC_KEY, NEXT_PUBLIC_EMAILJS_SERVICE_ID, NEXT_PUBLIC_EMAILJS_NEWSLETTER_TEMPLATE_ID.
+
+Template ID je u listi šablona (npr. template_xxxxx).

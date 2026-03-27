@@ -8,6 +8,7 @@ interface ButtonProps {
   fullWidth?: boolean;
   type?: 'button' | 'submit';
   onClick?: () => void;
+  disabled?: boolean;
 }
 
 export default function Button({
@@ -18,6 +19,7 @@ export default function Button({
   fullWidth = false,
   type = 'button',
   onClick,
+  disabled,
 }: ButtonProps) {
   const base = `
     inline-flex items-center justify-center
@@ -45,7 +47,12 @@ export default function Button({
   }
 
   return (
-    <button type={type} onClick={onClick} className={classes}>
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={`${classes} ${disabled ? 'opacity-50 pointer-events-none' : ''}`}
+    >
       {children}
     </button>
   );

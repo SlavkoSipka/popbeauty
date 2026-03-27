@@ -1,0 +1,223 @@
+'use client';
+
+import { useState } from 'react';
+import { getSupabaseBrowserClient } from '@/lib/supabase/client';
+import { commissionEarnedRsd } from '@/lib/commission';
+import { ORDER_STATUSES, formatOrderStatusLabel, telHref } from '@/lib/order-status';
+
+export type LineItem = {
+  slug?: string;
+  name?: string;
+  quantity?: number;
+  unit_price_rsd?: number;
+  line_total_rsd?: number;
+};
+
+export type AdminOrderRow = {
+  id: string;
+  customer_first_name: string;
+  customer_last_name: string;
+  customer_email: string;
+  customer_phone: string;
+  address_line: string;
+  city: string;
+  postal_code: string;
+  note: string | null;
+  line_items: unknown;
+  total_rsd: number | string;
+  subtotal_rsd: number | string | null;
+  discount_type: string | null;
+  discount_percent: number | string | null;
+  referral_discount_percent: number | string | null;
+  referral_code: string | null;
+  creator_id: string | null;
+  commission_percent_applied: number | string | null;
+  status: string;
+  created_at: string;
+};
+
+type Props = {
+  initialOrders: AdminOrderRow[];
+  listTruncated: boolean;
+};
+
+export default function AdminPorudzbineClient({ initialOrders, listTruncated }: Props) {
+  const [orders, setOrders] = useState(initialOrders);
+  const [updating, setUpdating] = useState<string | null>(null);
+
+  const updateStatus = async (id: string, status: string) => {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+    setUpdating(id);
+    const { error } = await supabase.from('orders').update({ status }).eq('id', id);
+    setUpdating(null);
+    if (!error) {
+      setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
+    }
+  };
+
+  const fmtMoney = (n: number) =>
+    new Intl.NumberFormat('sr-RS', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
+      n
+    );
+
+  return (
+    <div>
+      <h2 className="font-display font-[300] text-[24px] text-ink mb-2">Sve porudžbine</h2>
+      <p className="font-body font-[300] text-[13px] text-silver-dark mb-8 max-w-[720px] leading-relaxed">
+        Plaćanje je <strong className="font-[400] text-ink">pouzećem</strong>. Pregled pošiljki,
+        kupac, kontakt, adresa, stavke korpe, referral i status (poručeno → poslato → plaćeno, ili
+        odbijeno). Status menjaš u tabeli; broj telefona je link za poziv.
+        {listTruncated ? (
+          <span className="block mt-2 text-silver-mid">
+            Prikazano je poslednjih {orders.length} porudžbina (ograničenje performansi).
+          </span>
+        ) : null}
+      </p>
+
+      <div className="border border-silver-light overflow-x-auto bg-white">
+        <table className="w-full min-w-[1100px] text-left font-body text-[12px]">
+          <thead>
+            <tr className="border-b border-silver-light bg-off-white">
+              <th className="px-3 py-3 font-[400] text-[10px] uppercase tracking-[0.1em] text-silver-dark">
+                Datum
+              </th>
+              <th className="px-3 py-3 font-[400] text-[10px] uppercase tracking-[0.1em] text-silver-dark">
+                Kupac
+              </th>
+              <th className="px-3 py-3 font-[400] text-[10px] uppercase tracking-[0.1em] text-silver-dark">
+                Kontakt
+              </th>
+              <th className="px-3 py-3 font-[400] text-[10px] uppercase tracking-[0.1em] text-silver-dark">
+                Iznos
+              </th>
+              <th className="px-3 py-3 font-[400] text-[10px] uppercase tracking-[0.1em] text-silver-dark">
+                Referral
+              </th>
+              <th className="px-3 py-3 font-[400] text-[10px] uppercase tracking-[0.1em] text-silver-dark">
+                Zarada kr.
+              </th>
+              <th className="px-3 py-3 font-[400] text-[10px] uppercase tracking-[0.1em] text-silver-dark">
+                Status
+              </th>
+              <th className="px-3 py-3 font-[400] text-[10px] uppercase tracking-[0.1em] text-silver-dark">
+                Detalji
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.map((o) => {
+              const total = Number(o.total_rsd);
+              const earned = commissionEarnedRsd(total, o.commission_percent_applied);
+              return (
+                <tr key={o.id} className="border-b border-silver-light align-top">
+                  <td className="px-3 py-3 text-silver-dark whitespace-nowrap tabular-nums">
+                    {new Date(o.created_at).toLocaleString('sr-RS', {
+                      dateStyle: 'short',
+                      timeStyle: 'short',
+                    })}
+                  </td>
+                  <td className="px-3 py-3 text-ink max-w-[140px]">
+                    {o.customer_first_name} {o.customer_last_name}
+                  </td>
+                  <td className="px-3 py-3 text-silver-dark max-w-[180px] break-words">
+                    <div>
+                      <a
+                        href={`mailto:${encodeURIComponent(o.customer_email)}`}
+                        className="text-ink underline underline-offset-2 decoration-sage-mid/40 hover:decoration-ink"
+                      >
+                        {o.customer_email}
+                      </a>
+                    </div>
+                    <div className="mt-0.5">
+                      <a
+                        href={telHref(o.customer_phone)}
+                        className="text-ink font-[400] underline underline-offset-2 decoration-sage-mid/40 hover:decoration-ink"
+                      >
+                        {o.customer_phone}
+                      </a>
+                    </div>
+                  </td>
+                  <td className="px-3 py-3 text-ink tabular-nums whitespace-nowrap">
+                    {fmtMoney(total)} RSD
+                  </td>
+                  <td className="px-3 py-3 text-silver-dark font-mono text-[11px]">
+                    {o.referral_code ?? '—'}
+                  </td>
+                  <td className="px-3 py-3 text-ink tabular-nums whitespace-nowrap">
+                    {o.commission_percent_applied != null ? `${fmtMoney(earned)} RSD` : '—'}
+                  </td>
+                  <td className="px-3 py-3">
+                    <select
+                      value={o.status}
+                      disabled={updating === o.id}
+                      onChange={(e) => updateStatus(o.id, e.target.value)}
+                      className="max-w-[130px] border border-silver-light bg-white px-2 py-1.5 font-body text-[11px] text-ink focus:border-sage-mid focus:outline-none"
+                    >
+                      {Array.from(new Set([...ORDER_STATUSES, o.status])).map((s) => (
+                        <option key={s} value={s}>
+                          {formatOrderStatusLabel(s)}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="px-3 py-3">
+                    <details className="cursor-pointer">
+                      <summary className="font-body text-[11px] text-ink underline underline-offset-2">
+                        Adresa i stavke
+                      </summary>
+                      <div className="mt-3 pl-1 space-y-2 text-[11px] text-silver-dark max-w-[320px]">
+                        <p>
+                          {o.address_line}, {o.postal_code} {o.city}
+                        </p>
+                        {o.note ? <p>Napomena: {o.note}</p> : null}
+                        <ul className="list-disc pl-4 space-y-1 text-ink">
+                          {Array.isArray(o.line_items)
+                            ? (o.line_items as LineItem[]).map((li, i) => (
+                                <li key={i}>
+                                  {li.name ?? li.slug} × {li.quantity} —{' '}
+                                  {li.line_total_rsd != null
+                                    ? `${fmtMoney(Number(li.line_total_rsd))} RSD`
+                                    : ''}
+                                </li>
+                              ))
+                            : null}
+                        </ul>
+                        {(o.subtotal_rsd != null || o.discount_type || o.referral_discount_percent != null) && (
+                          <div className="border-t border-silver-light pt-2 mt-2 space-y-1">
+                            {o.subtotal_rsd != null && (
+                              <p>Ukupno pre popusta: <span className="text-ink">{fmtMoney(Number(o.subtotal_rsd))} RSD</span></p>
+                            )}
+                            {o.discount_type && o.discount_percent != null && (
+                              <p>
+                                {o.discount_type === 'bundle' ? 'Paket' : 'Sajt'} popust:{' '}
+                                <span className="text-ink">−{Number(o.discount_percent)}%</span>
+                              </p>
+                            )}
+                            {o.referral_discount_percent != null && (
+                              <p>
+                                Referral popust:{' '}
+                                <span className="text-ink">−{Number(o.referral_discount_percent)}%</span>
+                              </p>
+                            )}
+                            <p>Plaćeno (ukupno): <span className="text-ink font-[400]">{fmtMoney(total)} RSD</span></p>
+                          </div>
+                        )}
+                      </div>
+                    </details>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {orders.length === 0 ? (
+        <p className="mt-8 font-body font-[300] text-[14px] text-silver-dark text-center border border-dashed border-silver-light py-12">
+          Još nema porudžbina.
+        </p>
+      ) : null}
+    </div>
+  );
+}
