@@ -9,19 +9,22 @@ export default async function AdminPregledPage() {
 
   const [{ count: orderCount }, { data: sumRows }, { count: creatorCount }] = await Promise.all([
     supabase.from('orders').select('*', { count: 'exact', head: true }),
-    supabase.from('orders').select('total_rsd, commission_percent_applied'),
+    supabase.from('orders').select('total_rsd, commission_percent_applied, status'),
     supabase.from('creators').select('id', { count: 'exact', head: true }),
   ]);
 
   let ukupanPromet = 0;
   let ukupnaZaradaKreatora = 0;
   for (const o of sumRows ?? []) {
-    const t = Number((o as { total_rsd: number | string }).total_rsd);
+    const row = o as {
+      total_rsd: number | string;
+      commission_percent_applied: number | string | null;
+      status: string;
+    };
+    if (row.status !== 'placeno') continue;
+    const t = Number(row.total_rsd);
     ukupanPromet += t;
-    ukupnaZaradaKreatora += commissionEarnedRsd(
-      t,
-      (o as { commission_percent_applied: number | string | null }).commission_percent_applied
-    );
+    ukupnaZaradaKreatora += commissionEarnedRsd(t, row.commission_percent_applied);
   }
 
   return (

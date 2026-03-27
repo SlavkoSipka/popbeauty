@@ -288,7 +288,9 @@ export default function AdminKreatoriClient({
                             <p className="font-[400] text-[10px] uppercase tracking-[0.1em] text-silver-dark mb-1">
                               Porudžbine
                             </p>
-                            <p className="text-ink tabular-nums">{s.count} ({fmt(s.promet)} RSD promet)</p>
+                            <p className="text-ink tabular-nums">
+                              {s.count} ukupno · {fmt(s.promet)} RSD promet (samo plaćene)
+                            </p>
                           </div>
                           <div>
                             <p className="font-[400] text-[10px] uppercase tracking-[0.1em] text-silver-dark mb-1">

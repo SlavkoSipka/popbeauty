@@ -41,6 +41,9 @@ export default function AdminOverviewClient({
             {fmt(ukupanPromet)}{' '}
             <span className="text-[13px] font-body font-[300] text-silver-dark">RSD</span>
           </p>
+          <p className="font-body font-[300] text-[11px] text-silver-mid mt-2 leading-relaxed">
+            Samo porudžbine sa statusom „Plaćeno“.
+          </p>
         </div>
         <div className="border border-silver-light bg-white p-6">
           <p className="font-body font-[400] text-[10px] uppercase tracking-[0.14em] text-silver-mid mb-2">
@@ -51,7 +54,7 @@ export default function AdminOverviewClient({
             <span className="text-[13px] font-body font-[300] text-silver-dark">RSD</span>
           </p>
           <p className="font-body font-[300] text-[11px] text-silver-mid mt-2 leading-relaxed">
-            Zbir provizije po porudžbinama (prema snimljenom procentu).
+            Zbir provizije samo za porudžbine sa statusom „Plaćeno“ (prema snimljenom procentu).
           </p>
         </div>
         <div className="border border-silver-light bg-white p-6">

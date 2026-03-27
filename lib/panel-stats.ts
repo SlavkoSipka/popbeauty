@@ -8,8 +8,8 @@ export type OrderAggRow = {
 };
 
 /**
- * Zarada se broji SAMO za porudžbine sa statusom "placeno".
- * Promet i broj porudžbina broje sve statuse (da admin vidi ukupno koliko je prodaja).
+ * Promet i zarada broje se SAMO za porudžbine sa statusom "placeno".
+ * Broj porudžbina (count) i dalje obuhvata sve statuse (koliko je ukupno porudžbina preko koda).
  */
 export function aggregateCreatorStats(
   orders: OrderAggRow[]
@@ -20,8 +20,8 @@ export function aggregateCreatorStats(
     const cur = m.get(o.creator_id) ?? { count: 0, promet: 0, zarada: 0 };
     const t = Number(o.total_rsd);
     cur.count += 1;
-    cur.promet += t;
     if (o.status === 'placeno') {
+      cur.promet += t;
       cur.zarada += commissionEarnedRsd(t, o.commission_percent_applied);
     }
     m.set(o.creator_id, cur);

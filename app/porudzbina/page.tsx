@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useScrollReveal } from '@/lib/animations';
 import { useCart } from '@/lib/cart-context';
@@ -12,6 +13,7 @@ import Button from '@/components/ui/Button';
 
 export default function PorudzbinaPage() {
   useScrollReveal();
+  const router = useRouter();
   const {
     items, clearCart,
     referralCode, referralDiscountPercent,
@@ -19,7 +21,6 @@ export default function PorudzbinaPage() {
   } = useCart();
   const { priceMap, siteDiscountPercent, loaded } = usePricingData();
 
-  const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -111,7 +112,7 @@ export default function PorudzbinaPage() {
       }
 
       clearCart();
-      setSubmitted(true);
+      router.push('/zahvalnica');
     } catch {
       setError('Mrežna greška. Pokušajte ponovo.');
     } finally {
@@ -158,24 +159,6 @@ export default function PorudzbinaPage() {
                 className="inline-flex items-center justify-center border border-ink bg-ink text-white px-6 py-[10px] font-body font-[400] text-[11px] uppercase tracking-[0.14em] hover:bg-transparent hover:text-ink transition-colors duration-200"
               >
                 Pogledaj proizvode
-              </Link>
-            </div>
-          ) : submitted ? (
-            <div
-              data-reveal="true"
-              className="text-center py-16 border border-silver-light max-w-[560px] mx-auto"
-            >
-              <h2 className="font-display font-[300] text-[28px] text-ink mb-4">
-                Hvala na porudžbini
-              </h2>
-              <p className="font-body font-[300] text-[14px] text-silver-dark mb-6">
-                Primili smo vaše podatke. Javićemo vam se uskoro radi potvrde i dostave.
-              </p>
-              <Link
-                href="/"
-                className="font-body font-[300] text-[13px] text-ink underline underline-offset-4 hover:opacity-70"
-              >
-                Nazad na početnu
               </Link>
             </div>
           ) : (
