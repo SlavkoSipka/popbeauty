@@ -30,6 +30,9 @@ export type AdminOrderRow = {
   discount_percent: number | string | null;
   referral_discount_percent: number | string | null;
   referral_code: string | null;
+  promo_code?: string | null;
+  promo_discount_percent?: number | string | null;
+  promo_discount_rsd?: number | string | null;
   creator_id: string | null;
   commission_percent_applied: number | string | null;
   status: string;
@@ -183,7 +186,10 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
                               ))
                             : null}
                         </ul>
-                        {(o.subtotal_rsd != null || o.discount_type || o.referral_discount_percent != null) && (
+                        {(o.subtotal_rsd != null ||
+                          o.discount_type ||
+                          o.referral_discount_percent != null ||
+                          o.promo_code) && (
                           <div className="border-t border-silver-light pt-2 mt-2 space-y-1">
                             {o.subtotal_rsd != null && (
                               <p>Ukupno pre popusta: <span className="text-ink">{fmtMoney(Number(o.subtotal_rsd))} RSD</span></p>
@@ -198,6 +204,17 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
                               <p>
                                 Referral popust:{' '}
                                 <span className="text-ink">−{Number(o.referral_discount_percent)}%</span>
+                              </p>
+                            )}
+                            {o.promo_code != null && o.promo_discount_percent != null && (
+                              <p>
+                                Promo kod <span className="font-mono">{o.promo_code}</span>:{' '}
+                                <span className="text-ink">
+                                  −{Number(o.promo_discount_percent)}%
+                                  {o.promo_discount_rsd != null
+                                    ? ` (−${fmtMoney(Number(o.promo_discount_rsd))} RSD)`
+                                    : ''}
+                                </span>
                               </p>
                             )}
                             <p>Plaćeno (ukupno): <span className="text-ink font-[400]">{fmtMoney(total)} RSD</span></p>

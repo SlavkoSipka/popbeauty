@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/lib/cart-context';
@@ -9,14 +9,21 @@ import { computePricing } from '@/lib/pricing-engine';
 import { usePricingData } from '@/lib/use-pricing-data';
 
 export default function CartDrawer() {
-  const { items, itemCount, isOpen, closeCart, removeLine, setQuantity } = useCart();
+  const {
+    items, itemCount, isOpen, closeCart, removeLine, setQuantity,
+    setReferral, clearReferral, referralCode, referralDiscountPercent,
+  } = useCart();
   const { priceMap, siteDiscountPercent, loaded } = usePricingData();
+
+  const [codeInput, setCodeInput] = useState('');
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
+
+  useEffect(() => { setCodeInput(referralCode ?? ''); }, [referralCode]);
 
   useEffect(() => {
     if (!isOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeCart();
-    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeCart(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [isOpen, closeCart]);
@@ -30,9 +37,32 @@ export default function CartDrawer() {
         basePriceRsd: priceMap.get(l.slug) ?? 0,
       })),
       siteDiscountPercent,
-      referralDiscountPercent: 0,
+      referralDiscountPercent: referralDiscountPercent ?? 0,
     });
-  }, [items, priceMap, siteDiscountPercent, loaded]);
+  }, [items, priceMap, siteDiscountPercent, loaded, referralDiscountPercent]);
+
+  async function applyCode() {
+    const raw = codeInput.trim();
+    setCodeError(null);
+    if (!raw) { clearReferral(); return; }
+    setChecking(true);
+    try {
+      const res = await fetch(`/api/referral-lookup?code=${encodeURIComponent(raw)}`);
+      const data = (await res.json()) as
+        | { found: true; discountPercent: number }
+        | { found: false };
+      if (!res.ok) { setCodeError('Greška. Pokušaj ponovo.'); return; }
+      if (data.found) {
+        const norm = raw.toUpperCase().replace(/\s+/g, '');
+        setReferral(norm, data.discountPercent);
+        setCodeInput(norm);
+      } else {
+        setCodeError('Kod nije pronađen.');
+        clearReferral();
+      }
+    } catch { setCodeError('Mrežna greška.'); }
+    finally { setChecking(false); }
+  }
 
   return (
     <>
@@ -173,12 +203,59 @@ export default function CartDrawer() {
 
         {items.length > 0 && (
           <div className="border-t border-silver-light px-6 py-5">
+            {/* Promo kod (= kreatorov referral kod) */}
+            <div className="mb-5 border-b border-silver-light pb-5">
+              <label className="block font-body font-[400] text-[10px] uppercase tracking-[0.14em] text-ink mb-1.5">
+                Promo kod
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={codeInput}
+                  onChange={(e) => { setCodeInput(e.target.value); setCodeError(null); }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void applyCode(); } }}
+                  placeholder="Unesi kod"
+                  autoCapitalize="characters"
+                  className="min-w-0 flex-1 border border-silver-light bg-white px-3 py-2.5 font-body font-[300] text-[13px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none uppercase"
+                />
+                <button
+                  type="button"
+                  onClick={() => void applyCode()}
+                  disabled={checking}
+                  className="shrink-0 border border-ink bg-transparent px-3 py-2 font-body font-[400] text-[10px] uppercase tracking-[0.1em] text-ink hover:bg-ink hover:text-white transition-colors disabled:opacity-50"
+                >
+                  {checking ? '…' : 'Primeni'}
+                </button>
+              </div>
+              {codeError ? (
+                <p className="font-body font-[300] text-[11px] text-red-800 mt-1.5" role="alert">
+                  {codeError}
+                </p>
+              ) : null}
+              {referralCode && referralDiscountPercent != null && !codeError ? (
+                <p className="font-body font-[300] text-[11px] text-sage-mid mt-1.5">
+                  Kod <span className="font-mono text-ink">{referralCode}</span> — popust{' '}
+                  {referralDiscountPercent}%
+                </p>
+              ) : null}
+              {referralCode ? (
+                <button
+                  type="button"
+                  onClick={() => { clearReferral(); setCodeInput(''); setCodeError(null); }}
+                  className="font-body font-[300] text-[10px] text-silver-mid underline underline-offset-2 mt-1 hover:text-ink"
+                >
+                  Ukloni kod
+                </button>
+              ) : null}
+            </div>
+
+            {/* Cena */}
             <div className="mb-5 space-y-2 border-b border-silver-light pb-5">
               {pricing && pricing.discountType && (
                 <>
                   <div className="flex items-baseline justify-between gap-4">
                     <span className="font-body font-[300] text-[11px] text-silver-dark">
-                      Ukupno pre popusta
+                      Bez popusta
                     </span>
                     <span className="font-body font-[300] text-[14px] text-silver-dark tabular-nums line-through">
                       {formatRsd(pricing.subtotalRsd)}
@@ -196,12 +273,22 @@ export default function CartDrawer() {
                   </div>
                 </>
               )}
+              {pricing && pricing.referralDiscountPercent > 0 && (
+                <div className="flex items-baseline justify-between gap-4">
+                  <span className="font-body font-[300] text-[11px] text-sage-dark">
+                    Promo kod −{pricing.referralDiscountPercent}%
+                  </span>
+                  <span className="font-body font-[300] text-[13px] text-sage-dark tabular-nums">
+                    −{formatRsd(pricing.referralDiscountRsd)}
+                  </span>
+                </div>
+              )}
               <div className="flex items-end justify-between gap-4">
                 <span className="font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink">
                   Ukupno
                 </span>
                 <span className="font-display font-[400] text-[22px] text-ink tabular-nums leading-none">
-                  {pricing ? formatRsd(pricing.afterProductDiscountRsd) : formatRsd(0)}
+                  {pricing ? formatRsd(pricing.totalRsd) : formatRsd(0)}
                 </span>
               </div>
             </div>

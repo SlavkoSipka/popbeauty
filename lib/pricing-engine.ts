@@ -7,7 +7,8 @@
  *      - Bundle 10% if BOTH slugs present
  *      - Site discount % otherwise (if > 0)
  *   3. Referral discount (per-creator customer_discount_percent) on top of #2
- *   4. Creator commission = commission_percent% of final total (handled outside this module)
+ *   4. Promo kod (discount_codes) — procenat na iznos posle referral popusta
+ *   5. Creator commission = commission_percent% of final total (handled outside this module)
  */
 
 export const BUNDLE_DISCOUNT_PERCENT = 10;
@@ -23,6 +24,8 @@ export type PricingInput = {
   lines: PricingLine[];
   siteDiscountPercent: number;
   referralDiscountPercent: number;
+  /** Promo kod iz discount_codes (0 = nema). Primenjuje se na iznos posle referral popusta. */
+  promoDiscountPercent?: number;
 };
 
 export type PricingResult = {
@@ -34,6 +37,10 @@ export type PricingResult = {
   afterProductDiscountRsd: number;
   referralDiscountPercent: number;
   referralDiscountRsd: number;
+  /** Iznos posle paket/sajt i posle referrala, pre promo koda */
+  afterReferralRsd: number;
+  promoDiscountPercent: number;
+  promoDiscountRsd: number;
   totalRsd: number;
 };
 
@@ -43,6 +50,10 @@ function round2(n: number): number {
 
 export function computePricing(input: PricingInput): PricingResult {
   const { lines, siteDiscountPercent, referralDiscountPercent } = input;
+  const promoDiscountPercent =
+    input.promoDiscountPercent != null && input.promoDiscountPercent > 0
+      ? input.promoDiscountPercent
+      : 0;
 
   const subtotalRsd = round2(
     lines.reduce((sum, l) => sum + l.basePriceRsd * l.quantity, 0),
@@ -67,7 +78,12 @@ export function computePricing(input: PricingInput): PricingResult {
 
   const appliedReferral = referralDiscountPercent > 0 ? referralDiscountPercent : 0;
   const referralDiscountRsd = round2((afterProductDiscountRsd * appliedReferral) / 100);
-  const totalRsd = round2(afterProductDiscountRsd - referralDiscountRsd);
+  const afterReferralRsd = round2(afterProductDiscountRsd - referralDiscountRsd);
+
+  const appliedPromo =
+    promoDiscountPercent > 0 && promoDiscountPercent <= 100 ? promoDiscountPercent : 0;
+  const promoDiscountRsd = round2((afterReferralRsd * appliedPromo) / 100);
+  const totalRsd = round2(afterReferralRsd - promoDiscountRsd);
 
   return {
     subtotalRsd,
@@ -78,6 +94,9 @@ export function computePricing(input: PricingInput): PricingResult {
     afterProductDiscountRsd,
     referralDiscountPercent: appliedReferral,
     referralDiscountRsd,
+    afterReferralRsd,
+    promoDiscountPercent: appliedPromo,
+    promoDiscountRsd,
     totalRsd,
   };
 }

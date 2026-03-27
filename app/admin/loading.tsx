@@ -1,5 +1,5 @@
 import PopBeautyLoading from '@/components/layout/PopBeautyLoading';
 
-export default function AdminPanelLoading() {
+export default function AdminLoading() {
   return <PopBeautyLoading variant="compact" />;
 }

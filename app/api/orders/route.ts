@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { sendOrderNotificationEmail } from '@/lib/emailjs-order';
 import { createAdminClient, isSupabaseAdminConfigured } from '@/lib/supabase/admin';
 import { normalizeReferralCode, parseCartLinesFromBody } from '@/lib/order-validation';
 import { computePricing } from '@/lib/pricing-engine';
@@ -167,6 +168,35 @@ export async function POST(request: Request) {
   if (insertErr) {
     return NextResponse.json({ error: 'Čuvanje porudžbine nije uspelo.' }, { status: 500 });
   }
+
+  const orderIdStr = String(inserted?.id ?? '');
+
+  void sendOrderNotificationEmail({
+    orderId: orderIdStr,
+    firstName,
+    lastName,
+    email,
+    phone,
+    address,
+    city,
+    postal,
+    note,
+    referralCode: referralStored,
+    lineItems: lineItemsJson.map((li) => ({
+      name: li.name,
+      quantity: li.quantity,
+      lineTotalRsd: Number(li.line_total_rsd),
+    })),
+    subtotalRsd: pricing.subtotalRsd,
+    totalRsd: pricing.totalRsd,
+    discountType: pricing.discountType,
+    discountPercent: pricing.discountPercent,
+    discountAmountRsd: pricing.discountAmountRsd,
+    referralDiscountPercent: pricing.referralDiscountPercent,
+    referralDiscountRsd: pricing.referralDiscountRsd,
+  }).catch((err) => {
+    console.error('[api/orders] EmailJS porudžbina:', err);
+  });
 
   return NextResponse.json({ ok: true, orderId: inserted?.id });
 }

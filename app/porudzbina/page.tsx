@@ -12,14 +12,21 @@ import Button from '@/components/ui/Button';
 
 export default function PorudzbinaPage() {
   useScrollReveal();
-  const { items, clearCart } = useCart();
+  const {
+    items, clearCart,
+    referralCode, referralDiscountPercent,
+    setReferral, clearReferral,
+  } = useCart();
   const { priceMap, siteDiscountPercent, loaded } = usePricingData();
 
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [referralCode, setReferralCode] = useState('');
+  const [codeInput, setCodeInput] = useState(referralCode ?? '');
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const [codeChecking, setCodeChecking] = useState(false);
+
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -40,11 +47,34 @@ export default function PorudzbinaPage() {
         basePriceRsd: priceMap.get(l.slug) ?? 0,
       })),
       siteDiscountPercent,
-      referralDiscountPercent: 0,
+      referralDiscountPercent: referralDiscountPercent ?? 0,
     });
-  }, [items, priceMap, siteDiscountPercent, loaded]);
+  }, [items, priceMap, siteDiscountPercent, loaded, referralDiscountPercent]);
 
   const totalForApi = pricing?.totalRsd ?? 0;
+
+  async function applyCode() {
+    const raw = codeInput.trim();
+    setCodeError(null);
+    if (!raw) { clearReferral(); return; }
+    setCodeChecking(true);
+    try {
+      const res = await fetch(`/api/referral-lookup?code=${encodeURIComponent(raw)}`);
+      const data = (await res.json()) as
+        | { found: true; discountPercent: number }
+        | { found: false };
+      if (!res.ok) { setCodeError('Greška. Pokušaj ponovo.'); return; }
+      if (data.found) {
+        const norm = raw.toUpperCase().replace(/\s+/g, '');
+        setReferral(norm, data.discountPercent);
+        setCodeInput(norm);
+      } else {
+        setCodeError('Kod nije pronađen.');
+        clearReferral();
+      }
+    } catch { setCodeError('Mrežna greška.'); }
+    finally { setCodeChecking(false); }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +86,7 @@ export default function PorudzbinaPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          referralCode: referralCode.trim() || null,
+          referralCode: referralCode ?? null,
           firstName: firstName.trim(),
           lastName: lastName.trim(),
           email: email.trim(),
@@ -155,25 +185,55 @@ export default function PorudzbinaPage() {
               className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-12 lg:gap-16 items-start"
             >
               <form onSubmit={handleSubmit} className="space-y-6 order-2 lg:order-1">
+                {/* Promo kod (= kreatorov referral) */}
                 <div className="border border-silver-light p-5 md:p-6 bg-off-white/40">
                   <label className="block font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink mb-2">
-                    Referral kod kreatora{' '}
-                    <span className="font-[300] normal-case tracking-normal text-silver-mid">
-                      (opciono — daje ti dodatni popust)
-                    </span>
+                    Promo kod
                   </label>
-                  <input
-                    type="text"
-                    name="referralCode"
-                    value={referralCode}
-                    onChange={(e) => setReferralCode(e.target.value)}
-                    placeholder="npr. POP-IME1"
-                    autoCapitalize="characters"
-                    className="w-full border border-silver-light bg-white px-4 py-3 font-body font-[300] text-[14px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none transition-colors duration-200 uppercase"
-                  />
-                  <p className="font-body font-[300] text-[11px] text-silver-mid mt-2 leading-relaxed">
-                    Imaš kod od influensera? Unesi ga i dobij dodatni popust na porudžbinu.
-                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={codeInput}
+                      onChange={(e) => { setCodeInput(e.target.value); setCodeError(null); }}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void applyCode(); } }}
+                      placeholder="Unesi kod"
+                      autoCapitalize="characters"
+                      className="min-w-0 flex-1 border border-silver-light bg-white px-4 py-3 font-body font-[300] text-[14px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none transition-colors duration-200 uppercase"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => void applyCode()}
+                      disabled={codeChecking}
+                      className="shrink-0 border border-ink bg-transparent px-4 py-3 font-body font-[400] text-[11px] uppercase tracking-[0.12em] text-ink hover:bg-ink hover:text-white transition-colors disabled:opacity-50"
+                    >
+                      {codeChecking ? '…' : 'Proveri'}
+                    </button>
+                  </div>
+                  {codeError ? (
+                    <p className="font-body font-[300] text-[11px] text-red-800 mt-2" role="alert">
+                      {codeError}
+                    </p>
+                  ) : null}
+                  {referralCode && referralDiscountPercent != null && !codeError ? (
+                    <p className="font-body font-[300] text-[11px] text-sage-mid mt-2">
+                      Kod <span className="font-mono text-ink">{referralCode}</span> — popust{' '}
+                      {referralDiscountPercent}%
+                    </p>
+                  ) : null}
+                  {!referralCode && !codeError ? (
+                    <p className="font-body font-[300] text-[11px] text-silver-mid mt-2 leading-relaxed">
+                      Imaš promo kod? Unesi ga i dobij popust na porudžbinu.
+                    </p>
+                  ) : null}
+                  {referralCode ? (
+                    <button
+                      type="button"
+                      onClick={() => { clearReferral(); setCodeInput(''); setCodeError(null); }}
+                      className="font-body font-[300] text-[10px] text-silver-mid underline underline-offset-2 mt-1.5 hover:text-ink"
+                    >
+                      Ukloni kod
+                    </button>
+                  ) : null}
                 </div>
 
                 <h2 className="font-display font-[300] text-[20px] text-ink mb-2 pt-2">
@@ -348,7 +408,6 @@ export default function PorudzbinaPage() {
                   ))}
                 </ul>
 
-                {/* Discount breakdown */}
                 <div className="border-t border-silver-light pt-4 space-y-2">
                   {pricing && pricing.discountType && (
                     <>
@@ -372,10 +431,15 @@ export default function PorudzbinaPage() {
                       </div>
                     </>
                   )}
-                  {referralCode.trim() && (
-                    <p className="font-body font-[300] text-[11px] text-silver-mid italic">
-                      Referral popust se obračunava na serveru pri slanju.
-                    </p>
+                  {pricing && pricing.referralDiscountPercent > 0 && (
+                    <div className="flex justify-between gap-2">
+                      <span className="font-body font-[300] text-[12px] text-sage-dark">
+                        Promo kod −{pricing.referralDiscountPercent}%
+                      </span>
+                      <span className="font-body font-[300] text-[12px] text-sage-dark tabular-nums">
+                        −{formatRsd(pricing.referralDiscountRsd)}
+                      </span>
+                    </div>
                   )}
                   <div className="flex items-end justify-between gap-4 pt-2">
                     <span className="font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink">

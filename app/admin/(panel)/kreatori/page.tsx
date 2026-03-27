@@ -12,7 +12,7 @@ export default async function AdminKreatoriPage() {
 
   const { data: oRows, error: oErr } = await supabase
     .from('orders')
-    .select('creator_id, total_rsd, commission_percent_applied');
+    .select('creator_id, total_rsd, commission_percent_applied, status');
 
   if (oErr) {
     return (

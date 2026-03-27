@@ -70,3 +70,31 @@ export function normalizeReferralCode(raw: unknown): string | null {
   const t = raw.trim().toUpperCase().replace(/\s+/g, '');
   return t.length === 0 ? null : t;
 }
+
+const CREATOR_REFERRAL_MAX = 48;
+
+/**
+ * Validacija koda koje kreator unosi u panelu (samo slova, brojevi, crtica).
+ * Vraća normalizovan kod ili poruku greške.
+ */
+export function validateCreatorReferralCodeInput(raw: string):
+  | { ok: true; normalized: string }
+  | { ok: false; error: string } {
+  const normalized = raw.trim().toUpperCase().replace(/\s+/g, '');
+  if (normalized.length < 3) {
+    return { ok: false, error: 'Kod mora imati bar 3 znaka.' };
+  }
+  if (normalized.length > CREATOR_REFERRAL_MAX) {
+    return { ok: false, error: `Kod je predugačak (najviše ${CREATOR_REFERRAL_MAX} znakova).` };
+  }
+  if (!/^[A-Z0-9_-]+$/.test(normalized)) {
+    return {
+      ok: false,
+      error: 'Dozvoljena su slova, brojevi, crtica (-) i donja crta (_).',
+    };
+  }
+  return { ok: true, normalized };
+}
+
+/** Isti format kao referral (trim, uppercase, bez razmaka). */
+export const normalizePromoCode = normalizeReferralCode;

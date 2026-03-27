@@ -20,6 +20,13 @@ export type CartLine = {
   quantity: number;
 };
 
+type StoredShape = {
+  items: CartLine[];
+  /** Kreatorov referral kod (prikazan kao "promo kod" u UI-u) */
+  referralCode: string | null;
+  referralDiscountPercent: number | null;
+};
+
 type CartContextValue = {
   items: CartLine[];
   itemCount: number;
@@ -31,37 +38,72 @@ type CartContextValue = {
   removeLine: (slug: string) => void;
   setQuantity: (slug: string, quantity: number) => void;
   clearCart: () => void;
+  setReferral: (code: string, discountPercent: number) => void;
+  clearReferral: () => void;
+  referralCode: string | null;
+  referralDiscountPercent: number | null;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
 
+const EMPTY_STORED: StoredShape = {
+  items: [],
+  referralCode: null,
+  referralDiscountPercent: null,
+};
+
+function parseStored(raw: string | null): StoredShape {
+  if (!raw) return EMPTY_STORED;
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (Array.isArray(parsed)) {
+      return { ...EMPTY_STORED, items: parsed as CartLine[] };
+    }
+    if (parsed && typeof parsed === 'object' && Array.isArray((parsed as StoredShape).items)) {
+      const o = parsed as Partial<StoredShape>;
+      return {
+        items: o.items as CartLine[],
+        referralCode: typeof o.referralCode === 'string' ? o.referralCode : null,
+        referralDiscountPercent:
+          typeof o.referralDiscountPercent === 'number' && Number.isFinite(o.referralDiscountPercent)
+            ? o.referralDiscountPercent
+            : null,
+      };
+    }
+  } catch {
+    /* ignore */
+  }
+  return EMPTY_STORED;
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartLine[]>([]);
+  const [referralCode, setReferralCodeState] = useState<string | null>(null);
+  const [referralDiscountPercent, setReferralDiscountPercentState] = useState<number | null>(null);
   const [ready, setReady] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setItems(JSON.parse(raw) as CartLine[]);
-    } catch {
-      /* ignore */
-    }
+    const stored = parseStored(
+      typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null,
+    );
+    setItems(stored.items);
+    setReferralCodeState(stored.referralCode);
+    setReferralDiscountPercentState(stored.referralDiscountPercent);
     setReady(true);
   }, []);
 
   useEffect(() => {
     if (!ready) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items, ready]);
+    const payload: StoredShape = { items, referralCode, referralDiscountPercent };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  }, [items, referralCode, referralDiscountPercent, ready]);
 
   useEffect(() => {
     if (!isOpen) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prev;
-    };
+    return () => { document.body.style.overflow = prev; };
   }, [isOpen]);
 
   const openCart = useCallback(() => setIsOpen(true), []);
@@ -81,7 +123,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       });
       setIsOpen(true);
     },
-    []
+    [],
   );
 
   const removeLine = useCallback((slug: string) => {
@@ -93,45 +135,38 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setItems((prev) => prev.filter((x) => x.slug !== slug));
       return;
     }
-    setItems((prev) =>
-      prev.map((x) => (x.slug === slug ? { ...x, quantity } : x))
-    );
+    setItems((prev) => prev.map((x) => (x.slug === slug ? { ...x, quantity } : x)));
   }, []);
 
   const clearCart = useCallback(() => {
     setItems([]);
+    setReferralCodeState(null);
+    setReferralDiscountPercentState(null);
   }, []);
 
-  const itemCount = useMemo(
-    () => items.reduce((s, x) => s + x.quantity, 0),
-    [items]
-  );
+  const setReferral = useCallback((code: string, discountPercent: number) => {
+    setReferralCodeState(code);
+    setReferralDiscountPercentState(discountPercent);
+  }, []);
+
+  const clearReferral = useCallback(() => {
+    setReferralCodeState(null);
+    setReferralDiscountPercentState(null);
+  }, []);
+
+  const itemCount = useMemo(() => items.reduce((s, x) => s + x.quantity, 0), [items]);
 
   const value = useMemo(
     () => ({
-      items,
-      itemCount,
-      isOpen,
-      openCart,
-      closeCart,
-      toggleCart,
-      addItem,
-      removeLine,
-      setQuantity,
-      clearCart,
+      items, itemCount, isOpen, openCart, closeCart, toggleCart,
+      addItem, removeLine, setQuantity, clearCart,
+      setReferral, clearReferral, referralCode, referralDiscountPercent,
     }),
     [
-      items,
-      itemCount,
-      isOpen,
-      openCart,
-      closeCart,
-      toggleCart,
-      addItem,
-      removeLine,
-      setQuantity,
-      clearCart,
-    ]
+      items, itemCount, isOpen, openCart, closeCart, toggleCart,
+      addItem, removeLine, setQuantity, clearCart,
+      setReferral, clearReferral, referralCode, referralDiscountPercent,
+    ],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
@@ -139,8 +174,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
 export function useCart() {
   const ctx = useContext(CartContext);
-  if (!ctx) {
-    throw new Error('useCart mora biti unutar CartProvider');
-  }
+  if (!ctx) throw new Error('useCart mora biti unutar CartProvider');
   return ctx;
 }

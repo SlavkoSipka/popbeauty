@@ -32,6 +32,52 @@ html {
   }
 }
 
+/* Navigacija: blag ulaz sadržaja (template se remount-uje na svakoj promeni rute) */
+@keyframes page-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition-root {
+  animation: page-content-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-root {
+    animation: none;
+  }
+}
+
+/* Pastelni „ekvilajzer“ za ekran učitavanja */
+@keyframes popbeauty-load-bar {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.popbeauty-load-bar {
+  animation: popbeauty-load-bar 0.9s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popbeauty-load-bar {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
 body {
   font-family: var(--font-body);
   font-weight: 300;
