@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import ProductCardPrice from '@/components/ui/ProductCardPrice';
 
 interface ProductCardProps {
   number: string;
@@ -57,11 +58,11 @@ export default function ProductCard({
           <p className="font-body font-[300] text-[13px] leading-[1.6] text-silver-dark mb-3 line-clamp-2">
             {description}
           </p>
-          <div className="flex items-center justify-between">
-            <span className="font-body font-[400] text-[14px] text-ink">
-              {price}
-            </span>
-            <span className="font-body font-[400] text-[11px] text-ink link-underline">
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <ProductCardPrice slug={slug} fallbackPrice={price} compact />
+            </div>
+            <span className="font-body font-[400] text-[11px] text-ink link-underline shrink-0">
               Detaljnije →
             </span>
           </div>
@@ -91,9 +92,12 @@ export default function ProductCard({
           <h3 className="font-display font-[400] text-[28px] text-ink mb-3">
             {name}
           </h3>
-          <p className="font-body font-[300] text-[14px] leading-[1.7] text-silver-dark mb-6 line-clamp-2">
+          <p className="font-body font-[300] text-[14px] leading-[1.7] text-silver-dark mb-4 line-clamp-2">
             {description}
           </p>
+          <div className="mb-5">
+            <ProductCardPrice slug={slug} fallbackPrice={price} />
+          </div>
           <span className="inline-block font-body font-[400] text-[12px] text-ink link-underline">
             Saznaj više →
           </span>
