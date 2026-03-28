@@ -70,7 +70,76 @@ export default function ONamaPage() {
                 napravila nešto što zaista deluje na mojoj koži, pa tek onda to podelila sa svetom.
               </p>
             </div>
-            <div data-reveal="true" data-reveal-delay="100" className="aspect-[4/3] bg-sage-pale" />
+            <div
+              data-reveal="true"
+              data-reveal-delay="100"
+              className="grid grid-cols-2 gap-3 md:gap-4"
+            >
+              <figure className="relative aspect-[3/4] overflow-hidden bg-sage-pale">
+                <Image
+                  src="/lose%20lice.webp"
+                  alt="Teodora — period sa osetljivom, iritiranom kožom lica (pre nege)"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 45vw, 22vw"
+                />
+              </figure>
+              <figure className="relative aspect-[3/4] overflow-hidden bg-sage-pale">
+                <Image
+                  src="/lose%20lice1.webp"
+                  alt="Teodora — koža pre uspostavljanja rutine koja joj odgovara"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 45vw, 22vw"
+                />
+              </figure>
+            </div>
+          </div>
+
+          {/* Transformacija — posle */}
+          <div
+            data-reveal="true"
+            className="mb-32 border-t border-silver-light pt-16 md:pt-20"
+          >
+            <span className="block font-body font-[300] text-[11px] uppercase tracking-[0.2em] text-silver-dark mb-6">
+              Moja transformacija
+            </span>
+            <h2 className="font-display font-[300] text-[clamp(28px,4vw,40px)] leading-[1.3] text-ink mb-6 max-w-[720px]">
+              Danas je ogledalo prijatelj, ne sudija.
+            </h2>
+            <p className="font-body font-[300] text-[15px] leading-[1.8] text-silver-dark mb-4 max-w-[720px]">
+              Godinama sam verovala da je „dobra koža“ nešto što drugi imaju, a ja ne. Nije se desilo preko noći —
+              ali kad sam prestala da jurim agresivne tretmane i počela da slušam šta moje lice zaista podnosi,
+              ten se smirio. Manje crvenila, manje žurbe da sakrijem nesavršenosti.
+            </p>
+            <p className="font-body font-[300] text-[15px] leading-[1.8] text-silver-dark mb-10 max-w-[720px]">
+              Ove fotografije nisu retuširane da zvuče savršeno — one su podsjetnik odakle sam krenula i koliko
+              daleko sam došla. Pop Beauty je rezultat te iste iskrenosti: manje šuma, više sastojaka koji imaju smisla.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+              <figure className="relative aspect-[3/4] overflow-hidden bg-off-white">
+                <Image
+                  src="/dobro%20lice.webp"
+                  alt="Teodora — mirniji, ujednačeniji ten posle dosledne njege"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 100vw, 50vw"
+                />
+              </figure>
+              <figure className="relative aspect-[3/4] overflow-hidden bg-off-white">
+                <Image
+                  src="/dobro%20lice1.webp"
+                  alt="Teodora — sjaj i tekstura kože danas"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 100vw, 50vw"
+                />
+              </figure>
+            </div>
+            <p className="font-body font-[300] text-[11px] text-silver-mid mt-6 max-w-[720px] leading-relaxed">
+              Fotografije su lične i prikazuju moj individualni put. Rezultati zavise od tipa kože, navika i doslednosti —
+              ne obećavam isti ishod svima, obećavam iskren pristup u formulama.
+            </p>
           </div>
 
           {/* Block 2 — Testing & community */}
