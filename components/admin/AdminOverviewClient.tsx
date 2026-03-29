@@ -23,62 +23,62 @@ export default function AdminOverviewClient({
 
   return (
     <div>
-      <h2 className="font-display font-[300] text-[24px] text-ink mb-8">Pregled poslovanja</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12">
-        <div className="border border-silver-light bg-white p-6">
-          <p className="font-body font-[400] text-[10px] uppercase tracking-[0.14em] text-silver-mid mb-2">
+      <h2 className="font-display font-[300] text-[20px] md:text-[24px] text-ink mb-5 md:mb-8">
+        Pregled poslovanja
+      </h2>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-6 mb-8 md:mb-12">
+        <div className="border border-silver-light bg-white p-4 md:p-6">
+          <p className="font-body font-[400] text-[9px] md:text-[10px] uppercase tracking-[0.14em] text-silver-mid mb-1.5 md:mb-2">
             Porudžbine
           </p>
-          <p className="font-display font-[300] text-[32px] text-ink tabular-nums">
+          <p className="font-display font-[300] text-[24px] md:text-[32px] text-ink tabular-nums">
             {ukupnoPorudzbina}
           </p>
         </div>
-        <div className="border border-silver-light bg-white p-6">
-          <p className="font-body font-[400] text-[10px] uppercase tracking-[0.14em] text-silver-mid mb-2">
-            Ukupan promet
+        <div className="border border-silver-light bg-white p-4 md:p-6">
+          <p className="font-body font-[400] text-[9px] md:text-[10px] uppercase tracking-[0.14em] text-silver-mid mb-1.5 md:mb-2">
+            Promet
           </p>
-          <p className="font-display font-[300] text-[26px] text-ink tabular-nums">
-            {fmt(ukupanPromet)}{' '}
-            <span className="text-[13px] font-body font-[300] text-silver-dark">RSD</span>
+          <p className="font-display font-[300] text-[18px] md:text-[26px] text-ink tabular-nums">
+            {fmt(ukupanPromet)}
           </p>
-          <p className="font-body font-[300] text-[11px] text-silver-mid mt-2 leading-relaxed">
-            Samo porudžbine sa statusom „Plaćeno“.
-          </p>
-        </div>
-        <div className="border border-silver-light bg-white p-6">
-          <p className="font-body font-[400] text-[10px] uppercase tracking-[0.14em] text-silver-mid mb-2">
-            Procenjena zarada kreatora
-          </p>
-          <p className="font-display font-[300] text-[26px] text-ink tabular-nums">
-            {fmt(ukupnaZaradaKreatora)}{' '}
-            <span className="text-[13px] font-body font-[300] text-silver-dark">RSD</span>
-          </p>
-          <p className="font-body font-[300] text-[11px] text-silver-mid mt-2 leading-relaxed">
-            Zbir provizije samo za porudžbine sa statusom „Plaćeno“ (prema snimljenom procentu).
+          <p className="font-body font-[300] text-[10px] md:text-[11px] text-silver-mid mt-1 leading-relaxed">
+            Samo „Plaćeno"
           </p>
         </div>
-        <div className="border border-silver-light bg-white p-6">
-          <p className="font-body font-[400] text-[10px] uppercase tracking-[0.14em] text-silver-mid mb-2">
-            Kreatori u sistemu
+        <div className="border border-silver-light bg-white p-4 md:p-6">
+          <p className="font-body font-[400] text-[9px] md:text-[10px] uppercase tracking-[0.14em] text-silver-mid mb-1.5 md:mb-2">
+            Zarada kreatora
           </p>
-          <p className="font-display font-[300] text-[32px] text-ink tabular-nums">
+          <p className="font-display font-[300] text-[18px] md:text-[26px] text-ink tabular-nums">
+            {fmt(ukupnaZaradaKreatora)}
+          </p>
+          <p className="font-body font-[300] text-[10px] md:text-[11px] text-silver-mid mt-1 leading-relaxed">
+            Provizije (plaćene)
+          </p>
+        </div>
+        <div className="border border-silver-light bg-white p-4 md:p-6">
+          <p className="font-body font-[400] text-[9px] md:text-[10px] uppercase tracking-[0.14em] text-silver-mid mb-1.5 md:mb-2">
+            Kreatori
+          </p>
+          <p className="font-display font-[300] text-[24px] md:text-[32px] text-ink tabular-nums">
             {creatorCount}
           </p>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-2.5 md:gap-4">
         <Link
           href="/admin/porudzbine"
           prefetch
-          className="inline-flex border border-ink bg-ink px-5 py-3 font-body font-[400] text-[11px] uppercase tracking-[0.12em] text-white hover:bg-transparent hover:text-ink transition-colors"
+          className="inline-flex border border-ink bg-ink px-4 py-2.5 md:px-5 md:py-3 font-body font-[400] text-[10px] md:text-[11px] uppercase tracking-[0.12em] text-white hover:bg-transparent hover:text-ink transition-colors"
         >
           Sve porudžbine
         </Link>
         <Link
           href="/admin/kreatori"
           prefetch
-          className="inline-flex border border-silver-light px-5 py-3 font-body font-[400] text-[11px] uppercase tracking-[0.12em] text-ink hover:border-ink transition-colors"
+          className="inline-flex border border-silver-light px-4 py-2.5 md:px-5 md:py-3 font-body font-[400] text-[10px] md:text-[11px] uppercase tracking-[0.12em] text-ink hover:border-ink transition-colors"
         >
           Kreatori i provizije
         </Link>

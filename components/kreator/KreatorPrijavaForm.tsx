@@ -2,11 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { getSupabaseBrowserClient, isSupabaseBrowserConfigured } from '@/lib/supabase/client';
 
 export default function KreatorPrijavaForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = searchParams.get('next') || '/kreator';
 
@@ -35,32 +34,31 @@ export default function KreatorPrijavaForm() {
       email: email.trim(),
       password,
     });
-    setLoading(false);
 
     if (signErr) {
+      setLoading(false);
       setError('Pogrešan email ili lozinka.');
       return;
     }
 
     const safeNext = nextPath.startsWith('/kreator') ? nextPath : '/kreator';
-    router.push(safeNext);
-    router.refresh();
+    window.location.assign(safeNext);
   };
 
   return (
-    <main className="min-h-[70vh] flex flex-col justify-center section-padding py-16">
-      <div className="mx-auto w-full max-w-[400px] px-6">
-        <p className="font-body font-[300] text-[11px] uppercase tracking-[0.2em] text-silver-dark mb-4 text-center">
+    <main className="min-h-[70vh] flex flex-col justify-center px-4 md:px-6 py-12 md:py-16">
+      <div className="mx-auto w-full max-w-[400px]">
+        <p className="font-body font-[300] text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-silver-dark mb-3 md:mb-4 text-center">
           Pop Beauty
         </p>
-        <h1 className="font-display font-[300] text-[32px] text-ink text-center mb-2">
+        <h1 className="font-display font-[300] text-[26px] md:text-[32px] text-ink text-center mb-2">
           Panel kreatora
         </h1>
-        <p className="font-body font-[300] text-[13px] text-silver-dark text-center mb-10">
-          Prijava je samo za odobrene naloge. Registracija nije javna.
+        <p className="font-body font-[300] text-[12px] md:text-[13px] text-silver-dark text-center mb-8 md:mb-10">
+          Prijava za odobrene kreatore.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
           <div>
             <label className="block font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink mb-2">
               Email

@@ -165,3 +165,12 @@ h1, h2, h3, h4, h5, h6 {
     padding-bottom: 60px;
   }
 }
+
+/* Hide scrollbar but keep scrollability */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

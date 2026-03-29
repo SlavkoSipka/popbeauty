@@ -34,9 +34,9 @@ export default function AdminPrijavaForm() {
       email: email.trim(),
       password,
     });
-    setLoading(false);
 
     if (signErr || !authData.user) {
+      setLoading(false);
       setError('Pogrešan email ili lozinka.');
       return;
     }
@@ -49,30 +49,29 @@ export default function AdminPrijavaForm() {
 
     if (!adminRow) {
       await supabase.auth.signOut();
+      setLoading(false);
       setError('Ovaj nalog nema administratorska prava.');
       return;
     }
 
     const safeNext = nextPath.startsWith('/admin') ? nextPath : '/admin';
-    // Puna navigacija osigurava da browser pošalje kolačiće sesije na server — izbegava
-    // zaglavljivanje na "Rendering..." kada router.push + refresh ne sinhronizuju odmah.
     window.location.assign(safeNext);
   };
 
   return (
-    <main className="min-h-[70vh] flex flex-col justify-center section-padding py-16 bg-off-white">
-      <div className="mx-auto w-full max-w-[400px] px-6">
-        <p className="font-body font-[300] text-[11px] uppercase tracking-[0.2em] text-silver-dark mb-4 text-center">
+    <main className="min-h-[70vh] flex flex-col justify-center px-4 md:px-6 py-12 md:py-16 bg-off-white">
+      <div className="mx-auto w-full max-w-[400px]">
+        <p className="font-body font-[300] text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-silver-dark mb-3 md:mb-4 text-center">
           Pop Beauty
         </p>
-        <h1 className="font-display font-[300] text-[32px] text-ink text-center mb-2">
+        <h1 className="font-display font-[300] text-[26px] md:text-[32px] text-ink text-center mb-2">
           Admin prijava
         </h1>
-        <p className="font-body font-[300] text-[13px] text-silver-dark text-center mb-10">
+        <p className="font-body font-[300] text-[12px] md:text-[13px] text-silver-dark text-center mb-8 md:mb-10">
           Pristup samo za odobrene administratore.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
           <div>
             <label className="block font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink mb-2">
               Email

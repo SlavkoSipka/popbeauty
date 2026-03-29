@@ -24,15 +24,24 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
   return (
     <div className="min-h-[70vh] bg-off-white border-t border-silver-light">
-      <div className="mx-auto max-w-[1280px] px-6 py-8 md:py-10">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10 pb-8 border-b border-silver-light">
-          <div>
-            <p className="font-body font-[300] text-[10px] uppercase tracking-[0.2em] text-silver-mid mb-1">
-              Pop Beauty
-            </p>
-            <h1 className="font-display font-[300] text-[22px] text-ink">Admin panel</h1>
+      <div className="mx-auto max-w-[1280px] px-4 py-5 md:px-6 md:py-10">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-6 mb-6 md:mb-10 pb-4 md:pb-8 border-b border-silver-light">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-body font-[300] text-[10px] uppercase tracking-[0.2em] text-silver-mid mb-0.5">
+                Pop Beauty
+              </p>
+              <h1 className="font-display font-[300] text-[18px] md:text-[22px] text-ink">Admin panel</h1>
+            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="md:hidden font-body font-[300] text-[10px] uppercase tracking-[0.12em] text-silver-mid hover:text-ink"
+            >
+              Odjavi se
+            </button>
           </div>
-          <nav className="flex flex-wrap items-center gap-2 md:gap-4">
+          <nav className="flex items-center gap-1.5 md:gap-4 overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 no-scrollbar">
             {links.map((l) => {
               const active = pathname === l.href;
               return (
@@ -40,7 +49,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                   key={l.href}
                   href={l.href}
                   prefetch
-                  className={`font-body font-[400] text-[11px] uppercase tracking-[0.12em] px-3 py-2 border transition-colors ${
+                  className={`shrink-0 font-body font-[400] text-[10px] md:text-[11px] uppercase tracking-[0.1em] md:tracking-[0.12em] px-2.5 py-1.5 md:px-3 md:py-2 border transition-colors ${
                     active
                       ? 'border-ink bg-ink text-white'
                       : 'border-silver-light text-silver-dark hover:border-ink hover:text-ink'
@@ -53,7 +62,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             <button
               type="button"
               onClick={handleLogout}
-              className="font-body font-[300] text-[11px] uppercase tracking-[0.12em] text-silver-mid hover:text-ink ml-0 md:ml-4"
+              className="hidden md:inline-flex shrink-0 font-body font-[300] text-[11px] uppercase tracking-[0.12em] text-silver-mid hover:text-ink ml-4"
             >
               Odjavi se
             </button>

@@ -84,23 +84,20 @@ export default function AdminPodesavanjaClient({
 
   return (
     <div>
-      <h2 className="font-display font-[300] text-[24px] text-ink mb-2">Podešavanja</h2>
-      <p className="font-body font-[300] text-[13px] text-silver-dark mb-10 max-w-[720px] leading-relaxed">
+      <h2 className="font-display font-[300] text-[20px] md:text-[24px] text-ink mb-2">Podešavanja</h2>
+      <p className="font-body font-[300] text-[12px] md:text-[13px] text-silver-dark mb-6 md:mb-10 max-w-[720px] leading-relaxed">
         Upravljanje cenama i popustima na sajtu. Promene odmah važe za nove porudžbine.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-        {/* Site discount */}
-        <div className="border border-silver-light bg-white p-6">
-          <p className="font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-silver-dark mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-10">
+        <div className="border border-silver-light bg-white p-4 md:p-6">
+          <p className="font-body font-[400] text-[10px] md:text-[11px] uppercase tracking-[0.14em] text-silver-dark mb-3 md:mb-4">
             Popust na sajtu (%)
           </p>
-          <p className="font-body font-[300] text-[12px] text-silver-mid mb-4 leading-relaxed">
-            Važi kada kupac nema oba seruma u korpi. Kad su u korpi oba seruma, umesto ovoga
-            primenjuje se <strong className="font-[400] text-ink">paketni popust</strong> (vidi
-            pored).
+          <p className="font-body font-[300] text-[11px] md:text-[12px] text-silver-mid mb-3 md:mb-4 leading-relaxed">
+            Važi kada kupac nema oba seruma u korpi. Kad su oba, koristi se paketni popust.
           </p>
-          <div className="flex flex-wrap items-center gap-3 mb-3">
+          <div className="flex flex-wrap items-center gap-2.5 md:gap-3 mb-3">
             <input
               type="text"
               inputMode="decimal"
@@ -109,14 +106,14 @@ export default function AdminPodesavanjaClient({
                 setSiteDiscount(e.target.value);
                 setSavedSite(false);
               }}
-              className="w-24 border border-silver-light px-3 py-2 font-body text-[14px] text-ink focus:border-sage-mid focus:outline-none"
+              className="w-20 md:w-24 border border-silver-light px-2.5 py-1.5 md:px-3 md:py-2 font-body text-[13px] md:text-[14px] text-ink focus:border-sage-mid focus:outline-none"
             />
-            <span className="font-body text-[13px] text-silver-dark">%</span>
+            <span className="font-body text-[12px] md:text-[13px] text-silver-dark">%</span>
             <button
               type="button"
               disabled={savingSite}
               onClick={() => void handleSaveSite()}
-              className="border border-ink bg-ink text-white px-4 py-2 font-body font-[400] text-[11px] uppercase tracking-[0.12em] hover:bg-transparent hover:text-ink transition-colors disabled:opacity-50"
+              className="border border-ink bg-ink text-white px-3 py-1.5 md:px-4 md:py-2 font-body font-[400] text-[10px] md:text-[11px] uppercase tracking-[0.12em] hover:bg-transparent hover:text-ink transition-colors disabled:opacity-50"
             >
               {savingSite ? 'Čuvam…' : 'Sačuvaj'}
             </button>
@@ -127,21 +124,20 @@ export default function AdminPodesavanjaClient({
           {errorSite && (
             <p className="font-body font-[300] text-[12px] text-red-800">{errorSite}</p>
           )}
-          <p className="font-body font-[300] text-[11px] text-silver-mid mt-2">
+          <p className="font-body font-[300] text-[10px] md:text-[11px] text-silver-mid mt-2">
             Postavi na 0 da ugasiš popust.
           </p>
         </div>
 
-        {/* Bundle discount */}
-        <div className="border border-silver-light bg-white p-6">
-          <p className="font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-silver-dark mb-4">
+        <div className="border border-silver-light bg-white p-4 md:p-6">
+          <p className="font-body font-[400] text-[10px] md:text-[11px] uppercase tracking-[0.14em] text-silver-dark mb-3 md:mb-4">
             Paketni popust (%)
           </p>
-          <p className="font-body font-[300] text-[12px] text-silver-mid mb-4 leading-relaxed">
-            Automatski kada su u korpi <strong className="font-[400] text-ink">oba seruma</strong>{' '}
-            (uljani i vodeni). Ne sabira se sa popustom na sajtu.
+          <p className="font-body font-[300] text-[11px] md:text-[12px] text-silver-mid mb-3 md:mb-4 leading-relaxed">
+            Automatski kada su u korpi <strong className="font-[400] text-ink">oba seruma</strong>.
+            Ne sabira se sa popustom na sajtu.
           </p>
-          <div className="flex flex-wrap items-center gap-3 mb-3">
+          <div className="flex flex-wrap items-center gap-2.5 md:gap-3 mb-3">
             <input
               type="text"
               inputMode="decimal"
@@ -150,14 +146,14 @@ export default function AdminPodesavanjaClient({
                 setBundleDiscount(e.target.value);
                 setSavedBundle(false);
               }}
-              className="w-24 border border-silver-light px-3 py-2 font-body text-[14px] text-ink focus:border-sage-mid focus:outline-none"
+              className="w-20 md:w-24 border border-silver-light px-2.5 py-1.5 md:px-3 md:py-2 font-body text-[13px] md:text-[14px] text-ink focus:border-sage-mid focus:outline-none"
             />
-            <span className="font-body text-[13px] text-silver-dark">%</span>
+            <span className="font-body text-[12px] md:text-[13px] text-silver-dark">%</span>
             <button
               type="button"
               disabled={savingBundle}
               onClick={() => void handleSaveBundle()}
-              className="border border-ink bg-ink text-white px-4 py-2 font-body font-[400] text-[11px] uppercase tracking-[0.12em] hover:bg-transparent hover:text-ink transition-colors disabled:opacity-50"
+              className="border border-ink bg-ink text-white px-3 py-1.5 md:px-4 md:py-2 font-body font-[400] text-[10px] md:text-[11px] uppercase tracking-[0.12em] hover:bg-transparent hover:text-ink transition-colors disabled:opacity-50"
             >
               {savingBundle ? 'Čuvam…' : 'Sačuvaj'}
             </button>
@@ -168,17 +164,17 @@ export default function AdminPodesavanjaClient({
           {errorBundle && (
             <p className="font-body font-[300] text-[12px] text-red-800">{errorBundle}</p>
           )}
-          <p className="font-body font-[300] text-[11px] text-silver-mid mt-2">
-            Podrazumevano 10%. Postavi na 0 ako želiš da paket nema popusta (pazeći na poslovnu logiku).
+          <p className="font-body font-[300] text-[10px] md:text-[11px] text-silver-mid mt-2">
+            Podrazumevano 10%. Postavi na 0 da ugasiš.
           </p>
         </div>
       </div>
 
-      <div className="border border-silver-light bg-off-white/60 p-6 max-w-[720px]">
-        <p className="font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-silver-dark mb-1">
+      <div className="border border-silver-light bg-off-white/60 p-4 md:p-6 max-w-[720px]">
+        <p className="font-body font-[400] text-[10px] md:text-[11px] uppercase tracking-[0.14em] text-silver-dark mb-1">
           Popust kupaca kreatora & provizija
         </p>
-        <p className="font-body font-[300] text-[12px] text-silver-mid leading-relaxed">
+        <p className="font-body font-[300] text-[11px] md:text-[12px] text-silver-mid leading-relaxed">
           Podešava se <strong className="font-[400] text-ink">po kreatoru</strong> na stranici{' '}
           <a
             href="/admin/kreatori"
@@ -186,7 +182,7 @@ export default function AdminPodesavanjaClient({
           >
             Kreatori
           </a>
-          . Podrazumevano: 15% popust za kupce, 20% provizija za kreatora.
+          .
         </p>
       </div>
     </div>

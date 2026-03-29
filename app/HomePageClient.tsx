@@ -15,8 +15,15 @@ export default function HomePageClient() {
   return (
     <main>
       <Hero />
-      <BrandStatement />
-      <ProductsGrid />
+      {/* Na mobilnom: proizvodi pa filozofija; na md+: kao ranije (filozofija, proizvodi). */}
+      <div className="flex flex-col">
+        <div className="order-1 md:order-2">
+          <ProductsGrid />
+        </div>
+        <div className="order-2 md:order-1">
+          <BrandStatement />
+        </div>
+      </div>
       <IngredientsSection />
       <RitualSection />
       <TestimonialsSection />
