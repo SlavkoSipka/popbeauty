@@ -1,9 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { commissionEarnedRsd } from '@/lib/commission';
-import { ORDER_STATUSES, formatOrderStatusLabel, telHref } from '@/lib/order-status';
+import {
+  ORDER_STATUSES,
+  ORDER_STATUS_LABELS,
+  formatOrderStatusLabel,
+  telHref,
+} from '@/lib/order-status';
+import type { OrderStatus } from '@/lib/order-status';
 
 export type LineItem = {
   slug?: string;
@@ -43,6 +49,21 @@ type Props = {
   initialOrders: AdminOrderRow[];
   listTruncated: boolean;
 };
+
+type StatusFilter = 'all' | OrderStatus;
+
+/** Mapira stare engleske statuse na srpske radi filtera. */
+function canonicalStatusForFilter(raw: string): string {
+  if ((ORDER_STATUSES as readonly string[]).includes(raw)) return raw;
+  const legacy: Record<string, OrderStatus> = {
+    pending: 'poruceno',
+    processing: 'poslato',
+    shipped: 'poslato',
+    completed: 'placeno',
+    cancelled: 'odbijeno',
+  };
+  return legacy[raw] ?? raw;
+}
 
 function OrderDetails({ o, fmtMoney }: { o: AdminOrderRow; fmtMoney: (n: number) => string }) {
   const total = Number(o.total_rsd);
@@ -109,6 +130,14 @@ function OrderDetails({ o, fmtMoney }: { o: AdminOrderRow; fmtMoney: (n: number)
 export default function AdminPorudzbineClient({ initialOrders, listTruncated }: Props) {
   const [orders, setOrders] = useState(initialOrders);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+
+  const filteredOrders = useMemo(() => {
+    if (statusFilter === 'all') return orders;
+    return orders.filter(
+      (o) => canonicalStatusForFilter(o.status) === statusFilter,
+    );
+  }, [orders, statusFilter]);
 
   const updateStatus = async (id: string, status: string) => {
     const supabase = getSupabaseBrowserClient();
@@ -156,9 +185,36 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
         ) : null}
       </p>
 
+      <div className="mb-5 md:mb-6 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+        <label
+          htmlFor="admin-orders-status-filter"
+          className="font-body font-[400] text-[10px] uppercase tracking-[0.12em] text-silver-dark shrink-0"
+        >
+          Status
+        </label>
+        <select
+          id="admin-orders-status-filter"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+          className="w-full sm:w-auto min-w-[200px] max-w-full border border-silver-light bg-white px-3 py-2 font-body text-[12px] text-ink focus:border-sage-mid focus:outline-none"
+        >
+          <option value="all">Sve porudžbine</option>
+          {ORDER_STATUSES.map((s) => (
+            <option key={s} value={s}>
+              {ORDER_STATUS_LABELS[s]}
+            </option>
+          ))}
+        </select>
+        {statusFilter !== 'all' && (
+          <span className="font-body font-[300] text-[11px] text-silver-mid">
+            Prikazano: {filteredOrders.length} od {orders.length}
+          </span>
+        )}
+      </div>
+
       {/* ── Mobile: card layout ── */}
       <div className="md:hidden space-y-3">
-        {orders.map((o) => {
+        {filteredOrders.map((o) => {
           const total = Number(o.total_rsd);
           const earned = commissionEarnedRsd(total, o.commission_percent_applied);
           return (
@@ -256,7 +312,7 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
             </tr>
           </thead>
           <tbody>
-            {orders.map((o) => {
+            {filteredOrders.map((o) => {
               const total = Number(o.total_rsd);
               const earned = commissionEarnedRsd(total, o.commission_percent_applied);
               return (
@@ -318,6 +374,10 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
       {orders.length === 0 ? (
         <p className="mt-8 font-body font-[300] text-[14px] text-silver-dark text-center border border-dashed border-silver-light py-12">
           Još nema porudžbina.
+        </p>
+      ) : filteredOrders.length === 0 ? (
+        <p className="mt-8 font-body font-[300] text-[14px] text-silver-dark text-center border border-dashed border-silver-light py-12">
+          Nema porudžbina sa izabranim statusom. Izaberite drugi filter ili „Sve porudžbine“.
         </p>
       ) : null}
     </div>
