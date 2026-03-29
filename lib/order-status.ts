@@ -1,10 +1,17 @@
 /** Vrednosti u koloni `orders.status` — plaćanje je pouzećem, status prati isporuku i naplatu. */
-export const ORDER_STATUSES = ['poruceno', 'poslato', 'placeno', 'odbijeno'] as const;
+export const ORDER_STATUSES = [
+  'poruceno',
+  'kontaktiran',
+  'poslato',
+  'placeno',
+  'odbijeno',
+] as const;
 
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   poruceno: 'Poručeno',
+  kontaktiran: 'Kontaktiran',
   poslato: 'Poslato',
   placeno: 'Plaćeno',
   odbijeno: 'Odbijeno',

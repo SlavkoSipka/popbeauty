@@ -1,14 +1,15 @@
+import emailjs, { EmailJSResponseStatus } from '@emailjs/nodejs';
 import { formatRsd } from '@/lib/price';
 
 const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY ?? '';
 const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID ?? '';
-/** Server env (preferred). PUBLIC fallback: isti rizik kao newsletter template u browseru. */
+/** Server env (preferred). PUBLIC fallback ako hosting ne učitava server-only varijable. */
 const orderTemplateId =
   process.env.EMAILJS_ORDER_TEMPLATE_ID?.trim() ||
   process.env.NEXT_PUBLIC_EMAILJS_ORDER_TEMPLATE_ID?.trim() ||
   '';
 
-const EMAILJS_SEND_URL = 'https://api.emailjs.com/api/v1.0/email/send';
+const privateKey = process.env.EMAILJS_PRIVATE_KEY?.trim() ?? '';
 
 export function isOrderEmailJsConfigured(): boolean {
   return Boolean(
@@ -45,16 +46,37 @@ export type OrderEmailPayload = {
   referralDiscountRsd: number;
 };
 
+async function sendOnce(
+  templateParams: Record<string, string>,
+): Promise<void> {
+  await emailjs.send(serviceId, orderTemplateId, templateParams, {
+    publicKey,
+    ...(privateKey ? { privateKey } : {}),
+    /** Bez ovoga SDK može vratiti 429 pri više porudžbina sa iste instance. */
+    limitRate: { throttle: 0 },
+  });
+}
+
 /**
- * Šalje obaveštenje o novoj porudžbini (isti EmailJS nalog kao newsletter).
- * Ne baca grešku ako nije podešeno — pozivatelj može await bez try ako želi.
+ * Šalje obaveštenje o novoj porudžbini preko zvaničnog EmailJS Node SDK-a.
+ * @returns `true` ako je poslato, `false` ako env nije kompletan.
+ * @throws Ako EmailJS vrati grešku (porudžbina je već u bazi).
+ *
+ * Napomena: u EmailJS → Account → Security mora biti uključeno slanje API-jem
+ * van pregledača („Allow non-browser / API requests“), inače dobijaš grešku.
  */
-export async function sendOrderNotificationEmail(payload: OrderEmailPayload): Promise<void> {
+export async function sendOrderNotificationEmail(payload: OrderEmailPayload): Promise<boolean> {
   if (!isOrderEmailJsConfigured()) {
     console.warn(
       '[emailjs-order] Preskačem slanje: nije kompletna konfiguracija (NEXT_PUBLIC_EMAILJS_PUBLIC_KEY, NEXT_PUBLIC_EMAILJS_SERVICE_ID, EMAILJS_ORDER_TEMPLATE_ID ili NEXT_PUBLIC_EMAILJS_ORDER_TEMPLATE_ID).',
     );
-    return;
+    return false;
+  }
+
+  if (!privateKey) {
+    console.warn(
+      '[emailjs-order] EMAILJS_PRIVATE_KEY nije postavljen — dodaj privatni ključ iz EmailJS (Account → API keys). Bez njega nalog često odbija server zahteve.',
+    );
   }
 
   const {
@@ -142,19 +164,38 @@ export async function sendOrderNotificationEmail(payload: OrderEmailPayload): Pr
     site_name: 'Pop Beauty',
   };
 
-  const res = await fetch(EMAILJS_SEND_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      service_id: serviceId,
-      template_id: orderTemplateId,
-      user_id: publicKey,
-      template_params,
-    }),
-  });
+  const runSend = async () => {
+    try {
+      await sendOnce(template_params);
+    } catch (err) {
+      if (err instanceof EmailJSResponseStatus && err.status === 429) {
+        await new Promise((r) => setTimeout(r, 1500));
+        await sendOnce(template_params);
+        return;
+      }
+      throw err;
+    }
+  };
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`EmailJS order: ${res.status} ${text}`);
+  try {
+    await runSend();
+  } catch (err) {
+    if (err instanceof EmailJSResponseStatus) {
+      const hint =
+        err.status === 403 &&
+        /non-browser|disabled/i.test(String(err.text))
+          ? ' → Uključi „API access“ za ne-browser okruženje: https://dashboard.emailjs.com/admin/account/security (newsletter radi jer ide iz browsera; porudžbina sa servera zahteva ovu opciju).'
+          : err.status === 403
+            ? ' Proveri EmailJS Security i EMAILJS_PRIVATE_KEY.'
+            : '';
+      console.error(
+        `[emailjs-order] EmailJS ${err.status} za porudžbinu ${orderId}: ${err.text}${hint}`,
+      );
+      throw new Error(`EmailJS order: ${err.status} ${err.text}`);
+    }
+    throw err;
   }
+
+  console.info('[emailjs-order] Obaveštenje o porudžbini poslato preko EmailJS.', orderId);
+  return true;
 }

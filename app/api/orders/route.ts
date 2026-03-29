@@ -183,8 +183,9 @@ export async function POST(request: Request) {
    * Moramo await — na serverlessu (npr. Vercel) odgovor pre završetka `void fetch` često prekine izvršavanje
    * i mejl nikad ne ode na EmailJS.
    */
+  let emailSent = false;
   try {
-    await sendOrderNotificationEmail({
+    emailSent = await sendOrderNotificationEmail({
       orderId: orderIdStr,
       firstName,
       lastName,
@@ -212,5 +213,5 @@ export async function POST(request: Request) {
     console.error('[api/orders] EmailJS porudžbina nije poslata (porudžbina je sačuvana):', err);
   }
 
-  return NextResponse.json({ ok: true, orderId: inserted?.id });
+  return NextResponse.json({ ok: true, orderId: inserted?.id, emailSent });
 }

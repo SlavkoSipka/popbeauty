@@ -108,3 +108,28 @@ Nova porudžbina — {{customer_full_name}} — {{total_rsd}}
 | `total_rsd` | Ukupno za plaćanje |
 | `order_date` | Datum i vreme (sr-RS) |
 | `site_name` | `Pop Beauty` |
+
+---
+
+## Zašto newsletter radi, a porudžbine ne (403 „non-browser“)?
+
+- **Newsletter** koristi `@emailjs/browser` — JavaScript se izvršava u **pregledača** posetioca. EmailJS takve zahteve tretira kao dozvoljene.
+- **Porudžbine** šalju mejl sa **servera** (Next.js API ruta / Vercel). To je **ne-browser** okruženje. U EmailJS mora biti posebno **uključeno** slanje API-jem iz takvog okruženja.
+
+Bez toga dobijaš **403** i poruku tipa *„API access from non-browser environments is currently disabled“* — to **nije** greška u kodu sajta, nego podešavanje naloga na [dashboard.emailjs.com → Account → Security](https://dashboard.emailjs.com/admin/account/security).
+
+---
+
+## Ako obaveštenje o porudžbini ne stiže na mejl
+
+1. **EmailJS → Account → Security** — uključi opciju da su **API pozivi dozvoljeni van pregledača** (non-browser / server). Bez ovoga zahtevi sa Vercel/servera često vraćaju grešku i mejl ne ide. Ovo je najčešći uzrok.
+
+2. **`EMAILJS_PRIVATE_KEY`** — **Account** → **API keys** → **Private Key**. Dodaj u `.env` lokalno i u **Vercel Environment Variables** (Redeploy posle izmene). Aplikacija koristi zvanični `@emailjs/nodejs` SDK koji šalje ovaj ključ kao `accessToken`.
+
+3. **Proveri ostale env varijable na hostingu:** `NEXT_PUBLIC_EMAILJS_PUBLIC_KEY`, `NEXT_PUBLIC_EMAILJS_SERVICE_ID`, **`EMAILJS_ORDER_TEMPLATE_ID`** (ili `NEXT_PUBLIC_EMAILJS_ORDER_TEMPLATE_ID` ako server-only varijabla ne postoji na hostingu).
+
+4. U EmailJS šablonu proveri **To Email** (primalac) i da je šablon sačuvan.
+
+5. Logovi servera: greške počinju sa `[emailjs-order] EmailJS` — tu je status (npr. 403) i tekst od EmailJS-a.
+
+6. **Spam** — proveri neželjeno; za Gmail kao servis u EmailJS ponekad treba App password za nalog.
