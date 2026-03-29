@@ -1,16 +1,13 @@
-import { Suspense } from 'react';
-import KreatorPrijavaForm from '@/components/kreator/KreatorPrijavaForm';
+import { redirect } from 'next/navigation';
 
-export default function KreatorPrijavaPage() {
-  return (
-    <Suspense
-      fallback={
-        <main className="min-h-[50vh] flex items-center justify-center section-padding">
-          <p className="font-body font-[300] text-[14px] text-silver-dark">Učitavanje…</p>
-        </main>
-      }
-    >
-      <KreatorPrijavaForm />
-    </Suspense>
-  );
+/** Stara ruta — middleware takođe preusmerava na /prijava */
+export default async function KreatorPrijavaRedirectPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const sp = await searchParams;
+  const n = sp.next;
+  const next = n && n.startsWith('/kreator') ? n : '/kreator';
+  redirect(`/prijava?next=${encodeURIComponent(next)}`);
 }

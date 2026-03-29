@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from 'next';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { Cormorant_Garamond, Jost } from 'next/font/google';
+import { Suspense } from 'react';
 import Navigation from '@/components/layout/Navigation';
 import Footer from '@/components/layout/Footer';
 import CartDrawerLazy from '@/components/cart/CartDrawerLazy';
+import RouteProgressBar from '@/components/layout/RouteProgressBar';
 import JsonLdOrganization from '@/components/seo/JsonLdOrganization';
 import { CartProvider } from '@/lib/cart-context';
 import { getSiteUrl } from '@/lib/site-url';
@@ -92,6 +94,9 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col bg-white text-ink antialiased">
         <JsonLdOrganization />
         <CartProvider>
+          <Suspense fallback={null}>
+            <RouteProgressBar />
+          </Suspense>
           <Navigation />
           <CartDrawerLazy />
           <div className="flex-1 pt-20">

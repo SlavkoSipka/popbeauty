@@ -1,16 +1,13 @@
-import { Suspense } from 'react';
-import AdminPrijavaForm from '@/components/admin/AdminPrijavaForm';
+import { redirect } from 'next/navigation';
 
-export default function AdminPrijavaPage() {
-  return (
-    <Suspense
-      fallback={
-        <main className="min-h-[50vh] flex items-center justify-center section-padding">
-          <p className="font-body font-[300] text-[14px] text-silver-dark">Učitavanje…</p>
-        </main>
-      }
-    >
-      <AdminPrijavaForm />
-    </Suspense>
-  );
+/** Stara ruta — middleware takođe preusmerava na /prijava */
+export default async function AdminPrijavaRedirectPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const sp = await searchParams;
+  const n = sp.next;
+  const next = n && n.startsWith('/admin') ? n : '/admin';
+  redirect(`/prijava?next=${encodeURIComponent(next)}`);
 }

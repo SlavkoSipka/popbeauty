@@ -18,7 +18,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const handleLogout = async () => {
     const supabase = getSupabaseBrowserClient();
     if (supabase) await supabase.auth.signOut();
-    router.push('/admin/prijava');
+    router.push('/prijava?next=/admin');
     router.refresh();
   };
 

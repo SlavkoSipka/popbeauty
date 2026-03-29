@@ -90,7 +90,7 @@ export default function KreatorDashboardClient({ creator, initialOrders, initial
   const handleLogout = async () => {
     const supabase = getSupabaseBrowserClient();
     if (supabase) await supabase.auth.signOut();
-    router.push('/kreator/prijava');
+    router.push('/prijava?next=/kreator');
     router.refresh();
   };
 

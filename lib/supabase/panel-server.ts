@@ -17,7 +17,7 @@ export async function requireAdminServer(): Promise<SupabaseClient> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/admin/prijava');
+  if (!user) redirect('/prijava?next=/admin');
 
   const { data: adminRow } = await supabase
     .from('admins')
@@ -38,7 +38,7 @@ export async function requireCreatorServer(): Promise<{
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/kreator/prijava');
+  if (!user) redirect('/prijava?next=/kreator');
 
   const { data: creator } = await supabase
     .from('creators')

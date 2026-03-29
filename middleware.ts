@@ -33,40 +33,68 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
+  const search = request.nextUrl.search ?? '';
 
-  const isAdminLogin =
-    pathname === '/admin/prijava' || pathname.startsWith('/admin/prijava/');
+  let isAdminUser = false;
+  let isCreatorUser = false;
+  if (user) {
+    const [adminRes, creatorRes] = await Promise.all([
+      supabase.from('admins').select('user_id').eq('user_id', user.id).maybeSingle(),
+      supabase.from('creators').select('id').eq('id', user.id).maybeSingle(),
+    ]);
+    isAdminUser = Boolean(adminRes.data);
+    isCreatorUser = Boolean(creatorRes.data);
+  }
+
+  /** Stare rute prijave → jedna stranica /prijava */
+  if (pathname === '/admin/prijava' || pathname.startsWith('/admin/prijava/')) {
+    const u = request.nextUrl.clone();
+    u.pathname = '/prijava';
+    u.search = '';
+    const oldNext = request.nextUrl.searchParams.get('next');
+    const next =
+      oldNext && oldNext.startsWith('/admin') ? oldNext : '/admin';
+    u.searchParams.set('next', next);
+    return NextResponse.redirect(u);
+  }
+
+  if (pathname === '/kreator/prijava' || pathname.startsWith('/kreator/prijava/')) {
+    const u = request.nextUrl.clone();
+    u.pathname = '/prijava';
+    u.search = '';
+    const oldNext = request.nextUrl.searchParams.get('next');
+    const next =
+      oldNext && oldNext.startsWith('/kreator') ? oldNext : '/kreator';
+    u.searchParams.set('next', next);
+    return NextResponse.redirect(u);
+  }
+
+  const isPrijava = pathname === '/prijava' || pathname.startsWith('/prijava/');
+
+  if (isPrijava && user) {
+    const nextParam = request.nextUrl.searchParams.get('next');
+    if (isAdminUser) {
+      const dest =
+        nextParam && nextParam.startsWith('/admin') ? nextParam : '/admin';
+      return NextResponse.redirect(new URL(dest, request.url));
+    }
+    if (isCreatorUser) {
+      const dest =
+        nextParam && nextParam.startsWith('/kreator') ? nextParam : '/kreator';
+      return NextResponse.redirect(new URL(dest, request.url));
+    }
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
   const isAdminArea =
     pathname === '/admin' || pathname.startsWith('/admin/');
 
-  let isAdminUser = false;
-  if (user) {
-    const { data: adminRow } = await supabase
-      .from('admins')
-      .select('user_id')
-      .eq('user_id', user.id)
-      .maybeSingle();
-    isAdminUser = Boolean(adminRow);
-  }
-
   if (isAdminArea) {
-    if (isAdminLogin) {
-      if (user && isAdminUser) {
-        const redirectUrl = request.nextUrl.clone();
-        redirectUrl.pathname = '/admin';
-        redirectUrl.searchParams.delete('next');
-        return NextResponse.redirect(redirectUrl);
-      }
-      if (user && !isAdminUser) {
-        return NextResponse.redirect(new URL('/', request.url));
-      }
-      return supabaseResponse;
-    }
-
     if (!user) {
       const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = '/admin/prijava';
-      redirectUrl.searchParams.set('next', pathname);
+      redirectUrl.pathname = '/prijava';
+      redirectUrl.search = '';
+      redirectUrl.searchParams.set('next', pathname + search);
       return NextResponse.redirect(redirectUrl);
     }
 
@@ -77,22 +105,14 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse;
   }
 
-  const isKreatorLogin =
-    pathname === '/kreator/prijava' || pathname.startsWith('/kreator/prijava/');
   const isKreatorArea =
     pathname === '/kreator' || pathname.startsWith('/kreator/');
 
-  if (isKreatorArea && !isKreatorLogin && !user) {
+  if (isKreatorArea && !user) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = '/kreator/prijava';
-    redirectUrl.searchParams.set('next', pathname);
-    return NextResponse.redirect(redirectUrl);
-  }
-
-  if (isKreatorLogin && user) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = '/kreator';
-    redirectUrl.searchParams.delete('next');
+    redirectUrl.pathname = '/prijava';
+    redirectUrl.search = '';
+    redirectUrl.searchParams.set('next', pathname + search);
     return NextResponse.redirect(redirectUrl);
   }
 
@@ -100,5 +120,12 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/kreator', '/kreator/:path*', '/admin', '/admin/:path*'],
+  matcher: [
+    '/prijava',
+    '/prijava/:path*',
+    '/admin',
+    '/admin/:path*',
+    '/kreator',
+    '/kreator/:path*',
+  ],
 };
