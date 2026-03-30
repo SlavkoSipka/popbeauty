@@ -14,13 +14,18 @@ export default function HomePageClient() {
 
   return (
     <main>
-      <Hero />
-      {/* Na mobilnom: proizvodi pa filozofija; na md+: kao ranije (filozofija, proizvodi). */}
+      {/*
+        Mobilno: prvo proizvodi (brza porudžbina), pa hero, pa filozofija.
+        md+: klasično — hero, filozofija, proizvodi.
+      */}
       <div className="flex flex-col">
-        <div className="order-1 md:order-2">
+        <div className="order-1 md:order-3">
           <ProductsGrid />
         </div>
         <div className="order-2 md:order-1">
+          <Hero />
+        </div>
+        <div className="order-3 md:order-2">
           <BrandStatement />
         </div>
       </div>

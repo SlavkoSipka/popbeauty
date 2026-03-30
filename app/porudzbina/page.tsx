@@ -130,27 +130,7 @@ export default function PorudzbinaPage() {
     <main>
       <section className="py-10 max-md:pt-16 md:py-[120px] section-padding">
         <div className="mx-auto max-w-[960px] px-4 md:px-6">
-          <span
-            data-reveal="true"
-            className="block font-body font-[300] text-[10px] uppercase tracking-[0.2em] text-silver-dark mb-4 text-center md:mb-6 md:text-[11px]"
-          >
-            Pop Beauty
-          </span>
-          <h1
-            data-reveal="true"
-            data-reveal-delay="100"
-            className="font-display font-[300] text-[clamp(26px,6vw,48px)] text-ink text-center mb-3 md:mb-4"
-          >
-            Porudžbina i dostava
-          </h1>
-          <p
-            data-reveal="true"
-            data-reveal-delay="200"
-            className="font-body font-[300] text-[13px] leading-[1.65] text-silver-dark text-center mb-8 max-w-[520px] mx-auto md:text-[15px] md:leading-[1.8] md:mb-14"
-          >
-            Plaćanje pouzećem. Unesite podatke za slanje — potvrdićemo porudžbinu putem emaila ili telefona.
-          </p>
-
+          <h1 className="sr-only">Porudžbina i dostava</h1>
           {empty ? (
             <div
               data-reveal="true"
@@ -171,60 +151,9 @@ export default function PorudzbinaPage() {
             <div
               data-reveal="true"
               data-reveal-delay="300"
-              className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8 lg:gap-16 items-start"
+              className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 lg:gap-12 items-start"
             >
               <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6 order-2 lg:order-1">
-                {/* Promo kod (= kreatorov referral) */}
-                <div className="border border-silver-light p-4 md:p-6 bg-off-white/40">
-                  <label className={fieldLabelClass}>
-                    Promo kod
-                  </label>
-                  <div className="flex gap-1.5 md:gap-2">
-                    <input
-                      type="text"
-                      value={codeInput}
-                      onChange={(e) => { setCodeInput(e.target.value); setCodeError(null); }}
-                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void applyCode(); } }}
-                      placeholder="Unesi kod"
-                      autoCapitalize="characters"
-                      className="min-w-0 flex-1 border border-silver-light bg-white px-3 py-2 font-body font-[300] text-[13px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none transition-colors duration-200 uppercase md:px-4 md:py-3 md:text-[14px]"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => void applyCode()}
-                      disabled={codeChecking}
-                      className="shrink-0 border border-ink bg-transparent px-3 py-2 font-body font-[400] text-[10px] uppercase tracking-[0.1em] text-ink hover:bg-ink hover:text-white transition-colors disabled:opacity-50 md:px-4 md:py-3 md:text-[11px] md:tracking-[0.12em]"
-                    >
-                      {codeChecking ? '…' : 'Proveri'}
-                    </button>
-                  </div>
-                  {codeError ? (
-                    <p className="font-body font-[300] text-[11px] text-red-800 mt-2" role="alert">
-                      {codeError}
-                    </p>
-                  ) : null}
-                  {referralCode && referralDiscountPercent != null && !codeError ? (
-                    <p className="font-body font-[300] text-[11px] text-sage-mid mt-2">
-                      Kod <span className="font-mono text-ink">{referralCode}</span> — popust{' '}
-                      {referralDiscountPercent}%
-                    </p>
-                  ) : null}
-                  {!referralCode && !codeError ? (
-                    <p className="font-body font-[300] text-[11px] text-silver-mid mt-2 leading-relaxed">
-                      Imaš promo kod? Unesi ga i dobij popust na porudžbinu.
-                    </p>
-                  ) : null}
-                  {referralCode ? (
-                    <button
-                      type="button"
-                      onClick={() => { clearReferral(); setCodeInput(''); setCodeError(null); }}
-                      className="font-body font-[300] text-[10px] text-silver-mid underline underline-offset-2 mt-1.5 hover:text-ink"
-                    >
-                      Ukloni kod
-                    </button>
-                  ) : null}
-                </div>
-
                 <h2 className="font-display font-[300] text-[17px] text-ink mb-1.5 pt-1 md:mb-2 md:pt-2 md:text-[20px]">
                   Podaci za dostavu
                 </h2>
@@ -361,6 +290,58 @@ export default function PorudzbinaPage() {
                     placeholder="Npr. vreme dostave, dodatne napomene…"
                   />
                 </div>
+
+                {/* Promo kod (= kreatorov referral) — ispod napomene */}
+                <div className="border border-silver-light p-4 md:p-6 bg-off-white/40">
+                  <label className={fieldLabelClass}>
+                    Promo kod
+                  </label>
+                  <div className="flex gap-1.5 md:gap-2">
+                    <input
+                      type="text"
+                      value={codeInput}
+                      onChange={(e) => { setCodeInput(e.target.value); setCodeError(null); }}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void applyCode(); } }}
+                      placeholder="Unesi kod"
+                      autoCapitalize="characters"
+                      className="min-w-0 flex-1 border border-silver-light bg-white px-3 py-2 font-body font-[300] text-[13px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none transition-colors duration-200 uppercase md:px-4 md:py-3 md:text-[14px]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => void applyCode()}
+                      disabled={codeChecking}
+                      className="shrink-0 border border-ink bg-transparent px-3 py-2 font-body font-[400] text-[10px] uppercase tracking-[0.1em] text-ink hover:bg-ink hover:text-white transition-colors disabled:opacity-50 md:px-4 md:py-3 md:text-[11px] md:tracking-[0.12em]"
+                    >
+                      {codeChecking ? '…' : 'Proveri'}
+                    </button>
+                  </div>
+                  {codeError ? (
+                    <p className="font-body font-[300] text-[11px] text-red-800 mt-2" role="alert">
+                      {codeError}
+                    </p>
+                  ) : null}
+                  {referralCode && referralDiscountPercent != null && !codeError ? (
+                    <p className="font-body font-[300] text-[11px] text-sage-mid mt-2">
+                      Kod <span className="font-mono text-ink">{referralCode}</span> — popust{' '}
+                      {referralDiscountPercent}%
+                    </p>
+                  ) : null}
+                  {!referralCode && !codeError ? (
+                    <p className="font-body font-[300] text-[11px] text-silver-mid mt-2 leading-relaxed">
+                      Imaš promo kod? Unesi ga i dobij popust na porudžbinu.
+                    </p>
+                  ) : null}
+                  {referralCode ? (
+                    <button
+                      type="button"
+                      onClick={() => { clearReferral(); setCodeInput(''); setCodeError(null); }}
+                      className="font-body font-[300] text-[10px] text-silver-mid underline underline-offset-2 mt-1.5 hover:text-ink"
+                    >
+                      Ukloni kod
+                    </button>
+                  ) : null}
+                </div>
+
                 {error ? (
                   <p className="font-body font-[300] text-[12px] text-red-800 md:text-[13px]" role="alert">
                     {error}
@@ -377,34 +358,34 @@ export default function PorudzbinaPage() {
                 </Button>
               </form>
 
-              <aside className="order-1 lg:order-2 border border-silver-light p-4 md:p-6 lg:sticky lg:top-28">
-                <h2 className="font-display font-[300] text-[16px] text-ink mb-4 md:mb-6 md:text-[18px]">
+              <aside className="order-1 lg:order-2 border border-silver-light p-3 md:p-4 lg:sticky lg:top-28">
+                <h2 className="font-display font-[300] text-[14px] text-ink mb-3 md:mb-4 md:text-[15px]">
                   Pregled korpe
                 </h2>
-                <ul className="flex flex-col gap-3 mb-4 md:mb-6 md:gap-5">
+                <ul className="flex flex-col gap-2 mb-3 md:mb-4 md:gap-3">
                   {items.map((line) => (
-                    <li key={line.slug} className="flex gap-3">
-                      <div className="relative h-16 w-14 shrink-0 overflow-hidden bg-sage-pale">
+                    <li key={line.slug} className="flex gap-2">
+                      <div className="relative h-12 w-10 shrink-0 overflow-hidden bg-sage-pale">
                         <Image
                           src={line.image}
                           alt={line.name}
                           fill
-                          className="object-contain object-center p-1"
-                          sizes="56px"
+                          className="object-contain object-center p-0.5"
+                          sizes="40px"
                         />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-body font-[400] text-[13px] text-ink leading-snug md:text-[14px]">
+                        <p className="font-body font-[400] text-[12px] text-ink leading-snug md:text-[13px]">
                           {line.name}
                         </p>
-                        <p className="font-body font-[300] text-[11px] text-silver-dark mt-0.5 md:text-[12px]">
+                        <p className="font-body font-[300] text-[10px] text-silver-dark mt-0.5 md:text-[11px]">
                           {loaded
                             ? displayUnitPriceForLine(line, priceMap)
                             : displayUnitPriceForLine(line)}{' '}
                           × {line.quantity}
                         </p>
                       </div>
-                      <p className="font-body font-[400] text-[12px] text-ink tabular-nums shrink-0 md:text-[13px]">
+                      <p className="font-body font-[400] text-[11px] text-ink tabular-nums shrink-0 md:text-[12px]">
                         {loaded
                           ? formatRsd(lineSubtotalRsd(line, priceMap))
                           : formatRsd(lineSubtotalRsd(line))}
@@ -413,24 +394,24 @@ export default function PorudzbinaPage() {
                   ))}
                 </ul>
 
-                <div className="border-t border-silver-light pt-3 space-y-1.5 md:space-y-2 md:pt-4">
+                <div className="border-t border-silver-light pt-2 space-y-1 md:space-y-1.5 md:pt-3">
                   {pricing && pricing.discountType && (
                     <>
                       <div className="flex justify-between gap-2">
-                        <span className="font-body font-[300] text-[11px] text-silver-dark md:text-[12px]">
+                        <span className="font-body font-[300] text-[10px] text-silver-dark md:text-[11px]">
                           Bez popusta
                         </span>
-                        <span className="font-body font-[300] text-[12px] text-silver-dark tabular-nums line-through md:text-[13px]">
+                        <span className="font-body font-[300] text-[11px] text-silver-dark tabular-nums line-through md:text-[12px]">
                           {formatRsd(pricing.subtotalRsd)}
                         </span>
                       </div>
                       <div className="flex justify-between gap-2">
-                        <span className="font-body font-[300] text-[11px] text-sage-mid md:text-[12px]">
+                        <span className="font-body font-[300] text-[10px] text-sage-mid md:text-[11px]">
                           {pricing.discountType === 'bundle'
                             ? `Paket popust −${pricing.discountPercent}%`
                             : `Popust −${pricing.discountPercent}%`}
                         </span>
-                        <span className="font-body font-[300] text-[11px] text-sage-mid tabular-nums md:text-[12px]">
+                        <span className="font-body font-[300] text-[10px] text-sage-mid tabular-nums md:text-[11px]">
                           −{formatRsd(pricing.discountAmountRsd)}
                         </span>
                       </div>
@@ -438,19 +419,19 @@ export default function PorudzbinaPage() {
                   )}
                   {pricing && pricing.referralDiscountPercent > 0 && (
                     <div className="flex justify-between gap-2">
-                      <span className="font-body font-[300] text-[11px] text-sage-dark md:text-[12px]">
+                      <span className="font-body font-[300] text-[10px] text-sage-dark md:text-[11px]">
                         Promo kod −{pricing.referralDiscountPercent}%
                       </span>
-                      <span className="font-body font-[300] text-[11px] text-sage-dark tabular-nums md:text-[12px]">
+                      <span className="font-body font-[300] text-[10px] text-sage-dark tabular-nums md:text-[11px]">
                         −{formatRsd(pricing.referralDiscountRsd)}
                       </span>
                     </div>
                   )}
-                  <div className="flex items-end justify-between gap-3 pt-1.5 md:gap-4 md:pt-2">
-                    <span className="font-body font-[400] text-[10px] uppercase tracking-[0.12em] text-ink md:text-[11px] md:tracking-[0.14em]">
+                  <div className="flex items-end justify-between gap-2 pt-1 md:pt-1.5">
+                    <span className="font-body font-[400] text-[9px] uppercase tracking-[0.12em] text-ink md:text-[10px] md:tracking-[0.14em]">
                       Ukupno
                     </span>
-                    <span className="font-display font-[400] text-[19px] text-ink tabular-nums leading-none md:text-[22px]">
+                    <span className="font-body font-[500] text-[16px] text-ink tabular-nums leading-none md:text-[18px]">
                       {pricing ? formatRsd(pricing.totalRsd) : '…'}
                     </span>
                   </div>

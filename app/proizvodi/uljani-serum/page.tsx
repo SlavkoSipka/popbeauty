@@ -12,6 +12,7 @@ import Badge from '@/components/ui/Badge';
 import ReviewCard from '@/components/ui/ReviewCard';
 import ProductPrice from '@/components/product/ProductPrice';
 import ProductBundleCta from '@/components/product/ProductBundleCta';
+import ProductPageStickyCtas from '@/components/product/ProductPageStickyCtas';
 
 const product = products[0];
 const otherProduct = products[1];
@@ -33,7 +34,7 @@ export default function UljaniSerumPage() {
   ];
 
   return (
-    <main>
+    <main className="pb-[min(200px,32vh)] md:pb-0">
       {/* Hero */}
       <section className="py-[80px] md:py-[120px] section-padding">
         <div className="mx-auto max-w-[1280px] px-6">
@@ -98,40 +99,47 @@ export default function UljaniSerumPage() {
                 {product.description}
               </p>
 
-              <div data-reveal="true" data-reveal-delay="400" className="mb-6">
-                <Button
-                  variant="filled"
-                  fullWidth
-                  className="h-[52px]"
-                  onClick={() =>
-                    addItem({
-                      slug: product.slug,
-                      name: product.name,
-                      price: product.price,
-                      image: product.image,
-                    })
-                  }
-                >
-                  Dodaj u korpu
-                </Button>
-              </div>
+              <ProductPageStickyCtas>
+                <div className="md:mb-6">
+                  <Button
+                    variant="filled"
+                    fullWidth
+                    className="h-[52px]"
+                    onClick={() =>
+                      addItem({
+                        slug: product.slug,
+                        name: product.name,
+                        price: product.price,
+                        image: product.image,
+                      })
+                    }
+                  >
+                    Dodaj u korpu
+                  </Button>
+                </div>
 
-              <ProductBundleCta
-                lineUljani={{
-                  slug: products[0].slug,
-                  name: products[0].name,
-                  price: products[0].price,
-                  image: products[0].image,
-                }}
-                lineVodeni={{
-                  slug: products[1].slug,
-                  name: products[1].name,
-                  price: products[1].price,
-                  image: products[1].image,
-                }}
-              />
+                <ProductBundleCta
+                  className="mb-0 md:mb-6"
+                  lineUljani={{
+                    slug: products[0].slug,
+                    name: products[0].name,
+                    price: products[0].price,
+                    image: products[0].image,
+                  }}
+                  lineVodeni={{
+                    slug: products[1].slug,
+                    name: products[1].name,
+                    price: products[1].price,
+                    image: products[1].image,
+                  }}
+                />
+              </ProductPageStickyCtas>
 
-              <div data-reveal="true" data-reveal-delay="450" className="flex gap-6 justify-center">
+              <div
+                data-reveal="true"
+                data-reveal-delay="450"
+                className="mt-8 flex gap-6 justify-center md:mt-0"
+              >
                 {['Prirodno', 'Vegan', 'Cruelty-free'].map((label) => (
                   <div key={label} className="flex items-center gap-2">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-sage-dark">

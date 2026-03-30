@@ -7,7 +7,7 @@ type Props = {
   slug: string;
   /** Prikaz iz kataloga dok se ne učita Supabase */
   fallbackPrice: string;
-  /** Mobilni / uži blok koristi malo manju tipografiju */
+  /** Mobilni blok — uži prikaz cene (proporcionalno manji od desktop tela kartice) */
   compact?: boolean;
 };
 
@@ -19,10 +19,12 @@ export default function ProductCardPrice({ slug, fallbackPrice, compact }: Props
   const { priceMap, siteDiscountPercent, bundleDiscountPercent, loaded } = usePricingData();
 
   const sizeMain = compact
-    ? 'text-[15px] md:text-[16px]'
+    ? 'text-[17px] md:text-[16px]'
     : 'text-[16px] md:text-[18px]';
-  const sizeStrike = compact ? 'text-[11px] md:text-[12px]' : 'text-[12px] md:text-[13px]';
-  const sizeBadge = 'text-[9px] md:text-[10px]';
+  const sizeStrike = compact ? 'text-[12px] md:text-[13px]' : 'text-[12px] md:text-[13px]';
+  const sizeBadge = compact ? 'text-[10px] md:text-[11px]' : 'text-[9px] md:text-[10px]';
+  const sizeBundleNote = compact ? 'text-[10px] md:text-[10px]' : 'text-[9px] md:text-[10px]';
+  const fontMain = compact ? 'font-body font-[400]' : 'font-display font-[400]';
 
   if (!loaded) {
     return (
@@ -42,7 +44,7 @@ export default function ProductCardPrice({ slug, fallbackPrice, compact }: Props
     return (
       <div>
         <div className={`flex flex-wrap items-baseline gap-x-2 gap-y-0.5`}>
-          <span className={`font-display font-[400] text-ink tabular-nums ${sizeMain}`}>
+          <span className={`${fontMain} text-ink tabular-nums ${sizeMain}`}>
             {formatRsd(discounted)}
           </span>
           <span className={`font-body font-[300] text-silver-mid line-through tabular-nums ${sizeStrike}`}>
@@ -55,7 +57,7 @@ export default function ProductCardPrice({ slug, fallbackPrice, compact }: Props
           </span>
         </div>
         {bundleDiscountPercent > 0 ? (
-          <p className="font-body font-[300] text-[9px] md:text-[10px] text-sage-mid/90 mt-1 leading-snug">
+          <p className={`font-body font-[300] ${sizeBundleNote} text-sage-mid/90 mt-1 leading-snug`}>
             Paket (oba seruma): −{bundleDiscountPercent}%
           </p>
         ) : null}
@@ -65,11 +67,11 @@ export default function ProductCardPrice({ slug, fallbackPrice, compact }: Props
 
   return (
     <div>
-      <span className={`font-display font-[400] text-ink tabular-nums ${sizeMain}`}>
+      <span className={`${fontMain} text-ink tabular-nums ${sizeMain}`}>
         {formatRsd(basePrice)}
       </span>
       {bundleDiscountPercent > 0 ? (
-        <p className="font-body font-[300] text-[9px] md:text-[10px] text-silver-mid mt-1 leading-snug">
+        <p className={`font-body font-[300] ${sizeBundleNote} text-silver-mid mt-1 leading-snug`}>
           Oba seruma: paket −{bundleDiscountPercent}%
         </p>
       ) : null}

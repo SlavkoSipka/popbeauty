@@ -58,12 +58,12 @@ export default function ProductCard({
           <p className="font-body font-[300] text-[13px] leading-[1.6] text-silver-dark mb-3 line-clamp-2">
             {description}
           </p>
-          <div className="flex items-end justify-between gap-3">
+          <div className="flex flex-col gap-3 w-full">
             <div className="min-w-0">
               <ProductCardPrice slug={slug} fallbackPrice={price} compact />
             </div>
-            <span className="font-body font-[400] text-[11px] text-ink link-underline shrink-0">
-              Detaljnije →
+            <span className="inline-flex w-full items-center justify-center border border-ink bg-ink py-3.5 px-4 font-body font-[400] text-[12px] uppercase tracking-[0.14em] text-white shadow-sm">
+              Poruči
             </span>
           </div>
         </div>

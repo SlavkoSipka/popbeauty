@@ -10,6 +10,8 @@ import { usePricingData } from '@/lib/use-pricing-data';
 type Props = {
   lineUljani: CartLineInput;
   lineVodeni: CartLineInput;
+  /** npr. mb-0 u fixed baru */
+  className?: string;
 };
 
 /**
@@ -17,7 +19,7 @@ type Props = {
  * Bez `data-reveal`: blok nastaje tek kad se učita pricing — inače useScrollReveal ga
  * nikad ne bi registrovao i ostao bi na opacity 0.
  */
-export default function ProductBundleCta({ lineUljani, lineVodeni }: Props) {
+export default function ProductBundleCta({ lineUljani, lineVodeni, className }: Props) {
   const { addBundlePair } = useCart();
   const { priceMap, siteDiscountPercent, bundleDiscountPercent, loaded } = usePricingData();
 
@@ -53,7 +55,7 @@ export default function ProductBundleCta({ lineUljani, lineVodeni }: Props) {
     pricing.discountType === 'bundle' && pricing.discountAmountRsd > 0.005;
 
   return (
-    <div className="mb-6 opacity-100">
+    <div className={`opacity-100 ${className ?? 'mb-6'}`}>
       <button
         type="button"
         onClick={() => addBundlePair(lineUljani, lineVodeni)}
