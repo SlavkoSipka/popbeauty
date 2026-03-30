@@ -8,6 +8,9 @@ const links = [
   { href: '/admin', label: 'Pregled' },
   { href: '/admin/porudzbine', label: 'Porudžbine' },
   { href: '/admin/kreatori', label: 'Kreatori' },
+  { href: '/admin/finansije', label: 'Finansije' },
+  { href: '/admin/kalkulator', label: 'Kalkulator' },
+  { href: '/admin/zalihe', label: 'Zalihe' },
   { href: '/admin/podesavanja', label: 'Podešavanja' },
 ];
 
@@ -41,7 +44,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               Odjavi se
             </button>
           </div>
-          <nav className="flex items-center gap-1.5 md:gap-4 overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 no-scrollbar">
+          <nav className="flex w-full max-w-full min-w-0 flex-wrap items-center gap-1.5 sm:gap-2 md:gap-2.5 md:w-auto md:flex-1 md:justify-end">
             {links.map((l) => {
               const active = pathname === l.href;
               return (
@@ -49,7 +52,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                   key={l.href}
                   href={l.href}
                   prefetch
-                  className={`shrink-0 font-body font-[400] text-[10px] md:text-[11px] uppercase tracking-[0.1em] md:tracking-[0.12em] px-2.5 py-1.5 md:px-3 md:py-2 border transition-colors ${
+                  className={`inline-flex min-h-[2rem] items-center justify-center font-body font-[400] text-[9px] sm:text-[10px] md:text-[11px] uppercase tracking-[0.08em] md:tracking-[0.12em] px-2 py-1.5 sm:px-2.5 sm:py-1.5 md:px-3 md:py-2 border transition-colors ${
                     active
                       ? 'border-ink bg-ink text-white'
                       : 'border-silver-light text-silver-dark hover:border-ink hover:text-ink'
@@ -62,7 +65,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             <button
               type="button"
               onClick={handleLogout}
-              className="hidden md:inline-flex shrink-0 font-body font-[300] text-[11px] uppercase tracking-[0.12em] text-silver-mid hover:text-ink ml-4"
+              className="hidden min-h-[2rem] md:inline-flex items-center font-body font-[300] text-[10px] md:text-[11px] uppercase tracking-[0.12em] text-silver-mid hover:text-ink md:ml-1"
             >
               Odjavi se
             </button>
