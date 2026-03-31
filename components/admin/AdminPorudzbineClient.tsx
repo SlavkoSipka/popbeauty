@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { commissionEarnedRsd } from '@/lib/commission';
 import {
@@ -29,6 +29,8 @@ export type AdminOrderRow = {
   city: string;
   postal_code: string;
   note: string | null;
+  /** Interne admin beleške (kolona `admin_notes`). */
+  admin_notes?: string | null;
   line_items: unknown;
   total_rsd: number | string;
   subtotal_rsd: number | string | null;
@@ -127,6 +129,61 @@ function OrderDetails({ o, fmtMoney }: { o: AdminOrderRow; fmtMoney: (n: number)
   );
 }
 
+function OrderAdminNotesField({
+  orderId,
+  initial,
+  onSaved,
+}: {
+  orderId: string;
+  initial: string | null | undefined;
+  onSaved: (id: string, notes: string | null) => void;
+}) {
+  const [value, setValue] = useState(() => initial ?? '');
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(false);
+
+  useEffect(() => {
+    setValue(initial ?? '');
+  }, [initial, orderId]);
+
+  const save = async () => {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+    const trimmed = value.trim();
+    const payload = trimmed === '' ? null : trimmed;
+    setSaving(true);
+    setSaveError(false);
+    const { error } = await supabase.from('orders').update({ admin_notes: payload }).eq('id', orderId);
+    setSaving(false);
+    if (error) {
+      setSaveError(true);
+      return;
+    }
+    onSaved(orderId, payload);
+  };
+
+  return (
+    <div className="space-y-1 w-full min-w-0">
+      <textarea
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={save}
+        rows={4}
+        maxLength={8000}
+        placeholder="Interne beleške…"
+        className="w-full min-h-[5.5rem] resize-y border border-silver-light bg-white px-2.5 py-2 font-body text-[11px] md:text-[12px] text-ink leading-relaxed placeholder:text-silver-mid focus:border-sage-mid focus:outline-none"
+      />
+      <div className="flex items-center gap-2 min-h-[14px]">
+        {saving ? (
+          <span className="text-[10px] text-silver-mid">Čuvanje…</span>
+        ) : saveError ? (
+          <span className="text-[10px] text-red-700">Nije sačuvano. Pokušaj ponovo.</span>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPorudzbineClient({ initialOrders, listTruncated }: Props) {
   const [orders, setOrders] = useState(initialOrders);
   const [updating, setUpdating] = useState<string | null>(null);
@@ -148,6 +205,10 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
     if (!error) {
       setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
     }
+  };
+
+  const patchAdminNotes = (id: string, admin_notes: string | null) => {
+    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, admin_notes } : o)));
   };
 
   const fmtMoney = (n: number) =>
@@ -267,6 +328,17 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
 
               <div>{statusSelect(o)}</div>
 
+              <div className="pt-1">
+                <p className="font-body font-[400] text-[10px] uppercase tracking-[0.1em] text-silver-dark mb-1.5">
+                  Beleške
+                </p>
+                <OrderAdminNotesField
+                  orderId={o.id}
+                  initial={o.admin_notes}
+                  onSaved={patchAdminNotes}
+                />
+              </div>
+
               <details className="cursor-pointer">
                 <summary className="font-body text-[11px] text-ink underline underline-offset-2">
                   Adresa i stavke
@@ -282,7 +354,7 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
 
       {/* ── Desktop: table ── */}
       <div className="hidden md:block border border-silver-light overflow-x-auto bg-white">
-        <table className="w-full min-w-[1100px] text-left font-body text-[12px]">
+        <table className="w-full min-w-[1280px] text-left font-body text-[12px]">
           <thead>
             <tr className="border-b border-silver-light bg-off-white">
               <th className="px-3 py-3 font-[400] text-[10px] uppercase tracking-[0.1em] text-silver-dark">
@@ -308,6 +380,9 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
               </th>
               <th className="px-3 py-3 font-[400] text-[10px] uppercase tracking-[0.1em] text-silver-dark">
                 Detalji
+              </th>
+              <th className="px-3 py-3 font-[400] text-[10px] uppercase tracking-[0.1em] text-silver-dark min-w-[220px] max-w-[280px]">
+                Beleške
               </th>
             </tr>
           </thead>
@@ -363,6 +438,13 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
                         <OrderDetails o={o} fmtMoney={fmtMoney} />
                       </div>
                     </details>
+                  </td>
+                  <td className="px-3 py-3 align-top min-w-[220px] max-w-[280px]">
+                    <OrderAdminNotesField
+                      orderId={o.id}
+                      initial={o.admin_notes}
+                      onSaved={patchAdminNotes}
+                    />
                   </td>
                 </tr>
               );

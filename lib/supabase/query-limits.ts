@@ -6,7 +6,7 @@ export const ORDER_LIST_LIMIT = 500;
  * Ne uključuje promo_* kolone — ako migracija nije pokrenuta, ceo upit pada (42703).
  */
 export const ORDER_LIST_COLUMNS =
-  'id, customer_first_name, customer_last_name, customer_email, customer_phone, address_line, city, postal_code, note, line_items, total_rsd, subtotal_rsd, discount_type, discount_percent, referral_discount_percent, referral_code, creator_id, commission_percent_applied, status, created_at';
+  'id, customer_first_name, customer_last_name, customer_email, customer_phone, address_line, city, postal_code, note, admin_notes, line_items, total_rsd, subtotal_rsd, discount_type, discount_percent, referral_discount_percent, referral_code, creator_id, commission_percent_applied, status, created_at';
 
 /** Bez kolona iz products/discount migracije (starije baze). */
 export const ORDER_LIST_COLUMNS_NO_PRODUCT_DISCOUNTS =
