@@ -321,9 +321,40 @@ export default function PorudzbinaPage() {
                     </p>
                   ) : null}
                   {referralCode && referralDiscountPercent != null && !codeError ? (
-                    <p className="font-body font-[300] text-[11px] text-sage-mid mt-2">
-                      Kod <span className="font-mono text-ink">{referralCode}</span> — popust{' '}
-                      {referralDiscountPercent}%
+                    <p className="font-body font-[300] text-[11px] text-sage-mid mt-2 leading-relaxed">
+                      {referralDiscountPercent === 0 ? (
+                        siteDiscountPercent > 0 || bundleDiscountPercent > 0 ? (
+                          <>
+                            Kod <span className="font-mono text-ink">{referralCode}</span> — trenutno nema dodatnog
+                            popusta preko koda jer su u toku akcije na sajtu
+                            {siteDiscountPercent > 0 && bundleDiscountPercent > 0 ? (
+                              <>
+                                {' '}
+                                ({siteDiscountPercent}% na pojedinačne proizvode, {bundleDiscountPercent}% na paket
+                                kada su oba seruma u korpi).
+                              </>
+                            ) : siteDiscountPercent > 0 ? (
+                              <> ({siteDiscountPercent}% na pojedinačne proizvode).</>
+                            ) : (
+                              <>
+                                {' '}
+                                ({bundleDiscountPercent}% na paket kada su oba seruma u korpi).
+                              </>
+                            )}{' '}
+                            Kada ove akcije završe, kreatorov kod će ponovo važiti za tvoj popust.
+                          </>
+                        ) : (
+                          <>
+                            Kod <span className="font-mono text-ink">{referralCode}</span> — trenutno nema aktivnog
+                            popusta preko ovog koda.
+                          </>
+                        )
+                      ) : (
+                        <>
+                          Kod <span className="font-mono text-ink">{referralCode}</span> — popust{' '}
+                          {referralDiscountPercent}%
+                        </>
+                      )}
                     </p>
                   ) : null}
                   {!referralCode && !codeError ? (

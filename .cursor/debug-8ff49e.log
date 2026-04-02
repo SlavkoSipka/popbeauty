@@ -1,0 +1,12 @@
+{"sessionId":"8ff49e","location":"app/layout.tsx:root","message":"RootLayout SSR reached","data":{"hypothesisId":"H4"},"timestamp":1775153251383,"runId":"netlify-edge-debug"}
+{"sessionId":"8ff49e","location":"middleware.ts:entry","message":"middleware invoked","data":{"pathname":"/prijava","hasSupabaseEnv":true,"hypothesisId":"H1-H3"},"timestamp":1775153256535,"runId":"netlify-edge-debug"}
+{"sessionId":"8ff49e","location":"app/layout.tsx:root","message":"RootLayout SSR reached","data":{"hypothesisId":"H4"},"timestamp":1775153256653,"runId":"netlify-edge-debug"}
+{"sessionId":"8ff49e","location":"middleware.ts:entry","message":"middleware invoked","data":{"pathname":"/admin","hasSupabaseEnv":true,"hypothesisId":"H1-H3"},"timestamp":1775153276268,"runId":"netlify-edge-debug"}
+{"sessionId":"8ff49e","location":"app/layout.tsx:root","message":"RootLayout SSR reached","data":{"hypothesisId":"H4"},"timestamp":1775153276907,"runId":"netlify-edge-debug"}
+{"sessionId":"8ff49e","location":"middleware.ts:entry","message":"middleware invoked","data":{"pathname":"/admin/porudzbine","hasSupabaseEnv":true,"hypothesisId":"H1-H3"},"timestamp":1775153278588,"runId":"netlify-edge-debug"}
+{"sessionId":"8ff49e","location":"middleware.ts:entry","message":"middleware invoked","data":{"pathname":"/admin/kreatori","hasSupabaseEnv":true,"hypothesisId":"H1-H3"},"timestamp":1775153280336,"runId":"netlify-edge-debug"}
+{"sessionId":"8ff49e","location":"middleware.ts:entry","message":"middleware invoked","data":{"pathname":"/admin","hasSupabaseEnv":true,"hypothesisId":"H1-H3"},"timestamp":1775153281612,"runId":"netlify-edge-debug"}
+{"sessionId":"8ff49e","location":"middleware.ts:entry","message":"middleware invoked","data":{"pathname":"/admin/kreatori","hasSupabaseEnv":true,"hypothesisId":"H1-H3"},"timestamp":1775153283431,"runId":"netlify-edge-debug"}
+{"sessionId":"8ff49e","location":"middleware.ts:entry","message":"middleware invoked","data":{"pathname":"/admin","hasSupabaseEnv":true,"hypothesisId":"H1-H3"},"timestamp":1775153290895,"runId":"netlify-edge-debug"}
+{"sessionId":"8ff49e","location":"middleware.ts:entry","message":"middleware invoked","data":{"pathname":"/admin","hasSupabaseEnv":true,"hypothesisId":"H1-H3"},"timestamp":1775153351816,"runId":"netlify-edge-debug"}
+{"sessionId":"8ff49e","location":"app/layout.tsx:root","message":"RootLayout SSR reached","data":{"hypothesisId":"H4"},"timestamp":1775153354893,"runId":"netlify-edge-debug"}
