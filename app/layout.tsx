@@ -8,7 +8,7 @@ import CartDrawerLazy from '@/components/cart/CartDrawerLazy';
 import RouteProgressBar from '@/components/layout/RouteProgressBar';
 import JsonLdOrganization from '@/components/seo/JsonLdOrganization';
 import { CartProvider } from '@/lib/cart-context';
-import { getSiteUrl } from '@/lib/site-url';
+import { getMetadataBaseUrl, getSiteUrl } from '@/lib/site-url';
 import './globals.css';
 
 const cormorant = Cormorant_Garamond({
@@ -31,13 +31,14 @@ export const viewport: Viewport = {
 };
 
 const siteUrl = getSiteUrl();
+const metadataBase = getMetadataBaseUrl();
 const siteDescription =
   'Prirodni kozmetički brand sa dva seruma za lice. Čisti botanički sastojci, transparentna formulacija, slow beauty pristup.';
 const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
 const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase,
   title: {
     default: 'Pop Beauty — Prirodna kozmetika',
     template: '%s | Pop Beauty',

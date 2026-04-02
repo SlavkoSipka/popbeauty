@@ -28,23 +28,33 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user: { id: string } | null = null;
+  let isAdminUser = false;
+  let isCreatorUser = false;
+
+  try {
+    const {
+      data: { user: u },
+    } = await supabase.auth.getUser();
+    user = u ?? null;
+
+    if (user) {
+      const [adminRes, creatorRes] = await Promise.all([
+        supabase.from('admins').select('user_id').eq('user_id', user.id).maybeSingle(),
+        supabase.from('creators').select('id').eq('id', user.id).maybeSingle(),
+      ]);
+      isAdminUser = Boolean(adminRes.data);
+      isCreatorUser = Boolean(creatorRes.data);
+    }
+  } catch (err) {
+    console.error('[middleware] Supabase auth / role check failed:', err);
+    user = null;
+    isAdminUser = false;
+    isCreatorUser = false;
+  }
 
   const pathname = request.nextUrl.pathname;
   const search = request.nextUrl.search ?? '';
-
-  let isAdminUser = false;
-  let isCreatorUser = false;
-  if (user) {
-    const [adminRes, creatorRes] = await Promise.all([
-      supabase.from('admins').select('user_id').eq('user_id', user.id).maybeSingle(),
-      supabase.from('creators').select('id').eq('id', user.id).maybeSingle(),
-    ]);
-    isAdminUser = Boolean(adminRes.data);
-    isCreatorUser = Boolean(creatorRes.data);
-  }
 
   /** Stare rute prijave → jedna stranica /prijava */
   if (pathname === '/admin/prijava' || pathname.startsWith('/admin/prijava/')) {
