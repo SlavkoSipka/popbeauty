@@ -45,7 +45,7 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Right — Visual: zeleni okvir, slika manja (cijela, bez reza), kockica iznad */}
+          {/* Right — Visual */}
           <div className="order-1 md:order-2 relative" data-reveal="true" data-reveal-delay="200">
             <div className="relative aspect-[3/4] w-full overflow-visible rounded-2xl bg-sage-pale shadow-[0_12px_48px_-16px_rgba(28,28,26,0.1)]">
               <div className="absolute inset-4 z-0 md:inset-5">
@@ -58,10 +58,10 @@ export default function Hero() {
                     sizes="(max-width: 768px) 100vw, 40vw"
                     priority
                   />
-                  {/* Organske „tufne” na ivicama — mekši prelaz, manje oštar rub */}
+                  {/* Desktop: full 11-gradient vignette */}
                   <div
                     aria-hidden
-                    className="pointer-events-none absolute inset-0 z-[1]"
+                    className="pointer-events-none absolute inset-0 z-[1] hidden md:block"
                     style={{
                       background: `
                         radial-gradient(ellipse 52% 38% at 3% 10%, rgba(250, 250, 248, 0.52), transparent 72%),
@@ -75,6 +75,19 @@ export default function Hero() {
                         radial-gradient(ellipse 26% 28% at 100% 58%, rgba(250, 250, 248, 0.24), transparent 58%),
                         radial-gradient(ellipse 22% 26% at 38% 8%, rgba(232, 237, 229, 0.2), transparent 55%),
                         radial-gradient(ellipse 24% 22% at 72% 88%, rgba(250, 250, 248, 0.26), transparent 58%)
+                      `,
+                    }}
+                  />
+                  {/* Mobile: simplified 4-gradient vignette for GPU performance */}
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 z-[1] md:hidden"
+                    style={{
+                      background: `
+                        radial-gradient(ellipse 55% 40% at 2% 8%, rgba(250, 250, 248, 0.5), transparent 70%),
+                        radial-gradient(ellipse 50% 42% at 98% 5%, rgba(232, 237, 229, 0.45), transparent 70%),
+                        radial-gradient(ellipse 55% 40% at 97% 95%, rgba(250, 250, 248, 0.45), transparent 70%),
+                        radial-gradient(ellipse 50% 38% at 3% 92%, rgba(209, 218, 201, 0.4), transparent 70%)
                       `,
                     }}
                   />

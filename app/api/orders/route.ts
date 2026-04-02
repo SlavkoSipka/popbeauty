@@ -1,3 +1,4 @@
+import { after } from 'next/server';
 import { NextResponse } from 'next/server';
 import { sendOrderNotificationEmail } from '@/lib/emailjs-order';
 import { createAdminClient, isSupabaseAdminConfigured } from '@/lib/supabase/admin';
@@ -179,39 +180,36 @@ export async function POST(request: Request) {
 
   const orderIdStr = String(inserted?.id ?? '');
 
-  /**
-   * Moramo await — na serverlessu (npr. Vercel) odgovor pre završetka `void fetch` često prekine izvršavanje
-   * i mejl nikad ne ode na EmailJS.
-   */
-  let emailSent = false;
-  try {
-    emailSent = await sendOrderNotificationEmail({
-      orderId: orderIdStr,
-      firstName,
-      lastName,
-      email,
-      phone,
-      address,
-      city,
-      postal,
-      note,
-      referralCode: referralStored,
-      lineItems: lineItemsJson.map((li) => ({
-        name: li.name,
-        quantity: li.quantity,
-        lineTotalRsd: Number(li.line_total_rsd),
-      })),
-      subtotalRsd: pricing.subtotalRsd,
-      totalRsd: pricing.totalRsd,
-      discountType: pricing.discountType,
-      discountPercent: pricing.discountPercent,
-      discountAmountRsd: pricing.discountAmountRsd,
-      referralDiscountPercent: pricing.referralDiscountPercent,
-      referralDiscountRsd: pricing.referralDiscountRsd,
-    });
-  } catch (err) {
-    console.error('[api/orders] EmailJS porudžbina nije poslata (porudžbina je sačuvana):', err);
-  }
+  after(async () => {
+    try {
+      await sendOrderNotificationEmail({
+        orderId: orderIdStr,
+        firstName,
+        lastName,
+        email,
+        phone,
+        address,
+        city,
+        postal,
+        note,
+        referralCode: referralStored,
+        lineItems: lineItemsJson.map((li) => ({
+          name: li.name,
+          quantity: li.quantity,
+          lineTotalRsd: Number(li.line_total_rsd),
+        })),
+        subtotalRsd: pricing.subtotalRsd,
+        totalRsd: pricing.totalRsd,
+        discountType: pricing.discountType,
+        discountPercent: pricing.discountPercent,
+        discountAmountRsd: pricing.discountAmountRsd,
+        referralDiscountPercent: pricing.referralDiscountPercent,
+        referralDiscountRsd: pricing.referralDiscountRsd,
+      });
+    } catch (err) {
+      console.error('[api/orders] EmailJS porudžbina nije poslata (porudžbina je sačuvana):', err);
+    }
+  });
 
-  return NextResponse.json({ ok: true, orderId: inserted?.id, emailSent });
+  return NextResponse.json({ ok: true, orderId: inserted?.id });
 }
