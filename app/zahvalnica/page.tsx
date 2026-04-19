@@ -1,10 +1,58 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect } from 'react';
 import { useScrollReveal } from '@/lib/animations';
+import { buildHashedUserData, pixelTrackWithUserData } from '@/lib/meta-pixel';
+
+type StoredPurchase = {
+  orderId: string | null;
+  value: number;
+  currency: string;
+  contentName: string;
+  contentIds: string[];
+  contents: { id: string; quantity: number }[];
+  numItems: number;
+  email: string;
+  phone: string;
+  firstName: string;
+  lastName: string;
+};
 
 export default function ZahvalnicaPage() {
   useScrollReveal();
+
+  useEffect(() => {
+    let raw: string | null = null;
+    try { raw = sessionStorage.getItem('popbeauty-purchase'); } catch { return; }
+    if (!raw) return;
+    try { sessionStorage.removeItem('popbeauty-purchase'); } catch { /* ignore */ }
+    let p: StoredPurchase;
+    try { p = JSON.parse(raw) as StoredPurchase; } catch { return; }
+
+    void (async () => {
+      const userData = await buildHashedUserData({
+        email: p.email,
+        phone: p.phone,
+        firstName: p.firstName,
+        lastName: p.lastName,
+      });
+      pixelTrackWithUserData(
+        'Purchase',
+        {
+          value: p.value,
+          currency: p.currency,
+          content_name: p.contentName,
+          content_ids: p.contentIds,
+          contents: p.contents,
+          content_type: 'product',
+          num_items: p.numItems,
+          ...(p.orderId ? { order_id: p.orderId } : {}),
+        },
+        userData,
+      );
+    })();
+  }, []);
 
   return (
     <main>

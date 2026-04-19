@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { GoogleAnalytics } from '@next/third-parties/google';
+import MetaPixel from '@/components/analytics/MetaPixel';
 import { Cormorant_Garamond, Jost } from 'next/font/google';
 import { Suspense } from 'react';
 import Navigation from '@/components/layout/Navigation';
@@ -36,6 +37,7 @@ const siteDescription =
   'Prirodni kozmetički brand sa dva seruma za lice. Čisti botanički sastojci, transparentna formulacija, slow beauty pristup.';
 const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
 const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
+const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim();
 
 export const metadata: Metadata = {
   metadataBase,
@@ -106,6 +108,7 @@ export default function RootLayout({
           <Footer />
         </CartProvider>
         {gaMeasurementId ? <GoogleAnalytics gaId={gaMeasurementId} /> : null}
+        {metaPixelId ? <MetaPixel pixelId={metaPixelId} /> : null}
       </body>
     </html>
   );

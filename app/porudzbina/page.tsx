@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -9,6 +9,7 @@ import { useCart } from '@/lib/cart-context';
 import { displayUnitPriceForLine, formatRsd, lineSubtotalRsd } from '@/lib/price';
 import { computePricing, type PricingResult } from '@/lib/pricing-engine';
 import { usePricingData } from '@/lib/use-pricing-data';
+import { pixelTrack } from '@/lib/meta-pixel';
 import Button from '@/components/ui/Button';
 
 export default function PorudzbinaPage() {
@@ -54,6 +55,21 @@ export default function PorudzbinaPage() {
   }, [items, priceMap, siteDiscountPercent, bundleDiscountPercent, loaded, referralDiscountPercent]);
 
   const totalForApi = pricing?.totalRsd ?? 0;
+
+  const initiateFiredRef = useRef(false);
+  useEffect(() => {
+    if (initiateFiredRef.current) return;
+    if (empty || !pricing) return;
+    initiateFiredRef.current = true;
+    pixelTrack('InitiateCheckout', {
+      content_ids: items.map((l) => l.slug),
+      contents: items.map((l) => ({ id: l.slug, quantity: l.quantity })),
+      content_type: 'product',
+      num_items: items.reduce((s, l) => s + l.quantity, 0),
+      value: pricing.totalRsd,
+      currency: 'RSD',
+    });
+  }, [empty, pricing, items]);
 
   async function applyCode() {
     const raw = codeInput.trim();
@@ -105,12 +121,31 @@ export default function PorudzbinaPage() {
         }),
       });
 
-      const data = (await res.json()) as { error?: string };
+      const data = (await res.json()) as { error?: string; orderId?: string };
 
       if (!res.ok) {
         setError(data.error ?? 'Slanje nije uspelo.');
         return;
       }
+
+      try {
+        sessionStorage.setItem(
+          'popbeauty-purchase',
+          JSON.stringify({
+            orderId: data.orderId ?? null,
+            value: totalForApi,
+            currency: 'RSD',
+            contentName: items.map((l) => l.name).join(' + '),
+            contentIds: items.map((l) => l.slug),
+            contents: items.map((l) => ({ id: l.slug, quantity: l.quantity })),
+            numItems: items.reduce((s, l) => s + l.quantity, 0),
+            email: email.trim(),
+            phone: phone.trim(),
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+          }),
+        );
+      } catch { /* sessionStorage može biti blokiran */ }
 
       clearCart();
       router.push('/zahvalnica');

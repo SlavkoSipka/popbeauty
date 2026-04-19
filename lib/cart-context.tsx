@@ -9,6 +9,13 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { pixelTrack } from '@/lib/meta-pixel';
+
+function parsePriceToRsd(s: string): number {
+  const t = s.replace(/\s*RSD\s*$/i, '').replace(/\s*KM\s*$/i, '').trim();
+  const n = parseFloat(t.replace(/\./g, '').replace(',', '.'));
+  return Number.isFinite(n) ? n : 0;
+}
 
 const STORAGE_KEY = 'popbeauty-cart';
 
@@ -125,6 +132,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return [...prev, { ...p, quantity: 1 }];
     });
     setIsOpen(true);
+    pixelTrack('AddToCart', {
+      content_ids: [p.slug],
+      content_name: p.name,
+      content_type: 'product',
+      value: parsePriceToRsd(p.price),
+      currency: 'RSD',
+    });
   }, []);
 
   const addBundlePair = useCallback((a: CartLineInput, b: CartLineInput) => {
@@ -133,6 +147,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return [...rest, { ...a, quantity: 1 }, { ...b, quantity: 1 }];
     });
     setIsOpen(true);
+    pixelTrack('AddToCart', {
+      content_ids: [a.slug, b.slug],
+      content_name: `${a.name} + ${b.name}`,
+      content_type: 'product',
+      value: parsePriceToRsd(a.price) + parsePriceToRsd(b.price),
+      currency: 'RSD',
+      contents: [
+        { id: a.slug, quantity: 1 },
+        { id: b.slug, quantity: 1 },
+      ],
+    });
   }, []);
 
   const removeLine = useCallback((slug: string) => {

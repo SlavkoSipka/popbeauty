@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useScrollReveal } from '@/lib/animations';
 import { useCart } from '@/lib/cart-context';
 import { products } from '@/lib/data/products';
+import { pixelTrack } from '@/lib/meta-pixel';
+import { parsePriceStringToRsd } from '@/lib/price';
 import { testimonials } from '@/lib/data/testimonials';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -26,6 +28,16 @@ export default function VodeniSerumPage() {
   useScrollReveal();
   const { addItem } = useCart();
   const [activeTab, setActiveTab] = useState<Tab>('opis');
+
+  useEffect(() => {
+    pixelTrack('ViewContent', {
+      content_ids: [product.slug],
+      content_name: product.name,
+      content_type: 'product',
+      value: parsePriceStringToRsd(product.price) ?? 0,
+      currency: 'RSD',
+    });
+  }, []);
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'opis', label: 'Opis' },
