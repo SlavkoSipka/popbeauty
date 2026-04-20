@@ -7,6 +7,8 @@ import type { DbProduct, DbSiteSettings } from '@/lib/price';
 export type PricingData = {
   products: DbProduct[];
   priceMap: Map<string, number>;
+  /** Per-proizvod popust override (NULL → nedefinisan, koristi se siteDiscountPercent). */
+  productDiscountMap: Map<string, number | null>;
   siteDiscountPercent: number;
   bundleDiscountPercent: number;
   loaded: boolean;
@@ -15,6 +17,7 @@ export type PricingData = {
 const EMPTY: PricingData = {
   products: [],
   priceMap: new Map(),
+  productDiscountMap: new Map(),
   siteDiscountPercent: 0,
   bundleDiscountPercent: 10,
   loaded: false,
@@ -37,7 +40,9 @@ export function usePricingData(): PricingData {
     let cancelled = false;
 
     Promise.all([
-      supabase.from('products').select('slug, name, base_price_rsd, image_path, volume'),
+      supabase
+        .from('products')
+        .select('slug, name, base_price_rsd, image_path, volume, discount_percent'),
       supabase
         .from('site_settings')
         .select('site_discount_percent, bundle_discount_percent')
@@ -47,12 +52,19 @@ export function usePricingData(): PricingData {
       if (cancelled) return;
       const products = (prodRes.data ?? []) as DbProduct[];
       const priceMap = new Map(products.map((p) => [p.slug, Number(p.base_price_rsd)]));
+      const productDiscountMap = new Map<string, number | null>(
+        products.map((p) => {
+          const v = p.discount_percent;
+          return [p.slug, v == null ? null : Number(v)];
+        }),
+      );
       const sett = settRes.data as DbSiteSettings | null;
       const siteDiscountPercent = Number(sett?.site_discount_percent ?? 0);
       const bundleDiscountPercent = Number(sett?.bundle_discount_percent ?? 10);
       const result: PricingData = {
         products,
         priceMap,
+        productDiscountMap,
         siteDiscountPercent,
         bundleDiscountPercent: Number.isFinite(bundleDiscountPercent)
           ? bundleDiscountPercent
@@ -69,6 +81,17 @@ export function usePricingData(): PricingData {
   }, []);
 
   return data;
+}
+
+/** Efektivni % popusta za proizvod (override ili site fallback). */
+export function effectiveDiscountPercent(
+  slug: string,
+  productDiscountMap: Map<string, number | null>,
+  siteDiscountPercent: number,
+): number {
+  const override = productDiscountMap.get(slug);
+  if (override != null) return Number(override) || 0;
+  return Number(siteDiscountPercent) || 0;
 }
 
 /** Invalidate cached pricing data (e.g. after admin changes settings). */

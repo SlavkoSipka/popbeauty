@@ -6,13 +6,17 @@ export const dynamic = 'force-dynamic';
 export default async function AdminPodesavanjaPage() {
   const supabase = await requireAdminServer();
 
-  const [{ data }, { data: creatorRows }] = await Promise.all([
+  const [{ data }, { data: creatorRows }, { data: productRows }] = await Promise.all([
     supabase
       .from('site_settings')
       .select('site_discount_percent, bundle_discount_percent')
       .eq('id', 1)
       .maybeSingle(),
     supabase.from('creators').select('commission_percent, customer_discount_percent'),
+    supabase
+      .from('products')
+      .select('slug, name, base_price_rsd, discount_percent')
+      .order('name', { ascending: true }),
   ]);
 
   const row = data as {
@@ -40,6 +44,18 @@ export default async function AdminPodesavanjaPage() {
         ? null
         : Number([...uniqCust][0]);
 
+  const initialProducts = ((productRows ?? []) as {
+    slug: string;
+    name: string;
+    base_price_rsd: number | string;
+    discount_percent: number | string | null;
+  }[]).map((p) => ({
+    slug: p.slug,
+    name: p.name,
+    basePriceRsd: Number(p.base_price_rsd),
+    discountPercent: p.discount_percent == null ? null : Number(p.discount_percent),
+  }));
+
   return (
     <AdminPodesavanjaClient
       initialSiteDiscount={siteDiscount}
@@ -49,6 +65,7 @@ export default async function AdminPodesavanjaPage() {
       creatorCommissionMixed={creatorCommissionMixed}
       creatorCustomerDiscountMixed={creatorCustomerDiscountMixed}
       creatorCount={cr.length}
+      initialProducts={initialProducts}
     />
   );
 }

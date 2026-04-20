@@ -1,7 +1,7 @@
 'use client';
 
 import { formatRsd } from '@/lib/price';
-import { usePricingData } from '@/lib/use-pricing-data';
+import { effectiveDiscountPercent, usePricingData } from '@/lib/use-pricing-data';
 
 type Props = {
   slug: string;
@@ -9,7 +9,13 @@ type Props = {
 };
 
 export default function ProductPrice({ slug, fallbackPrice }: Props) {
-  const { priceMap, siteDiscountPercent, bundleDiscountPercent, loaded } = usePricingData();
+  const {
+    priceMap,
+    productDiscountMap,
+    siteDiscountPercent,
+    bundleDiscountPercent,
+    loaded,
+  } = usePricingData();
 
   if (!loaded) {
     return (
@@ -24,8 +30,11 @@ export default function ProductPrice({ slug, fallbackPrice }: Props) {
     );
   }
 
-  if (siteDiscountPercent > 0) {
-    const discounted = Math.round(basePrice * (1 - siteDiscountPercent / 100) * 100) / 100;
+  const effectivePct = effectiveDiscountPercent(slug, productDiscountMap, siteDiscountPercent);
+  const displayPct = Math.round(effectivePct);
+
+  if (effectivePct > 0) {
+    const discounted = Math.round(basePrice * (1 - effectivePct / 100) * 100) / 100;
     return (
       <div>
         <div className="flex flex-wrap items-baseline gap-3">
@@ -36,11 +45,11 @@ export default function ProductPrice({ slug, fallbackPrice }: Props) {
             {formatRsd(basePrice)}
           </span>
           <span className="font-body font-[400] text-[12px] text-sage-mid uppercase tracking-[0.08em]">
-            −{siteDiscountPercent}%
+            −{displayPct}%
           </span>
         </div>
         <p className="font-body font-[300] text-[11px] text-sage-mid mt-1">
-          Oba seruma zajedno? Paketni popust {bundleDiscountPercent}% na ukupnu cenu.
+          Oba seruma zajedno? Paketni popust {Math.round(bundleDiscountPercent)}% na ukupnu cenu.
         </p>
       </div>
     );
@@ -52,7 +61,7 @@ export default function ProductPrice({ slug, fallbackPrice }: Props) {
         {formatRsd(basePrice)}
       </span>
       <p className="font-body font-[300] text-[11px] text-silver-mid mt-1">
-        Oba seruma zajedno? Paketni popust {bundleDiscountPercent}% na ukupnu cenu.
+        Oba seruma zajedno? Paketni popust {Math.round(bundleDiscountPercent)}% na ukupnu cenu.
       </p>
     </div>
   );

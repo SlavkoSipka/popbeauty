@@ -13,7 +13,13 @@ export default function CartDrawer() {
     items, itemCount, isOpen, closeCart, removeLine, setQuantity,
     setReferral, clearReferral, referralCode, referralDiscountPercent,
   } = useCart();
-  const { priceMap, siteDiscountPercent, bundleDiscountPercent, loaded } = usePricingData();
+  const {
+    priceMap,
+    productDiscountMap,
+    siteDiscountPercent,
+    bundleDiscountPercent,
+    loaded,
+  } = usePricingData();
 
   const [codeInput, setCodeInput] = useState('');
   const [codeError, setCodeError] = useState<string | null>(null);
@@ -35,12 +41,21 @@ export default function CartDrawer() {
         slug: l.slug,
         quantity: l.quantity,
         basePriceRsd: priceMap.get(l.slug) ?? 0,
+        discountPercent: productDiscountMap.get(l.slug) ?? null,
       })),
       siteDiscountPercent,
       bundleDiscountPercent,
       referralDiscountPercent: referralDiscountPercent ?? 0,
     });
-  }, [items, priceMap, siteDiscountPercent, bundleDiscountPercent, loaded, referralDiscountPercent]);
+  }, [
+    items,
+    priceMap,
+    productDiscountMap,
+    siteDiscountPercent,
+    bundleDiscountPercent,
+    loaded,
+    referralDiscountPercent,
+  ]);
 
   async function applyCode() {
     const raw = codeInput.trim();
@@ -243,15 +258,15 @@ export default function CartDrawer() {
                         {siteDiscountPercent > 0 && bundleDiscountPercent > 0 ? (
                           <>
                             {' '}
-                            ({siteDiscountPercent}% na pojedinačne proizvode, {bundleDiscountPercent}% na paket kada su
+                            ({Math.round(siteDiscountPercent)}% na pojedinačne proizvode, {Math.round(bundleDiscountPercent)}% na paket kada su
                             oba seruma u korpi).
                           </>
                         ) : siteDiscountPercent > 0 ? (
-                          <> ({siteDiscountPercent}% na pojedinačne proizvode).</>
+                          <> ({Math.round(siteDiscountPercent)}% na pojedinačne proizvode).</>
                         ) : (
                           <>
                             {' '}
-                            ({bundleDiscountPercent}% na paket kada su oba seruma u korpi).
+                            ({Math.round(bundleDiscountPercent)}% na paket kada su oba seruma u korpi).
                           </>
                         )}{' '}
                         Kada ove akcije završe, kreatorov kod će ponovo važiti za tvoj popust.
@@ -265,7 +280,7 @@ export default function CartDrawer() {
                   ) : (
                     <>
                       Kod <span className="font-mono text-ink">{referralCode}</span> — popust{' '}
-                      {referralDiscountPercent}%
+                      {Math.round(referralDiscountPercent)}%
                     </>
                   )}
                 </p>
@@ -293,22 +308,41 @@ export default function CartDrawer() {
                       {formatRsd(pricing.subtotalRsd)}
                     </span>
                   </div>
-                  <div className="flex items-baseline justify-between gap-4">
-                    <span className="font-body font-[300] text-[12px] text-sage-mid md:text-[13px]">
-                      {pricing.discountType === 'bundle'
-                        ? `Paket popust −${pricing.discountPercent}%`
-                        : `Popust −${pricing.discountPercent}%`}
-                    </span>
-                    <span className="font-body font-[300] text-[14px] text-sage-mid tabular-nums md:text-[15px]">
-                      −{formatRsd(pricing.discountAmountRsd)}
-                    </span>
-                  </div>
+                  {pricing.discountType === 'site' && pricing.lineDiscounts.length > 1 && (
+                    new Set(pricing.lineDiscounts.map((ld) => Math.round(ld.percent))).size > 1
+                  ) ? (
+                    pricing.lineDiscounts.map((ld) => {
+                      const line = items.find((it) => it.slug === ld.slug);
+                      const label = line?.name ?? ld.slug;
+                      return (
+                        <div key={ld.slug} className="flex items-baseline justify-between gap-4">
+                          <span className="font-body font-[300] text-[12px] text-sage-mid md:text-[13px]">
+                            {label} −{Math.round(ld.percent)}%
+                          </span>
+                          <span className="font-body font-[300] text-[14px] text-sage-mid tabular-nums md:text-[15px]">
+                            −{formatRsd(ld.amountRsd)}
+                          </span>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="flex items-baseline justify-between gap-4">
+                      <span className="font-body font-[300] text-[12px] text-sage-mid md:text-[13px]">
+                        {pricing.discountType === 'bundle'
+                          ? `Paket popust −${Math.round(pricing.discountPercent)}%`
+                          : `Popust −${Math.round(pricing.discountPercent)}%`}
+                      </span>
+                      <span className="font-body font-[300] text-[14px] text-sage-mid tabular-nums md:text-[15px]">
+                        −{formatRsd(pricing.discountAmountRsd)}
+                      </span>
+                    </div>
+                  )}
                 </>
               )}
               {pricing && pricing.referralDiscountPercent > 0 && (
                 <div className="flex items-baseline justify-between gap-4">
                   <span className="font-body font-[300] text-[12px] text-sage-dark md:text-[13px]">
-                    Promo kod −{pricing.referralDiscountPercent}%
+                    Promo kod −{Math.round(pricing.referralDiscountPercent)}%
                   </span>
                   <span className="font-body font-[300] text-[14px] text-sage-dark tabular-nums md:text-[15px]">
                     −{formatRsd(pricing.referralDiscountRsd)}

@@ -73,6 +73,8 @@ export type DbProduct = {
   base_price_rsd: number;
   image_path: string;
   volume: string;
+  /** Per-proizvod popust u %. NULL/undefined = koristi site_settings.site_discount_percent. */
+  discount_percent?: number | null;
 };
 
 export type DbSiteSettings = {

@@ -55,7 +55,9 @@ export async function POST(request: Request) {
 
   // ── Fetch DB products + site settings ──
   const [{ data: dbProducts }, { data: settingsRow }] = await Promise.all([
-    admin.from('products').select('slug, name, base_price_rsd, image_path, volume'),
+    admin
+      .from('products')
+      .select('slug, name, base_price_rsd, image_path, volume, discount_percent'),
     admin
       .from('site_settings')
       .select('site_discount_percent, bundle_discount_percent')
@@ -124,6 +126,7 @@ export async function POST(request: Request) {
       slug: l.slug,
       quantity: l.quantity,
       basePriceRsd: l.basePriceRsd,
+      discountPercent: l.discountPercent,
     })),
     siteDiscountPercent,
     bundleDiscountPercent: Number.isFinite(bundleDiscountPercent) ? bundleDiscountPercent : 10,

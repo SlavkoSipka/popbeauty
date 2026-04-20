@@ -21,7 +21,13 @@ type Props = {
  */
 export default function ProductBundleCta({ lineUljani, lineVodeni, className }: Props) {
   const { addBundlePair } = useCart();
-  const { priceMap, siteDiscountPercent, bundleDiscountPercent, loaded } = usePricingData();
+  const {
+    priceMap,
+    productDiscountMap,
+    siteDiscountPercent,
+    bundleDiscountPercent,
+    loaded,
+  } = usePricingData();
 
   const pricing = useMemo(() => {
     if (!loaded) return null;
@@ -30,8 +36,18 @@ export default function ProductBundleCta({ lineUljani, lineVodeni, className }: 
     if (pu === undefined || pv === undefined) return null;
     return computePricing({
       lines: [
-        { slug: lineUljani.slug, quantity: 1, basePriceRsd: pu },
-        { slug: lineVodeni.slug, quantity: 1, basePriceRsd: pv },
+        {
+          slug: lineUljani.slug,
+          quantity: 1,
+          basePriceRsd: pu,
+          discountPercent: productDiscountMap.get(lineUljani.slug) ?? null,
+        },
+        {
+          slug: lineVodeni.slug,
+          quantity: 1,
+          basePriceRsd: pv,
+          discountPercent: productDiscountMap.get(lineVodeni.slug) ?? null,
+        },
       ],
       siteDiscountPercent,
       bundleDiscountPercent,
@@ -40,6 +56,7 @@ export default function ProductBundleCta({ lineUljani, lineVodeni, className }: 
   }, [
     loaded,
     priceMap,
+    productDiscountMap,
     siteDiscountPercent,
     bundleDiscountPercent,
     lineUljani.slug,
@@ -75,7 +92,7 @@ export default function ProductBundleCta({ lineUljani, lineVodeni, className }: 
           </span>
         </span>
         <span className="font-body font-[400] text-[10px] tracking-[0.08em] text-[#6B7D5E] normal-case group-hover:text-white/85">
-          {bundlePct > 0 ? `Paket −${bundlePct}%` : 'Paket — oba seruma'}
+          {bundlePct > 0 ? `Paket −${Math.round(bundlePct)}%` : 'Paket — oba seruma'}
         </span>
       </button>
     </div>

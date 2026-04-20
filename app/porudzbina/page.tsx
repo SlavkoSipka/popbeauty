@@ -20,7 +20,13 @@ export default function PorudzbinaPage() {
     referralCode, referralDiscountPercent,
     setReferral, clearReferral,
   } = useCart();
-  const { priceMap, siteDiscountPercent, bundleDiscountPercent, loaded } = usePricingData();
+  const {
+    priceMap,
+    productDiscountMap,
+    siteDiscountPercent,
+    bundleDiscountPercent,
+    loaded,
+  } = usePricingData();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,12 +53,21 @@ export default function PorudzbinaPage() {
         slug: l.slug,
         quantity: l.quantity,
         basePriceRsd: priceMap.get(l.slug) ?? 0,
+        discountPercent: productDiscountMap.get(l.slug) ?? null,
       })),
       siteDiscountPercent,
       bundleDiscountPercent,
       referralDiscountPercent: referralDiscountPercent ?? 0,
     });
-  }, [items, priceMap, siteDiscountPercent, bundleDiscountPercent, loaded, referralDiscountPercent]);
+  }, [
+    items,
+    priceMap,
+    productDiscountMap,
+    siteDiscountPercent,
+    bundleDiscountPercent,
+    loaded,
+    referralDiscountPercent,
+  ]);
 
   const totalForApi = pricing?.totalRsd ?? 0;
 
@@ -365,15 +380,15 @@ export default function PorudzbinaPage() {
                             {siteDiscountPercent > 0 && bundleDiscountPercent > 0 ? (
                               <>
                                 {' '}
-                                ({siteDiscountPercent}% na pojedinačne proizvode, {bundleDiscountPercent}% na paket
+                                ({Math.round(siteDiscountPercent)}% na pojedinačne proizvode, {Math.round(bundleDiscountPercent)}% na paket
                                 kada su oba seruma u korpi).
                               </>
                             ) : siteDiscountPercent > 0 ? (
-                              <> ({siteDiscountPercent}% na pojedinačne proizvode).</>
+                              <> ({Math.round(siteDiscountPercent)}% na pojedinačne proizvode).</>
                             ) : (
                               <>
                                 {' '}
-                                ({bundleDiscountPercent}% na paket kada su oba seruma u korpi).
+                                ({Math.round(bundleDiscountPercent)}% na paket kada su oba seruma u korpi).
                               </>
                             )}{' '}
                             Kada ove akcije završe, kreatorov kod će ponovo važiti za tvoj popust.
@@ -387,7 +402,7 @@ export default function PorudzbinaPage() {
                       ) : (
                         <>
                           Kod <span className="font-mono text-ink">{referralCode}</span> — popust{' '}
-                          {referralDiscountPercent}%
+                          {Math.round(referralDiscountPercent)}%
                         </>
                       )}
                     </p>
@@ -471,22 +486,41 @@ export default function PorudzbinaPage() {
                           {formatRsd(pricing.subtotalRsd)}
                         </span>
                       </div>
-                      <div className="flex justify-between gap-2">
-                        <span className="font-body font-[300] text-[10px] text-sage-mid md:text-[11px]">
-                          {pricing.discountType === 'bundle'
-                            ? `Paket popust −${pricing.discountPercent}%`
-                            : `Popust −${pricing.discountPercent}%`}
-                        </span>
-                        <span className="font-body font-[300] text-[10px] text-sage-mid tabular-nums md:text-[11px]">
-                          −{formatRsd(pricing.discountAmountRsd)}
-                        </span>
-                      </div>
+                      {pricing.discountType === 'site' &&
+                      pricing.lineDiscounts.length > 1 &&
+                      new Set(pricing.lineDiscounts.map((ld) => Math.round(ld.percent))).size > 1 ? (
+                        pricing.lineDiscounts.map((ld) => {
+                          const line = items.find((it) => it.slug === ld.slug);
+                          const label = line?.name ?? ld.slug;
+                          return (
+                            <div key={ld.slug} className="flex justify-between gap-2">
+                              <span className="font-body font-[300] text-[10px] text-sage-mid md:text-[11px]">
+                                {label} −{Math.round(ld.percent)}%
+                              </span>
+                              <span className="font-body font-[300] text-[10px] text-sage-mid tabular-nums md:text-[11px]">
+                                −{formatRsd(ld.amountRsd)}
+                              </span>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="flex justify-between gap-2">
+                          <span className="font-body font-[300] text-[10px] text-sage-mid md:text-[11px]">
+                            {pricing.discountType === 'bundle'
+                              ? `Paket popust −${Math.round(pricing.discountPercent)}%`
+                              : `Popust −${Math.round(pricing.discountPercent)}%`}
+                          </span>
+                          <span className="font-body font-[300] text-[10px] text-sage-mid tabular-nums md:text-[11px]">
+                            −{formatRsd(pricing.discountAmountRsd)}
+                          </span>
+                        </div>
+                      )}
                     </>
                   )}
                   {pricing && pricing.referralDiscountPercent > 0 && (
                     <div className="flex justify-between gap-2">
                       <span className="font-body font-[300] text-[10px] text-sage-dark md:text-[11px]">
-                        Promo kod −{pricing.referralDiscountPercent}%
+                        Promo kod −{Math.round(pricing.referralDiscountPercent)}%
                       </span>
                       <span className="font-body font-[300] text-[10px] text-sage-dark tabular-nums md:text-[11px]">
                         −{formatRsd(pricing.referralDiscountRsd)}

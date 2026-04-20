@@ -8,14 +8,20 @@ declare global {
 
 export const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? '';
 
-function call(...args: unknown[]) {
+function call(event: string, params: Record<string, unknown>, extraOpts?: Record<string, unknown>) {
   if (typeof window === 'undefined') return;
   if (typeof window.fbq !== 'function') return;
-  try { window.fbq(...args); } catch { /* no-op */ }
+  try {
+    if (extraOpts && Object.keys(extraOpts).length > 0) {
+      window.fbq('track', event, params, extraOpts);
+    } else {
+      window.fbq('track', event, params);
+    }
+  } catch { /* no-op */ }
 }
 
 export function pixelTrack(event: string, params?: Record<string, unknown>) {
-  call('track', event, params ?? {});
+  call(event, params ?? {});
 }
 
 export function pixelTrackWithUserData(
@@ -23,7 +29,7 @@ export function pixelTrackWithUserData(
   params: Record<string, unknown>,
   userData: Record<string, unknown>,
 ) {
-  call('track', event, params, { user_data: userData });
+  call(event, params, { user_data: userData });
 }
 
 // Meta zahteva email/telefon/ime/prezime hashovane SHA-256 (lowercase, trimmed).

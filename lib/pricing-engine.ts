@@ -5,7 +5,7 @@
  *   1. Subtotal = SUM(base_price * qty)
  *   2. Product discount (mutually exclusive):
  *      - Bundle % if BOTH slugs present (bundle_discount_percent iz site_settings)
- *      - Site discount % otherwise (if > 0)
+ *      - Inače: per-line % (line.discountPercent ?? siteDiscountPercent) za svaku liniju
  *   3. Referral discount (per-creator customer_discount_percent) on top of #2
  *   4. Promo kod (discount_codes) — procenat na iznos posle referral popusta
  *   5. Creator commission = commission_percent% of final total (handled outside this module)
@@ -18,6 +18,8 @@ export type PricingLine = {
   slug: string;
   quantity: number;
   basePriceRsd: number;
+  /** Override popusta za ovaj proizvod (u %). NULL/undefined = koristi siteDiscountPercent. */
+  discountPercent?: number | null;
 };
 
 export type PricingInput = {
@@ -30,12 +32,26 @@ export type PricingInput = {
   promoDiscountPercent?: number;
 };
 
+export type LineDiscount = {
+  slug: string;
+  /** Efektivni procenat primenjen na ovu liniju (može biti decimalan). */
+  percent: number;
+  /** Iznos popusta u RSD za ovu liniju (ukupno za qty). */
+  amountRsd: number;
+};
+
 export type PricingResult = {
   subtotalRsd: number;
   isBundle: boolean;
   discountType: 'site' | 'bundle' | null;
+  /**
+   * Za bundle: paketni %. Za site mode: reprezentativni % (max efektivni % u korpi) —
+   * koristi se za pojednostavljeni prikaz. Za tačan prikaz po proizvodu koristi `lineDiscounts`.
+   */
   discountPercent: number;
   discountAmountRsd: number;
+  /** Popust po liniji (samo za site mode; za bundle je prazan niz). */
+  lineDiscounts: LineDiscount[];
   afterProductDiscountRsd: number;
   referralDiscountPercent: number;
   referralDiscountRsd: number;
@@ -50,12 +66,15 @@ function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
+function clampPct(n: number): number {
+  if (!Number.isFinite(n)) return 0;
+  return Math.min(100, Math.max(0, n));
+}
+
 export function computePricing(input: PricingInput): PricingResult {
   const { lines, siteDiscountPercent, bundleDiscountPercent, referralDiscountPercent } = input;
-  const bundlePct = Math.min(
-    100,
-    Math.max(0, Number(bundleDiscountPercent) || 0),
-  );
+  const sitePct = clampPct(Number(siteDiscountPercent) || 0);
+  const bundlePct = clampPct(Number(bundleDiscountPercent) || 0);
   const promoDiscountPercent =
     input.promoDiscountPercent != null && input.promoDiscountPercent > 0
       ? input.promoDiscountPercent
@@ -70,16 +89,38 @@ export function computePricing(input: PricingInput): PricingResult {
 
   let discountType: PricingResult['discountType'] = null;
   let discountPercent = 0;
+  let discountAmountRsd = 0;
+  let lineDiscounts: LineDiscount[] = [];
 
   if (isBundle) {
     discountType = 'bundle';
     discountPercent = bundlePct;
-  } else if (siteDiscountPercent > 0) {
-    discountType = 'site';
-    discountPercent = siteDiscountPercent;
+    discountAmountRsd = round2((subtotalRsd * bundlePct) / 100);
+  } else {
+    // Per-line popust: koristi override ako postoji, inače site %.
+    let maxPct = 0;
+    let totalDiscount = 0;
+    const perLine: LineDiscount[] = [];
+    for (const l of lines) {
+      if (l.quantity <= 0) continue;
+      const override = l.discountPercent;
+      const pct = clampPct(override != null ? Number(override) : sitePct);
+      const lineGross = l.basePriceRsd * l.quantity;
+      const amount = round2((lineGross * pct) / 100);
+      if (pct > 0) {
+        perLine.push({ slug: l.slug, percent: pct, amountRsd: amount });
+        totalDiscount += amount;
+        if (pct > maxPct) maxPct = pct;
+      }
+    }
+    if (totalDiscount > 0.005) {
+      discountType = 'site';
+      discountPercent = maxPct;
+      discountAmountRsd = round2(totalDiscount);
+      lineDiscounts = perLine;
+    }
   }
 
-  const discountAmountRsd = round2((subtotalRsd * discountPercent) / 100);
   const afterProductDiscountRsd = round2(subtotalRsd - discountAmountRsd);
 
   const appliedReferral = referralDiscountPercent > 0 ? referralDiscountPercent : 0;
@@ -97,6 +138,7 @@ export function computePricing(input: PricingInput): PricingResult {
     discountType,
     discountPercent,
     discountAmountRsd,
+    lineDiscounts,
     afterProductDiscountRsd,
     referralDiscountPercent: appliedReferral,
     referralDiscountRsd,

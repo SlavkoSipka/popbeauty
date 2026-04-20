@@ -10,6 +10,8 @@ export type ParsedOrderLine = {
   quantity: number;
   basePriceRsd: number;
   image: string;
+  /** Per-proizvod override popusta u %. NULL = koristi se site popust. */
+  discountPercent: number | null;
 };
 
 /**
@@ -41,12 +43,14 @@ export function parseCartLinesFromBody(
     const q = typeof quantity === 'number' ? quantity : Number(quantity);
     if (!Number.isInteger(q) || q < 1 || q > 99) return null;
 
+    const rawDisc = dbP?.discount_percent;
     out.push({
       slug,
       name: dbP?.name ?? staticP!.name,
       quantity: q,
       basePriceRsd: dbP?.base_price_rsd ?? 0,
       image: dbP?.image_path ?? staticP!.image,
+      discountPercent: rawDisc == null ? null : Number(rawDisc),
     });
   }
 

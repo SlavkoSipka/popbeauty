@@ -6,6 +6,14 @@ import { invalidatePricingCache } from '@/lib/use-pricing-data';
 
 const NIL_UUID = '00000000-0000-0000-0000-000000000000';
 
+type ProductRow = {
+  slug: string;
+  name: string;
+  basePriceRsd: number;
+  /** NULL = koristi se site popust. */
+  discountPercent: number | null;
+};
+
 type Props = {
   initialSiteDiscount: number;
   initialBundleDiscount: number;
@@ -14,6 +22,7 @@ type Props = {
   creatorCommissionMixed: boolean;
   creatorCustomerDiscountMixed: boolean;
   creatorCount: number;
+  initialProducts: ProductRow[];
 };
 
 export default function AdminPodesavanjaClient({
@@ -24,6 +33,7 @@ export default function AdminPodesavanjaClient({
   creatorCommissionMixed,
   creatorCustomerDiscountMixed,
   creatorCount,
+  initialProducts,
 }: Props) {
   const [siteDiscount, setSiteDiscount] = useState(String(initialSiteDiscount));
   const [bundleDiscount, setBundleDiscount] = useState(String(initialBundleDiscount));
@@ -49,10 +59,50 @@ export default function AdminPodesavanjaClient({
   const [errorCommission, setErrorCommission] = useState<string | null>(null);
   const [errorCustomerDisc, setErrorCustomerDisc] = useState<string | null>(null);
 
+  // Per-proizvod popust
+  const [productInputs, setProductInputs] = useState<Record<string, string>>(() => {
+    const out: Record<string, string> = {};
+    for (const p of initialProducts) {
+      out[p.slug] = p.discountPercent == null ? '' : String(p.discountPercent);
+    }
+    return out;
+  });
+  const [savedProduct, setSavedProduct] = useState<Record<string, boolean>>({});
+  const [savingProduct, setSavingProduct] = useState<Record<string, boolean>>({});
+  const [errorProduct, setErrorProduct] = useState<Record<string, string | null>>({});
+
   const parsePct = (raw: string) => {
     const v = parseFloat(raw.replace(',', '.'));
     if (Number.isNaN(v) || v < 0 || v > 100) return null;
-    return v;
+    return Math.round(v * 100) / 100;
+  };
+
+  const handleSaveProductDiscount = async (slug: string) => {
+    const raw = (productInputs[slug] ?? '').trim();
+    const value = raw === '' ? null : parsePct(raw);
+    if (raw !== '' && value === null) {
+      setErrorProduct((s) => ({ ...s, [slug]: 'Unesite broj između 0 i 100 (ili ostavite prazno).' }));
+      return;
+    }
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+    setSavingProduct((s) => ({ ...s, [slug]: true }));
+    setErrorProduct((s) => ({ ...s, [slug]: null }));
+    setSavedProduct((s) => ({ ...s, [slug]: false }));
+
+    const { error: err } = await supabase
+      .from('products')
+      .update({ discount_percent: value })
+      .eq('slug', slug);
+
+    setSavingProduct((s) => ({ ...s, [slug]: false }));
+    if (err) {
+      setErrorProduct((s) => ({ ...s, [slug]: 'Čuvanje nije uspelo.' }));
+    } else {
+      setProductInputs((s) => ({ ...s, [slug]: value == null ? '' : String(value) }));
+      setSavedProduct((s) => ({ ...s, [slug]: true }));
+      invalidatePricingCache();
+    }
   };
 
   const handleSaveSite = async () => {
@@ -355,6 +405,75 @@ export default function AdminPodesavanjaClient({
               ? 'Još nema kreatora.'
               : 'Individualno i dalje možeš menjati na stranici Kreatori.'}
           </p>
+        </div>
+      </div>
+
+      <div className="mb-6 md:mb-10">
+        <h3 className="font-display font-[300] text-[16px] md:text-[18px] text-ink mb-2">
+          Popust po proizvodu
+        </h3>
+        <p className="font-body font-[300] text-[11px] md:text-[12px] text-silver-mid mb-4 md:mb-6 max-w-[720px] leading-relaxed">
+          Override globalnog popusta za pojedinačan proizvod. Ostavi prazno da se primeni popust na sajtu.
+          Unosi se u % (do 2 decimale), na sajtu se prikazuje zaokruženo na ceo broj.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+          {initialProducts.map((p) => {
+            const currentDiscPctNum = parseFloat((productInputs[p.slug] ?? '').replace(',', '.'));
+            const currentDiscPct = Number.isFinite(currentDiscPctNum) ? currentDiscPctNum : null;
+            const effectivePct =
+              currentDiscPct != null ? currentDiscPct : Number(siteDiscount) || 0;
+            const discounted =
+              effectivePct > 0
+                ? Math.round(p.basePriceRsd * (1 - effectivePct / 100) * 100) / 100
+                : p.basePriceRsd;
+            return (
+              <div key={p.slug} className="border border-silver-light bg-white p-4 md:p-5">
+                <p className="font-body font-[400] text-[12px] md:text-[13px] text-ink mb-0.5">
+                  {p.name}
+                </p>
+                <p className="font-body font-[300] text-[10px] md:text-[11px] text-silver-mid mb-3">
+                  Bazna: {p.basePriceRsd.toLocaleString('sr-RS')} RSD
+                  {effectivePct > 0 ? (
+                    <>
+                      {' · '}Prodajna: {discounted.toLocaleString('sr-RS')} RSD
+                      {' · '}Prikaz: −{Math.round(effectivePct)}%
+                      {currentDiscPct == null ? ' (sa sajta)' : ''}
+                    </>
+                  ) : null}
+                </p>
+                <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2">
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={productInputs[p.slug] ?? ''}
+                    onChange={(e) => {
+                      setProductInputs((s) => ({ ...s, [p.slug]: e.target.value }));
+                      setSavedProduct((s) => ({ ...s, [p.slug]: false }));
+                    }}
+                    placeholder="prazno = sa sajta"
+                    className="w-28 md:w-32 border border-silver-light px-2.5 py-1.5 md:px-3 md:py-2 font-body text-[13px] md:text-[14px] text-ink focus:border-sage-mid focus:outline-none"
+                  />
+                  <span className="font-body text-[12px] md:text-[13px] text-silver-dark">%</span>
+                  <button
+                    type="button"
+                    disabled={savingProduct[p.slug]}
+                    onClick={() => void handleSaveProductDiscount(p.slug)}
+                    className="border border-ink bg-ink text-white px-3 py-1.5 md:px-4 md:py-2 font-body font-[400] text-[10px] md:text-[11px] uppercase tracking-[0.12em] hover:bg-transparent hover:text-ink transition-colors disabled:opacity-50"
+                  >
+                    {savingProduct[p.slug] ? 'Čuvam…' : 'Sačuvaj'}
+                  </button>
+                </div>
+                {savedProduct[p.slug] && (
+                  <p className="font-body font-[300] text-[12px] text-sage-mid">Sačuvano.</p>
+                )}
+                {errorProduct[p.slug] && (
+                  <p className="font-body font-[300] text-[12px] text-red-800">
+                    {errorProduct[p.slug]}
+                  </p>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
