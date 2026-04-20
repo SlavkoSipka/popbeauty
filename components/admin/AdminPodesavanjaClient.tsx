@@ -74,7 +74,7 @@ export default function AdminPodesavanjaClient({
   const parsePct = (raw: string) => {
     const v = parseFloat(raw.replace(',', '.'));
     if (Number.isNaN(v) || v < 0 || v > 100) return null;
-    return Math.round(v * 100) / 100;
+    return Math.round(v * 1e8) / 1e8;
   };
 
   const handleSaveProductDiscount = async (slug: string) => {
