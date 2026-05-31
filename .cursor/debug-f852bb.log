@@ -1,5 +1,0 @@
-{"sessionId":"f852bb","location":"animations.ts:useScrollReveal","message":"scroll reveal init","data":{"revealCount":16,"hasTestimonials":false},"timestamp":1780238634941,"hypothesisId":"H1","runId":"post-fix"}
-{"sessionId":"f852bb","location":"animations.ts:observeRevealElements","message":"observe late reveal","data":{"observed":9,"scopeIsTestimonials":true},"timestamp":1780238634995,"hypothesisId":"H1","runId":"post-fix"}
-{"sessionId":"f852bb","location":"TestimonialsSection.tsx:mount","message":"testimonials mounted after observe","data":{"unrevealedInSection":9,"trackScrollWidth":2104},"timestamp":1780238634998,"hypothesisId":"H1","runId":"post-fix"}
-{"sessionId":"f852bb","location":"animations.ts:observeRevealElements","message":"observe late reveal","data":{"observed":9,"scopeIsTestimonials":true},"timestamp":1780238634999,"hypothesisId":"H1","runId":"post-fix"}
-{"sessionId":"f852bb","location":"TestimonialsSection.tsx:mount","message":"testimonials mounted after observe","data":{"unrevealedInSection":9,"trackScrollWidth":2104},"timestamp":1780238634999,"hypothesisId":"H1","runId":"post-fix"}

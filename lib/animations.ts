@@ -44,23 +44,12 @@ export function observeRevealElements(scope: ParentNode = document) {
       observer.observe(htmlEl);
     }
   });
-  // #region agent log
-  const inTestimonials = scope instanceof Element && scope.classList.contains('testimonials-section')
-    ? nodes.length
-    : scope.querySelectorAll?.('.testimonials-section [data-reveal]:not(.revealed)').length ?? 0;
-  if (inTestimonials > 0 || (scope instanceof Element && scope.classList.contains('testimonials-section'))) {
-    fetch('http://127.0.0.1:7256/ingest/e48ec5c9-1222-4755-acbd-1976e3fa33d6',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'f852bb'},body:JSON.stringify({sessionId:'f852bb',location:'animations.ts:observeRevealElements',message:'observe late reveal',data:{observed:nodes.length,scopeIsTestimonials:scope instanceof Element&&scope.classList.contains('testimonials-section')},timestamp:Date.now(),hypothesisId:'H1',runId:'post-fix'})}).catch(()=>{});
-  }
-  // #endregion
   return nodes.length;
 }
 
 export function useScrollReveal() {
   useEffect(() => {
-    const count = observeRevealElements(document);
-    // #region agent log
-    fetch('http://127.0.0.1:7256/ingest/e48ec5c9-1222-4755-acbd-1976e3fa33d6',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'f852bb'},body:JSON.stringify({sessionId:'f852bb',location:'animations.ts:useScrollReveal',message:'scroll reveal init',data:{revealCount:count,hasTestimonials:!!document.querySelector('.testimonials-section')},timestamp:Date.now(),hypothesisId:'H1',runId:'post-fix'})}).catch(()=>{});
-    // #endregion
+    observeRevealElements(document);
 
     return () => {
       revealObserver?.disconnect();

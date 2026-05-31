@@ -21,12 +21,6 @@ export default function TestimonialsSection() {
   useEffect(() => {
     const root = sectionRef.current;
     if (root) observeRevealElements(root);
-    const unrevealed = root
-      ? root.querySelectorAll('[data-reveal]:not(.revealed)').length
-      : -1;
-    // #region agent log
-    fetch('http://127.0.0.1:7256/ingest/e48ec5c9-1222-4755-acbd-1976e3fa33d6',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'f852bb'},body:JSON.stringify({sessionId:'f852bb',location:'TestimonialsSection.tsx:mount',message:'testimonials mounted after observe',data:{unrevealedInSection:unrevealed,trackScrollWidth:trackRef.current?.scrollWidth??0},timestamp:Date.now(),hypothesisId:'H1',runId:'post-fix'})}).catch(()=>{});
-    // #endregion
   }, []);
 
   const scrollBy = (dir: number) => {
