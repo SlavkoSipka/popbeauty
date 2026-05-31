@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useScrollReveal } from '@/lib/animations';
 import { useCart } from '@/lib/cart-context';
 import { displayUnitPriceForLine, formatRsd, lineSubtotalRsd } from '@/lib/price';
+import { SHIPPING_CARRIER, SHIPPING_RSD } from '@/lib/shipping';
 import { computePricing, type PricingResult } from '@/lib/pricing-engine';
 import { usePricingData } from '@/lib/use-pricing-data';
 import { pixelTrack } from '@/lib/meta-pixel';
@@ -69,7 +70,8 @@ export default function PorudzbinaPage() {
     referralDiscountPercent,
   ]);
 
-  const totalForApi = pricing?.totalRsd ?? 0;
+  const totalForApi = (pricing?.totalRsd ?? 0) + SHIPPING_RSD;
+  const productsTotal = pricing?.totalRsd ?? 0;
 
   const initiateFiredRef = useRef(false);
   useEffect(() => {
@@ -81,7 +83,7 @@ export default function PorudzbinaPage() {
       contents: items.map((l) => ({ id: l.slug, quantity: l.quantity })),
       content_type: 'product',
       num_items: items.reduce((s, l) => s + l.quantity, 0),
-      value: pricing.totalRsd,
+      value: totalForApi,
       currency: 'RSD',
     });
   }, [empty, pricing, items]);
@@ -172,9 +174,9 @@ export default function PorudzbinaPage() {
   };
 
   const fieldInputClass =
-    'w-full border border-silver-light bg-transparent px-3 py-2 font-body font-[300] text-[13px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none transition-colors duration-200 md:px-4 md:py-3 md:text-[14px]';
+    'w-full border-2 border-ink/25 bg-white px-4 py-3 font-body font-[400] text-[15px] text-ink placeholder:text-silver-dark focus:border-sage-dark focus:outline-none transition-colors duration-200 md:px-5 md:py-3.5 md:text-[16px]';
   const fieldLabelClass =
-    'block font-body font-[400] text-[10px] uppercase tracking-[0.12em] text-ink mb-1 md:mb-2 md:text-[11px] md:tracking-[0.14em]';
+    'block font-body font-[500] text-[13px] text-ink mb-1.5 md:mb-2 md:text-[14px]';
 
   return (
     <main>
@@ -203,10 +205,15 @@ export default function PorudzbinaPage() {
               data-reveal-delay="300"
               className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6 lg:gap-12 items-start"
             >
-              <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6 order-2 lg:order-1">
-                <h2 className="font-display font-[300] text-[17px] text-ink mb-1.5 pt-1 md:mb-2 md:pt-2 md:text-[20px]">
-                  Podaci za dostavu
-                </h2>
+              <form onSubmit={handleSubmit} className="space-y-5 md:space-y-7 order-2 lg:order-1">
+                <div>
+                  <h2 className="font-display font-[400] text-[22px] text-ink mb-1 md:text-[26px]">
+                    Podaci za dostavu
+                  </h2>
+                  <p className="font-body font-[400] text-[14px] text-ink-soft md:text-[15px]">
+                    Poštarina {formatRsd(SHIPPING_RSD)} ({SHIPPING_CARRIER}) sabira se sa iznosom porudžbine.
+                  </p>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-6">
                   <div>
                     <label className={fieldLabelClass} htmlFor="checkout-firstName">
@@ -326,7 +333,7 @@ export default function PorudzbinaPage() {
                 <div>
                   <label className={fieldLabelClass} htmlFor="checkout-note">
                     Napomena{' '}
-                    <span className="font-[300] normal-case tracking-normal text-silver-mid">
+                    <span className="font-[400] text-silver-dark">
                       (opciono)
                     </span>
                   </label>
@@ -342,11 +349,11 @@ export default function PorudzbinaPage() {
                 </div>
 
                 {/* Promo kod (= kreatorov referral) — ispod napomene */}
-                <div className="border border-silver-light p-4 md:p-6 bg-off-white/40">
+                <div className="border-2 border-ink/15 p-4 md:p-6 bg-off-white">
                   <label className={fieldLabelClass}>
                     Promo kod
                   </label>
-                  <div className="flex gap-1.5 md:gap-2">
+                  <div className="flex gap-2 md:gap-3">
                     <input
                       type="text"
                       value={codeInput}
@@ -354,24 +361,24 @@ export default function PorudzbinaPage() {
                       onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void applyCode(); } }}
                       placeholder="Unesi kod"
                       autoCapitalize="characters"
-                      className="min-w-0 flex-1 border border-silver-light bg-white px-3 py-2 font-body font-[300] text-[13px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none transition-colors duration-200 uppercase md:px-4 md:py-3 md:text-[14px]"
+                      className="min-w-0 flex-1 border-2 border-ink/25 bg-white px-4 py-3 font-body font-[400] text-[15px] text-ink placeholder:text-silver-dark focus:border-sage-dark focus:outline-none transition-colors duration-200 uppercase md:px-5 md:py-3.5 md:text-[16px]"
                     />
                     <button
                       type="button"
                       onClick={() => void applyCode()}
                       disabled={codeChecking}
-                      className="shrink-0 border border-ink bg-transparent px-3 py-2 font-body font-[400] text-[10px] uppercase tracking-[0.1em] text-ink hover:bg-ink hover:text-white transition-colors disabled:opacity-50 md:px-4 md:py-3 md:text-[11px] md:tracking-[0.12em]"
+                      className="shrink-0 border-2 border-ink bg-ink px-4 py-3 font-body font-[500] text-[12px] uppercase tracking-[0.08em] text-white hover:bg-transparent hover:text-ink transition-colors disabled:opacity-50 md:px-5 md:py-3.5 md:text-[13px]"
                     >
                       {codeChecking ? '…' : 'Proveri'}
                     </button>
                   </div>
                   {codeError ? (
-                    <p className="font-body font-[300] text-[11px] text-red-800 mt-2" role="alert">
+                    <p className="font-body font-[400] text-[13px] text-red-800 mt-2" role="alert">
                       {codeError}
                     </p>
                   ) : null}
                   {referralCode && referralDiscountPercent != null && !codeError ? (
-                    <p className="font-body font-[300] text-[11px] text-sage-mid mt-2 leading-relaxed">
+                    <p className="font-body font-[400] text-[13px] text-sage-dark mt-2 leading-relaxed">
                       {referralDiscountPercent === 0 ? (
                         siteDiscountPercent > 0 || bundleDiscountPercent > 0 ? (
                           <>
@@ -408,7 +415,7 @@ export default function PorudzbinaPage() {
                     </p>
                   ) : null}
                   {!referralCode && !codeError ? (
-                    <p className="font-body font-[300] text-[11px] text-silver-mid mt-2 leading-relaxed">
+                    <p className="font-body font-[400] text-[13px] text-ink-soft mt-2 leading-relaxed">
                       Imaš promo kod? Unesi ga i dobij popust na porudžbinu.
                     </p>
                   ) : null}
@@ -424,7 +431,7 @@ export default function PorudzbinaPage() {
                 </div>
 
                 {error ? (
-                  <p className="font-body font-[300] text-[12px] text-red-800 md:text-[13px]" role="alert">
+                  <p className="font-body font-[500] text-[14px] text-red-800 md:text-[15px]" role="alert">
                     {error}
                   </p>
                 ) : null}
@@ -433,17 +440,17 @@ export default function PorudzbinaPage() {
                   type="submit"
                   fullWidth
                   disabled={loading || !loaded}
-                  className="py-2 text-[10px] tracking-[0.12em] md:py-[10px] md:text-[11px] md:tracking-[0.14em]"
+                  className="py-3.5 text-[13px] tracking-[0.1em] md:py-4 md:text-[14px] md:tracking-[0.12em]"
                 >
                   {loading ? 'Šaljem…' : 'Pošalji porudžbinu'}
                 </Button>
               </form>
 
-              <aside className="order-1 lg:order-2 border border-silver-light p-3 md:p-4 lg:sticky lg:top-28">
-                <h2 className="font-display font-[300] text-[14px] text-ink mb-3 md:mb-4 md:text-[15px]">
+              <aside className="order-1 lg:order-2 border-2 border-ink/15 p-4 md:p-5 lg:sticky lg:top-28 bg-off-white">
+                <h2 className="font-display font-[400] text-[18px] text-ink mb-4 md:mb-5 md:text-[20px]">
                   Pregled korpe
                 </h2>
-                <ul className="flex flex-col gap-2 mb-3 md:mb-4 md:gap-3">
+                <ul className="flex flex-col gap-3 mb-4 md:mb-5 md:gap-4">
                   {items.map((line) => (
                     <li key={line.slug} className="flex gap-2">
                       <div className="relative h-12 w-10 shrink-0 overflow-hidden bg-sage-pale">
@@ -456,17 +463,17 @@ export default function PorudzbinaPage() {
                         />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-body font-[400] text-[12px] text-ink leading-snug md:text-[13px]">
+                        <p className="font-body font-[500] text-[14px] text-ink leading-snug md:text-[15px]">
                           {line.name}
                         </p>
-                        <p className="font-body font-[300] text-[10px] text-silver-dark mt-0.5 md:text-[11px]">
+                        <p className="font-body font-[400] text-[12px] text-ink-soft mt-0.5 md:text-[13px]">
                           {loaded
                             ? displayUnitPriceForLine(line, priceMap)
                             : displayUnitPriceForLine(line)}{' '}
                           × {line.quantity}
                         </p>
                       </div>
-                      <p className="font-body font-[400] text-[11px] text-ink tabular-nums shrink-0 md:text-[12px]">
+                      <p className="font-body font-[500] text-[13px] text-ink tabular-nums shrink-0 md:text-[14px]">
                         {loaded
                           ? formatRsd(lineSubtotalRsd(line, priceMap))
                           : formatRsd(lineSubtotalRsd(line))}
@@ -475,14 +482,14 @@ export default function PorudzbinaPage() {
                   ))}
                 </ul>
 
-                <div className="border-t border-silver-light pt-2 space-y-1 md:space-y-1.5 md:pt-3">
+                <div className="border-t-2 border-ink/10 pt-3 space-y-2 md:space-y-2.5 md:pt-4">
                   {pricing && pricing.discountType && (
                     <>
                       <div className="flex justify-between gap-2">
-                        <span className="font-body font-[300] text-[10px] text-silver-dark md:text-[11px]">
+                        <span className="font-body font-[400] text-[13px] text-ink-soft md:text-[14px]">
                           Bez popusta
                         </span>
-                        <span className="font-body font-[300] text-[11px] text-silver-dark tabular-nums line-through md:text-[12px]">
+                        <span className="font-body font-[400] text-[13px] text-ink-soft tabular-nums line-through md:text-[14px]">
                           {formatRsd(pricing.subtotalRsd)}
                         </span>
                       </div>
@@ -494,10 +501,10 @@ export default function PorudzbinaPage() {
                           const label = line?.name ?? ld.slug;
                           return (
                             <div key={ld.slug} className="flex justify-between gap-2">
-                              <span className="font-body font-[300] text-[10px] text-sage-mid md:text-[11px]">
+                              <span className="font-body font-[500] text-[13px] text-sage-dark md:text-[14px]">
                                 {label} −{Math.round(ld.percent)}%
                               </span>
-                              <span className="font-body font-[300] text-[10px] text-sage-mid tabular-nums md:text-[11px]">
+                              <span className="font-body font-[500] text-[13px] text-sage-dark tabular-nums md:text-[14px]">
                                 −{formatRsd(ld.amountRsd)}
                               </span>
                             </div>
@@ -505,12 +512,12 @@ export default function PorudzbinaPage() {
                         })
                       ) : (
                         <div className="flex justify-between gap-2">
-                          <span className="font-body font-[300] text-[10px] text-sage-mid md:text-[11px]">
+                          <span className="font-body font-[500] text-[13px] text-sage-dark md:text-[14px]">
                             {pricing.discountType === 'bundle'
                               ? `Paket popust −${Math.round(pricing.discountPercent)}%`
                               : `Popust −${Math.round(pricing.discountPercent)}%`}
                           </span>
-                          <span className="font-body font-[300] text-[10px] text-sage-mid tabular-nums md:text-[11px]">
+                          <span className="font-body font-[500] text-[13px] text-sage-dark tabular-nums md:text-[14px]">
                             −{formatRsd(pricing.discountAmountRsd)}
                           </span>
                         </div>
@@ -519,20 +526,38 @@ export default function PorudzbinaPage() {
                   )}
                   {pricing && pricing.referralDiscountPercent > 0 && (
                     <div className="flex justify-between gap-2">
-                      <span className="font-body font-[300] text-[10px] text-sage-dark md:text-[11px]">
+                      <span className="font-body font-[500] text-[13px] text-sage-dark md:text-[14px]">
                         Promo kod −{Math.round(pricing.referralDiscountPercent)}%
                       </span>
-                      <span className="font-body font-[300] text-[10px] text-sage-dark tabular-nums md:text-[11px]">
+                      <span className="font-body font-[500] text-[13px] text-sage-dark tabular-nums md:text-[14px]">
                         −{formatRsd(pricing.referralDiscountRsd)}
                       </span>
                     </div>
                   )}
-                  <div className="flex items-end justify-between gap-2 pt-1 md:pt-1.5">
-                    <span className="font-body font-[400] text-[9px] uppercase tracking-[0.12em] text-ink md:text-[10px] md:tracking-[0.14em]">
+                  {pricing ? (
+                    <div className="flex justify-between gap-2">
+                      <span className="font-body font-[400] text-[13px] text-ink-soft md:text-[14px]">
+                        Proizvodi
+                      </span>
+                      <span className="font-body font-[500] text-[14px] text-ink tabular-nums md:text-[15px]">
+                        {formatRsd(productsTotal)}
+                      </span>
+                    </div>
+                  ) : null}
+                  <div className="flex justify-between gap-2">
+                    <span className="font-body font-[500] text-[13px] text-ink md:text-[14px]">
+                      Poštarina ({SHIPPING_CARRIER})
+                    </span>
+                    <span className="font-body font-[500] text-[14px] text-ink tabular-nums md:text-[15px]">
+                      {formatRsd(SHIPPING_RSD)}
+                    </span>
+                  </div>
+                  <div className="flex items-end justify-between gap-2 pt-2 border-t-2 border-ink/10 md:pt-3">
+                    <span className="font-body font-[600] text-[13px] uppercase tracking-[0.08em] text-ink md:text-[14px]">
                       Ukupno
                     </span>
-                    <span className="font-body font-[500] text-[16px] text-ink tabular-nums leading-none md:text-[18px]">
-                      {pricing ? formatRsd(pricing.totalRsd) : '…'}
+                    <span className="font-body font-[600] text-[20px] text-ink tabular-nums leading-none md:text-[22px]">
+                      {pricing ? formatRsd(totalForApi) : '…'}
                     </span>
                   </div>
                 </div>

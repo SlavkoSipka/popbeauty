@@ -25,14 +25,14 @@ export interface Product {
 export const products: Product[] = [
   {
     slug: 'uljani-serum',
-    image: '/zuti.webp',
+    image: '/uljani-serum.png',
     name: 'Uljani serum za lice',
     tagline: 'Botanički uljani kompleks za obnovu i sjaj',
     step: 1,
     stepLabel: 'Korak prvi',
     type: 'Uljani',
     description: 'Liposolubilni aktivni sastojci koji prodiru duboko u kožu, obnavljaju lipidnu barijeru i daju prirodan sjaj.',
-    fullDescription: 'Naš uljani serum kombinuje pažljivo odabrana biljna ulja koja rade u sinergiji s prirodnim lipidima vaše kože. Svaka kap sadrži koncentrirane botaničke ekstrakte koji prodiru duboko u epidermis, obnavljajući lipidnu barijeru i pružajući intenzivnu njegu. Formulisan bez sintetičkih mirisa, silikona i mineralnih ulja — samo čista botanička snaga.',
+    fullDescription: 'Serum za lice namenjen svim tipovima kože. Hrani kožu i blago deluje na postojeće bore. Štiti kožu od spoljašnjih uticaja, neguje je i obnavlja. Upotrebom Beauty seruma umanjuješ crvenilo i upalne procese na koži. Odličan za masažu lica.',
     volume: '20ml',
     price: '2.490,00 RSD',
     ingredients: [
@@ -73,7 +73,7 @@ export const products: Product[] = [
       },
     ],
     inci: 'Squalane, Caprylic/Capric Triglyceride, Vitis Vinifera Seed Oil, Simmondsia Chinensis Oil, Psoralea Corylifolia Seed Oil, Rosa Rubiginosa Seed Oil, Tocopheryl Acetate.',
-    howToUse: 'Nanesite 3–4 kapi na čistu kožu lica ujutro i uveče. Lagano umasirajte pokretima prema gore. Nanosi se kao prvi korak u ritualu, prije vodenog seruma. Sačekajte 30 sekundi da se upije prije nanošenja sljedećeg proizvoda.',
+    howToUse: 'Na čistu kožu lica prvo nanesite vodeni serum, a zatim uljani serum kao drugi korak. Nanesite 3–4 kapi uljanog seruma i lagano umasirajte pokretima prema gore. Koristite ujutro i uveče.',
     benefits: [
       'Obnavlja lipidnu barijeru',
       'Pruža dubok sjaj bez masnog osjećaja',
@@ -84,14 +84,14 @@ export const products: Product[] = [
   },
   {
     slug: 'vodeni-serum',
-    image: '/zeleni.webp',
+    image: '/hijaluronski-serum.png',
     name: 'Vodeni serum za lice',
     tagline: 'Hidratacijski vodeni kompleks sa hialuronskom kiselinom',
     step: 2,
     stepLabel: 'Korak drugi',
     type: 'Vodeni',
     description: 'Hidrosolubilni aktivni sastojci koji privlače i zadržavaju vlagu, ostavljajući kožu napetom i svježom.',
-    fullDescription: 'Vodeni serum je drugi korak u našem ritualu — lagana, brzo-upijajuća formula koja dostavlja intenzivnu hidrataciju u dublje slojeve kože. Hialuronska kiselina i poliglutaminska kiselina zajedno grade višeslojnu hidratacijsku mrežu, dok niacinamid ujednačava ten i smanjuje pore. Obogaćen alojom i pantenolom za vidljivo svjež i umiren ten.',
+    fullDescription: 'Serum za lice namenjen svim tipovima kože. Hrani kožu i blago deluje na postojeće bore. Štiti kožu od spoljašnjih uticaja, neguje je i obnavlja. Upotrebom Beauty seruma umanjuješ crvenilo i upalne procese na koži. Odličan za masažu lica.',
     volume: '30ml',
     price: '2.390,00 RSD',
     ingredients: [
@@ -137,7 +137,7 @@ export const products: Product[] = [
       },
     ],
     inci: 'Aqua, Aloe Barbadensis Leaf Juice, Niacinamide, Glycerin, D-Panthenol, Sodium Hyaluronate, Gamma Polyglutamic Acid, Benzyl Alcohol, Dehydroacetic Acid.',
-    howToUse: 'Nanesite 2–3 pumpe na lice i vrat nakon uljnog seruma. Lagano utisnite u kožu dlanovima — ne trljajte. Vodeni serum se nanosi kao drugi korak, kada uljna baza već pripremi kožu za optimalnu apsorpciju hidrosolubilnih aktivnih sastojaka.',
+    howToUse: 'Vodeni serum se nanosi prvi, na čistu kožu lica i vrata — 2–3 pumpe lagano utisnite dlanovima. Zatim, kao drugi korak, nanesite uljani serum. Koristite ujutro i uveče.',
     benefits: [
       'Intenzivna višeslojna hidratacija',
       'Vidljivo ujednačava ten',
@@ -147,3 +147,41 @@ export const products: Product[] = [
     ],
   },
 ];
+
+export interface SerumSet {
+  slug: string;
+  name: string;
+  image: string;
+  uljaniSlug: string;
+  vodeniSlug: string;
+  fullDescription: string;
+  ingredients: { name: string }[];
+  howToUse: string;
+}
+
+export const serumSet: SerumSet = {
+  slug: 'serum-set',
+  name: 'Serum set',
+  image: '/Serumi.png',
+  uljaniSlug: 'uljani-serum',
+  vodeniSlug: 'vodeni-serum',
+  fullDescription:
+    'Kompletan ritual nege za lice — vodeni i uljani serum koji rade zajedno. Vodeni serum hidrira i osvežava kožu, dok je uljani serum hrani, štiti i obnavlja. Zajedno umanjuju crvenilo i upalne procese, deluju na postojeće bore i ostavljaju kožu mekom, glatkom i sjajnom. Namenjen svim tipovima kože.',
+  ingredients: [
+    { name: 'Skvalan' },
+    { name: 'Kaprilik/kaprik triglicerid' },
+    { name: 'Ulje koštica grožđa' },
+    { name: 'Jojoba ulje' },
+    { name: 'Bakuci ulje' },
+    { name: 'Ulje šipka' },
+    { name: 'Vitamin E' },
+    { name: 'Aloja' },
+    { name: 'Niacinamid' },
+    { name: 'Glicerin' },
+    { name: 'Pantenol' },
+    { name: 'Hialuronska kiselina' },
+    { name: 'Poliglutaminska kiselina' },
+  ],
+  howToUse:
+    'Na čistu kožu lica prvo nanesite vodeni serum — 2–3 pumpe lagano utisnite dlanovima. Zatim, kao drugi korak, nanesite 3–4 kapi uljanog seruma i lagano umasirajte pokretima prema gore. Koristite ujutro i uveče.',
+};

@@ -4,105 +4,60 @@ import ProductCardPrice from '@/components/ui/ProductCardPrice';
 
 interface ProductCardProps {
   number: string;
-  type: string;
   name: string;
-  description: string;
   slug: string;
   image: string;
   price: string;
-  bgColor?: 'white' | 'sage-pale';
+}
+
+function splitName(name: string): [string, string] {
+  if (name.includes(' za lice')) {
+    return [name.replace(' za lice', ''), 'za lice'];
+  }
+  return [name, ''];
 }
 
 export default function ProductCard({
-  number,
-  type,
   name,
-  description,
   slug,
   image,
   price,
-  bgColor = 'white',
 }: ProductCardProps) {
-  const bg = bgColor === 'sage-pale' ? 'bg-sage-pale' : 'bg-white';
-  const imageBg =
-    bgColor === 'sage-pale' ? 'bg-off-white' : 'bg-sage-pale';
+  const [line1, line2] = splitName(name);
 
   return (
     <Link
       href={`/proizvodi/${slug}`}
-      className={`group block ${bg} transition-transform duration-300 ease-out hover:-translate-y-1`}
+      className="group block bg-white p-3 transition-transform duration-300 ease-out hover:-translate-y-1 md:p-4"
     >
-      {/* Mobile: horizontal card */}
-      <div className="flex md:hidden">
-        <div className={`relative w-[140px] shrink-0 ${imageBg}`}>
-          <span className="absolute top-2 right-3 font-display font-[300] text-[40px] leading-none text-silver-light/60 select-none pointer-events-none z-10">
-            {number}
-          </span>
-          <div className="relative h-full min-h-[180px]">
-            <Image
-              src={image}
-              alt={name}
-              fill
-              className="object-contain object-center p-2 transition-transform duration-500 ease-out group-hover:scale-[1.02]"
-              sizes="140px"
-            />
-          </div>
-        </div>
-        <div className="flex flex-1 flex-col justify-center px-5 py-5">
-          <span className="block font-body font-[400] text-[9px] uppercase tracking-[0.16em] text-sage-dark mb-1.5">
-            {type}
-          </span>
-          <h3 className="font-display font-[400] text-[22px] leading-[1.15] text-ink mb-2">
-            {name}
-          </h3>
-          <p className="font-body font-[300] text-[13px] leading-[1.6] text-silver-dark mb-3 line-clamp-2">
-            {description}
-          </p>
-          <div className="flex flex-col gap-3 w-full">
-            <div className="min-w-0">
-              <ProductCardPrice slug={slug} fallbackPrice={price} compact />
-            </div>
-            <span className="inline-flex w-full items-center justify-center border border-ink bg-ink py-3.5 px-4 font-body font-[400] text-[12px] uppercase tracking-[0.14em] text-white shadow-sm">
-              Poruči
-            </span>
-          </div>
+      <div className="relative aspect-[4/5] w-full overflow-hidden bg-sage-pale md:aspect-square">
+        <Image
+          src={image}
+          alt={name}
+          fill
+          className="object-cover object-center scale-[1.04] transition-transform duration-500 ease-out group-hover:scale-[1.09]"
+          sizes="(max-width: 768px) 100vw, 50vw"
+        />
+      </div>
+
+      <div className="flex items-start justify-between gap-4 pt-4">
+        <h3 className="font-display font-[500] text-[20px] leading-[1.15] text-ink md:text-[24px] [-webkit-text-stroke:0.4px_currentColor]">
+          {line1}
+          {line2 ? (
+            <>
+              <br />
+              {line2}
+            </>
+          ) : null}
+        </h3>
+        <div className="shrink-0 pt-1">
+          <ProductCardPrice slug={slug} fallbackPrice={price} />
         </div>
       </div>
 
-      {/* Desktop: vertical card (unchanged) */}
-      <div className="hidden md:block">
-        <div className="relative">
-          <span className="absolute top-4 right-6 font-display font-[300] text-[72px] leading-none text-silver-light select-none pointer-events-none z-10">
-            {number}
-          </span>
-          <div className={`relative aspect-[4/3] w-full overflow-hidden ${imageBg}`}>
-            <Image
-              src={image}
-              alt={name}
-              fill
-              className="object-contain object-center transition-transform duration-500 ease-out group-hover:scale-[1.02]"
-              sizes="50vw"
-            />
-          </div>
-        </div>
-        <div className="p-10">
-          <span className="block font-body font-[400] text-[10px] uppercase tracking-[0.16em] text-sage-dark mb-3">
-            {type}
-          </span>
-          <h3 className="font-display font-[400] text-[28px] text-ink mb-3">
-            {name}
-          </h3>
-          <p className="font-body font-[300] text-[14px] leading-[1.7] text-silver-dark mb-4 line-clamp-2">
-            {description}
-          </p>
-          <div className="mb-5">
-            <ProductCardPrice slug={slug} fallbackPrice={price} />
-          </div>
-          <span className="inline-block font-body font-[400] text-[12px] text-ink link-underline">
-            Saznaj više →
-          </span>
-        </div>
-      </div>
+      <span className="mt-4 inline-flex w-full items-center justify-center border border-[#A1A797] bg-[#A1A797] px-4 py-3.5 font-body font-[400] text-[12px] uppercase tracking-[0.14em] text-[#FBFAED] transition-colors duration-200 ease-in-out group-hover:bg-transparent group-hover:text-[#A1A797] md:text-[13px]">
+        Dodaj u korpu
+      </span>
     </Link>
   );
 }

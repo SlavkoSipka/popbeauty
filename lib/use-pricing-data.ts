@@ -94,6 +94,11 @@ export function effectiveDiscountPercent(
   return Number(siteDiscountPercent) || 0;
 }
 
+/** Sync read of module cache (null until first fetch completes). */
+export function getCachedPricing(): PricingData | null {
+  return cached;
+}
+
 /** Invalidate cached pricing data (e.g. after admin changes settings). */
 export function invalidatePricingCache() {
   cached = null;

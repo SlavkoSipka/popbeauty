@@ -6,6 +6,7 @@ import { Suspense } from 'react';
 import Navigation from '@/components/layout/Navigation';
 import Footer from '@/components/layout/Footer';
 import CartDrawerLazy from '@/components/cart/CartDrawerLazy';
+import PricingWarmup from '@/components/layout/PricingWarmup';
 import RouteProgressBar from '@/components/layout/RouteProgressBar';
 import JsonLdOrganization from '@/components/seo/JsonLdOrganization';
 import { CartProvider } from '@/lib/cart-context';
@@ -97,12 +98,13 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col bg-white text-ink antialiased">
         <JsonLdOrganization />
         <CartProvider>
+          <PricingWarmup />
           <Suspense fallback={null}>
             <RouteProgressBar />
           </Suspense>
           <Navigation />
           <CartDrawerLazy />
-          <div className="flex-1 pt-20">
+          <div className="flex-1 pt-[120px]">
             {children}
           </div>
           <Footer />

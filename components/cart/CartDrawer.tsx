@@ -1,17 +1,80 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useCart } from '@/lib/cart-context';
-import { displayUnitPriceForLine, formatRsd, lineSubtotalRsd } from '@/lib/price';
-import { computePricing } from '@/lib/pricing-engine';
-import { usePricingData } from '@/lib/use-pricing-data';
+import { useCart, type CartLine } from '@/lib/cart-context';
+import { formatRsd, unitPriceRsdForLine } from '@/lib/price';
+import { BUNDLE_SLUGS, computePricing } from '@/lib/pricing-engine';
+import { effectiveDiscountPercent, usePricingData } from '@/lib/use-pricing-data';
+
+function discountedUnitPrice(base: number, pct: number): number {
+  return Math.round(base * (1 - pct / 100) * 100) / 100;
+}
+
+function CartLinePrice({
+  line,
+  priceMap,
+  productDiscountMap,
+  siteDiscountPercent,
+  bundleDiscountPercent,
+  isBundle,
+  loaded,
+}: {
+  line: CartLine;
+  priceMap: Map<string, number>;
+  productDiscountMap: Map<string, number | null>;
+  siteDiscountPercent: number;
+  bundleDiscountPercent: number;
+  isBundle: boolean;
+  loaded: boolean;
+}) {
+  const base = unitPriceRsdForLine(line, loaded ? priceMap : undefined);
+  const effectivePct = isBundle
+    ? bundleDiscountPercent
+    : effectiveDiscountPercent(line.slug, productDiscountMap, siteDiscountPercent);
+
+  if (!loaded || effectivePct <= 0) {
+    return (
+      <div className="mt-1.5 flex flex-col gap-0.5">
+        <p className="font-body font-[400] text-[15px] text-ink tabular-nums md:text-[16px]">
+          {formatRsd(base)}
+        </p>
+        {line.quantity > 1 ? (
+        <p className="font-body font-[500] text-[13px] text-ink-soft tabular-nums md:text-[14px]">
+          × {line.quantity} = {formatRsd(base * line.quantity)}
+        </p>
+        ) : null}
+      </div>
+    );
+  }
+
+  const discounted = discountedUnitPrice(base, effectivePct);
+  const displayPct = Math.round(effectivePct);
+
+  return (
+    <div className="mt-1.5 flex flex-col gap-1">
+      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+        <p className="font-body font-[400] text-[15px] text-ink tabular-nums md:text-[16px]">
+          {formatRsd(discounted)}
+        </p>
+        <span className="inline-flex items-center border border-sage-dark bg-sage-pale px-1.5 py-0.5 font-body font-[500] text-[10px] text-sage-dark tabular-nums md:text-[11px]">
+          −{displayPct}%
+        </span>
+      </div>
+      {line.quantity > 1 ? (
+        <p className="font-body font-[500] text-[13px] text-ink-soft tabular-nums md:text-[14px]">
+          × {line.quantity} = {formatRsd(discounted * line.quantity)}
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 export default function CartDrawer() {
   const {
     items, itemCount, isOpen, closeCart, removeLine, setQuantity,
-    setReferral, clearReferral, referralCode, referralDiscountPercent,
+    referralDiscountPercent,
   } = useCart();
   const {
     priceMap,
@@ -20,12 +83,6 @@ export default function CartDrawer() {
     bundleDiscountPercent,
     loaded,
   } = usePricingData();
-
-  const [codeInput, setCodeInput] = useState('');
-  const [codeError, setCodeError] = useState<string | null>(null);
-  const [checking, setChecking] = useState(false);
-
-  useEffect(() => { setCodeInput(referralCode ?? ''); }, [referralCode]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -57,28 +114,10 @@ export default function CartDrawer() {
     referralDiscountPercent,
   ]);
 
-  async function applyCode() {
-    const raw = codeInput.trim();
-    setCodeError(null);
-    if (!raw) { clearReferral(); return; }
-    setChecking(true);
-    try {
-      const res = await fetch(`/api/referral-lookup?code=${encodeURIComponent(raw)}`);
-      const data = (await res.json()) as
-        | { found: true; discountPercent: number }
-        | { found: false };
-      if (!res.ok) { setCodeError('Greška. Pokušaj ponovo.'); return; }
-      if (data.found) {
-        const norm = raw.toUpperCase().replace(/\s+/g, '');
-        setReferral(norm, data.discountPercent);
-        setCodeInput(norm);
-      } else {
-        setCodeError('Kod nije pronađen.');
-        clearReferral();
-      }
-    } catch { setCodeError('Mrežna greška.'); }
-    finally { setChecking(false); }
-  }
+  const isBundle = useMemo(() => {
+    const slugs = new Set(items.filter((i) => i.quantity > 0).map((i) => i.slug));
+    return BUNDLE_SLUGS.every((s) => slugs.has(s));
+  }, [items]);
 
   return (
     <>
@@ -98,8 +137,7 @@ export default function CartDrawer() {
         aria-modal="true"
         aria-label="Korpa"
       >
-        <div className="flex shrink-0 items-center justify-between border-b border-silver-light px-4 py-3.5 md:px-6 md:py-5">
-          <h2 className="font-display font-[300] text-[18px] text-ink md:text-[22px]">Korpa</h2>
+        <div className="flex shrink-0 justify-end px-4 py-3.5 md:px-6 md:py-5">
           <button
             type="button"
             onClick={closeCart}
@@ -128,183 +166,93 @@ export default function CartDrawer() {
               </Link>
             </div>
           ) : (
-            <>
-              <p className="font-body font-[300] text-[11px] text-silver-mid mb-4 md:mb-6 md:text-[12px]">
-                {itemCount}{' '}
-                {itemCount === 1 ? 'stavka' : itemCount < 5 ? 'stavke' : 'stavki'}
-              </p>
-              <ul className="flex flex-col gap-4 md:gap-6">
+            <ul className="flex flex-col gap-5 md:gap-7">
                 {items.map((line) => (
                   <li
                     key={line.slug}
-                    className="flex gap-3 border-b border-silver-light pb-4 last:border-0 md:gap-4 md:pb-6"
+                    className="flex gap-4 border-b border-silver-light pb-5 last:border-0 md:gap-5 md:pb-7"
                   >
                     <Link
                       href={`/proizvodi/${line.slug}`}
                       onClick={closeCart}
-                      className="relative h-20 w-16 shrink-0 overflow-hidden bg-sage-pale md:h-24 md:w-[4.5rem]"
+                      className="relative h-28 w-24 shrink-0 overflow-hidden bg-white md:h-32 md:w-28"
                     >
                       <Image
                         src={line.image}
                         alt={line.name}
                         fill
-                        className="object-contain object-center p-1"
-                        sizes="(max-width: 768px) 64px, 72px"
+                        className="object-cover object-center scale-[1.04]"
+                        sizes="(max-width: 768px) 96px, 112px"
                       />
                     </Link>
-                    <div className="flex min-w-0 flex-1 flex-col justify-between gap-2">
+                    <div className="flex min-w-0 flex-1 flex-col justify-between gap-3">
                       <div>
                         <Link
                           href={`/proizvodi/${line.slug}`}
                           onClick={closeCart}
-                          className="font-display font-[400] text-[15px] text-ink link-underline md:text-[17px]"
+                          className={`font-display text-[18px] text-ink link-underline md:text-[21px] ${line.slug === 'uljani-serum' ? 'font-[500]' : 'font-[400]'}`}
                         >
                           {line.name}
                         </Link>
-                        <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                          <p className="font-body font-[300] text-[13px] text-silver-dark">
-                            {loaded
-                              ? displayUnitPriceForLine(line, priceMap)
-                              : displayUnitPriceForLine(line)}
-                            {line.quantity > 1 ? (
-                              <span className="text-silver-mid"> × {line.quantity}</span>
-                            ) : null}
-                          </p>
-                          {line.quantity > 1 ? (
-                            <p className="font-body font-[400] text-[13px] text-ink tabular-nums">
-                              {loaded
-                                ? formatRsd(lineSubtotalRsd(line, priceMap))
-                                : formatRsd(lineSubtotalRsd(line))}
-                            </p>
-                          ) : null}
-                        </div>
+                        <CartLinePrice
+                          line={line}
+                          priceMap={priceMap}
+                          productDiscountMap={productDiscountMap}
+                          siteDiscountPercent={siteDiscountPercent}
+                          bundleDiscountPercent={bundleDiscountPercent}
+                          isBundle={isBundle}
+                          loaded={loaded}
+                        />
                       </div>
-                      <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                        <div className="flex items-center border border-silver-light">
-                          <button
-                            type="button"
-                            aria-label="Smanji količinu"
-                            className="flex h-8 w-8 items-center justify-center font-body text-[16px] leading-none text-ink hover:bg-off-white md:h-auto md:w-auto md:px-2.5 md:py-1 md:text-[14px]"
-                            onClick={() => setQuantity(line.slug, line.quantity - 1)}
-                          >
-                            −
-                          </button>
-                          <span className="min-w-[1.35rem] text-center font-body font-[400] text-[12px] md:min-w-[1.75rem] md:text-[13px]">
-                            {line.quantity}
-                          </span>
-                          <button
-                            type="button"
-                            aria-label="Povećaj količinu"
-                            className="flex h-8 w-8 items-center justify-center font-body text-[16px] leading-none text-ink hover:bg-off-white md:h-auto md:w-auto md:px-2.5 md:py-1 md:text-[14px]"
-                            onClick={() => setQuantity(line.slug, line.quantity + 1)}
-                          >
-                            +
-                          </button>
-                        </div>
+                      <div className="flex items-center border border-silver-light w-fit">
                         <button
                           type="button"
-                          className="font-body font-[300] text-[10px] text-silver-mid underline underline-offset-2 hover:text-ink md:text-[11px]"
-                          onClick={() => removeLine(line.slug)}
+                          aria-label="Smanji količinu"
+                          className="flex h-9 w-9 items-center justify-center font-body text-[18px] leading-none text-ink hover:bg-off-white md:h-10 md:w-10 md:text-[16px]"
+                          onClick={() => setQuantity(line.slug, line.quantity - 1)}
                         >
-                          Ukloni
+                          −
+                        </button>
+                        <span className="min-w-[1.5rem] text-center font-body font-[400] text-[14px] md:min-w-[1.75rem] md:text-[15px]">
+                          {line.quantity}
+                        </span>
+                        <button
+                          type="button"
+                          aria-label="Povećaj količinu"
+                          className="flex h-9 w-9 items-center justify-center font-body text-[18px] leading-none text-ink hover:bg-off-white md:h-10 md:w-10 md:text-[16px]"
+                          onClick={() => setQuantity(line.slug, line.quantity + 1)}
+                        >
+                          +
                         </button>
                       </div>
                     </div>
+                    <button
+                      type="button"
+                      aria-label="Ukloni"
+                      onClick={() => removeLine(line.slug)}
+                      className="flex h-8 w-8 shrink-0 items-center justify-center self-start text-ink-soft transition-colors hover:text-ink md:h-9 md:w-9"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                        <line x1="1" y1="1" x2="15" y2="15" />
+                        <line x1="15" y1="1" x2="1" y2="15" />
+                      </svg>
+                    </button>
                   </li>
                 ))}
               </ul>
-            </>
           )}
         </div>
 
         {items.length > 0 && (
           <div className="mt-auto shrink-0 border-t border-silver-light bg-white px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[0_-6px_24px_rgba(28,28,26,0.06)] md:px-7 md:py-6 md:pb-6 md:shadow-none">
-            {/* Promo kod (= kreatorov referral kod) */}
-            <div className="mb-4 border-b border-silver-light pb-4 md:mb-6 md:pb-6">
-              <label className="block font-body font-[400] text-[10px] uppercase tracking-[0.12em] text-ink mb-1.5 md:text-[11px] md:tracking-[0.14em] md:mb-2">
-                Promo kod
-              </label>
-              <div className="flex gap-2 md:gap-2.5">
-                <input
-                  type="text"
-                  value={codeInput}
-                  onChange={(e) => { setCodeInput(e.target.value); setCodeError(null); }}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void applyCode(); } }}
-                  placeholder="Unesi kod"
-                  autoCapitalize="characters"
-                  className="min-w-0 flex-1 border border-silver-light bg-white px-3 py-2.5 font-body font-[300] text-[13px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none uppercase md:px-3.5 md:py-3 md:text-[14px]"
-                />
-                <button
-                  type="button"
-                  onClick={() => void applyCode()}
-                  disabled={checking}
-                  className="shrink-0 border border-ink bg-transparent px-3 py-2.5 font-body font-[400] text-[10px] uppercase tracking-[0.08em] text-ink hover:bg-ink hover:text-white transition-colors disabled:opacity-50 md:px-4 md:text-[11px] md:tracking-[0.1em]"
-                >
-                  {checking ? '…' : 'Primeni'}
-                </button>
-              </div>
-              {codeError ? (
-                <p className="font-body font-[300] text-[12px] text-red-800 mt-2" role="alert">
-                  {codeError}
-                </p>
-              ) : null}
-              {referralCode && referralDiscountPercent != null && !codeError ? (
-                <p className="font-body font-[300] text-[12px] text-sage-mid mt-2 leading-relaxed">
-                  {referralDiscountPercent === 0 ? (
-                    siteDiscountPercent > 0 || bundleDiscountPercent > 0 ? (
-                      <>
-                        Kod <span className="font-mono text-ink">{referralCode}</span> — trenutno nema dodatnog
-                        popusta preko koda jer su u toku akcije na sajtu
-                        {siteDiscountPercent > 0 && bundleDiscountPercent > 0 ? (
-                          <>
-                            {' '}
-                            ({Math.round(siteDiscountPercent)}% na pojedinačne proizvode, {Math.round(bundleDiscountPercent)}% na paket kada su
-                            oba seruma u korpi).
-                          </>
-                        ) : siteDiscountPercent > 0 ? (
-                          <> ({Math.round(siteDiscountPercent)}% na pojedinačne proizvode).</>
-                        ) : (
-                          <>
-                            {' '}
-                            ({Math.round(bundleDiscountPercent)}% na paket kada su oba seruma u korpi).
-                          </>
-                        )}{' '}
-                        Kada ove akcije završe, kreatorov kod će ponovo važiti za tvoj popust.
-                      </>
-                    ) : (
-                      <>
-                        Kod <span className="font-mono text-ink">{referralCode}</span> — trenutno nema aktivnog
-                        popusta preko ovog koda.
-                      </>
-                    )
-                  ) : (
-                    <>
-                      Kod <span className="font-mono text-ink">{referralCode}</span> — popust{' '}
-                      {Math.round(referralDiscountPercent)}%
-                    </>
-                  )}
-                </p>
-              ) : null}
-              {referralCode ? (
-                <button
-                  type="button"
-                  onClick={() => { clearReferral(); setCodeInput(''); setCodeError(null); }}
-                  className="font-body font-[300] text-[11px] text-silver-mid underline underline-offset-2 mt-1.5 hover:text-ink"
-                >
-                  Ukloni kod
-                </button>
-              ) : null}
-            </div>
-
-            {/* Cena */}
             <div className="mb-4 space-y-2 border-b border-silver-light pb-4 md:mb-6 md:space-y-2.5 md:pb-6">
               {pricing && pricing.discountType && (
                 <>
                   <div className="flex items-baseline justify-between gap-4">
-                    <span className="font-body font-[300] text-[12px] text-silver-dark md:text-[13px]">
+                    <span className="font-body font-[500] text-[13px] text-ink md:text-[14px]">
                       Bez popusta
                     </span>
-                    <span className="font-body font-[300] text-[15px] text-silver-dark tabular-nums line-through md:text-[16px]">
+                    <span className="font-body font-[500] text-[16px] text-silver-dark tabular-nums line-through md:text-[17px]">
                       {formatRsd(pricing.subtotalRsd)}
                     </span>
                   </div>
@@ -316,10 +264,10 @@ export default function CartDrawer() {
                       const label = line?.name ?? ld.slug;
                       return (
                         <div key={ld.slug} className="flex items-baseline justify-between gap-4">
-                          <span className="font-body font-[300] text-[12px] text-sage-mid md:text-[13px]">
+                          <span className="font-body font-[500] text-[13px] text-sage-dark md:text-[14px]">
                             {label} −{Math.round(ld.percent)}%
                           </span>
-                          <span className="font-body font-[300] text-[14px] text-sage-mid tabular-nums md:text-[15px]">
+                          <span className="font-body font-[500] text-[15px] text-sage-dark tabular-nums md:text-[16px]">
                             −{formatRsd(ld.amountRsd)}
                           </span>
                         </div>
@@ -327,30 +275,20 @@ export default function CartDrawer() {
                     })
                   ) : (
                     <div className="flex items-baseline justify-between gap-4">
-                      <span className="font-body font-[300] text-[12px] text-sage-mid md:text-[13px]">
+                      <span className="font-body font-[500] text-[13px] text-sage-dark md:text-[14px]">
                         {pricing.discountType === 'bundle'
                           ? `Paket popust −${Math.round(pricing.discountPercent)}%`
                           : `Popust −${Math.round(pricing.discountPercent)}%`}
                       </span>
-                      <span className="font-body font-[300] text-[14px] text-sage-mid tabular-nums md:text-[15px]">
+                      <span className="font-body font-[500] text-[15px] text-sage-dark tabular-nums md:text-[16px]">
                         −{formatRsd(pricing.discountAmountRsd)}
                       </span>
                     </div>
                   )}
                 </>
               )}
-              {pricing && pricing.referralDiscountPercent > 0 && (
-                <div className="flex items-baseline justify-between gap-4">
-                  <span className="font-body font-[300] text-[12px] text-sage-dark md:text-[13px]">
-                    Promo kod −{Math.round(pricing.referralDiscountPercent)}%
-                  </span>
-                  <span className="font-body font-[300] text-[14px] text-sage-dark tabular-nums md:text-[15px]">
-                    −{formatRsd(pricing.referralDiscountRsd)}
-                  </span>
-                </div>
-              )}
               <div className="flex items-end justify-between gap-3 pt-0.5">
-                <span className="font-body font-[400] text-[11px] uppercase tracking-[0.12em] text-ink md:text-[12px] md:tracking-[0.14em]">
+                <span className="font-body font-[600] text-[12px] uppercase tracking-[0.12em] text-ink md:text-[13px] md:tracking-[0.14em]">
                   Ukupno
                 </span>
                 <span className="font-body font-[500] text-[22px] text-ink tabular-nums leading-none md:text-[26px]">
@@ -358,14 +296,6 @@ export default function CartDrawer() {
                 </span>
               </div>
             </div>
-            {pricing?.isBundle && (
-              <p className="font-body font-[300] text-[11px] text-sage-mid mb-2.5 leading-relaxed md:mb-3.5 md:text-[12px]">
-                Paketna cena za oba seruma — ušteda {formatRsd(pricing.discountAmountRsd)}.
-              </p>
-            )}
-            <p className="font-body font-[300] text-[11px] text-silver-mid mb-4 leading-relaxed md:mb-5 md:text-[12px]">
-              Plaćanje pouzećem. Dostava se dogovara nakon slanja porudžbine.
-            </p>
             <Link
               href="/porudzbina"
               onClick={closeCart}

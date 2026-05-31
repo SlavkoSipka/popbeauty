@@ -13,20 +13,19 @@ export default function ProductPrice({ slug, fallbackPrice }: Props) {
     priceMap,
     productDiscountMap,
     siteDiscountPercent,
-    bundleDiscountPercent,
     loaded,
   } = usePricingData();
 
   if (!loaded) {
     return (
-      <span className="font-display font-[400] text-[28px] text-ink">{fallbackPrice}</span>
+      <span className="font-body font-[500] text-[24px] text-ink tabular-nums leading-none">{fallbackPrice}</span>
     );
   }
 
   const basePrice = priceMap.get(slug);
   if (basePrice === undefined) {
     return (
-      <span className="font-display font-[400] text-[28px] text-ink">{fallbackPrice}</span>
+      <span className="font-body font-[500] text-[24px] text-ink tabular-nums leading-none">{fallbackPrice}</span>
     );
   }
 
@@ -36,33 +35,23 @@ export default function ProductPrice({ slug, fallbackPrice }: Props) {
   if (effectivePct > 0) {
     const discounted = Math.round(basePrice * (1 - effectivePct / 100) * 100) / 100;
     return (
-      <div>
-        <div className="flex flex-wrap items-baseline gap-3">
-          <span className="font-display font-[400] text-[28px] text-ink">
-            {formatRsd(discounted)}
-          </span>
-          <span className="font-body font-[300] text-[16px] text-silver-mid line-through">
-            {formatRsd(basePrice)}
-          </span>
-          <span className="font-body font-[400] text-[12px] text-sage-mid uppercase tracking-[0.08em]">
-            −{displayPct}%
-          </span>
-        </div>
-        <p className="font-body font-[300] text-[11px] text-sage-mid mt-1">
-          Oba seruma zajedno? Paketni popust {Math.round(bundleDiscountPercent)}% na ukupnu cenu.
-        </p>
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="font-body font-[500] text-[24px] text-ink tabular-nums leading-none">
+          {formatRsd(discounted)}
+        </span>
+        <span className="font-body font-[500] text-[18px] text-silver-dark line-through tabular-nums">
+          {formatRsd(basePrice)}
+        </span>
+        <span className="inline-flex items-center border border-sage-dark bg-sage-pale px-2 py-1 font-body font-[600] text-[13px] text-sage-dark tabular-nums">
+          −{displayPct}%
+        </span>
       </div>
     );
   }
 
   return (
-    <div>
-      <span className="font-display font-[400] text-[28px] text-ink">
-        {formatRsd(basePrice)}
-      </span>
-      <p className="font-body font-[300] text-[11px] text-silver-mid mt-1">
-        Oba seruma zajedno? Paketni popust {Math.round(bundleDiscountPercent)}% na ukupnu cenu.
-      </p>
-    </div>
+    <span className="font-body font-[500] text-[24px] text-ink tabular-nums leading-none">
+      {formatRsd(basePrice)}
+    </span>
   );
 }

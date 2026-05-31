@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import BrandLogo from '@/components/layout/BrandLogo';
+import AnnouncementTicker from '@/components/layout/AnnouncementTicker';
 import { useCart } from '@/lib/cart-context';
 
 const navLinks = [
@@ -26,7 +27,7 @@ function CartNavButton({
         onBeforeOpen?.();
         openCart();
       }}
-      className={`relative inline-flex items-center justify-center text-ink hover:opacity-70 transition-opacity ${className}`}
+      className={`relative inline-flex items-center justify-center text-[#FBFAED] hover:opacity-70 transition-opacity ${className}`}
       aria-label={`Korpa${itemCount > 0 ? `, ${itemCount} stavki` : ''}`}
     >
       <svg
@@ -44,7 +45,7 @@ function CartNavButton({
         <path d="M4 9h16l-1.2 12H5.2L4 9z" />
       </svg>
       {itemCount > 0 ? (
-        <span className="absolute -top-1.5 -right-2 flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-ink px-[5px] font-body font-[500] text-[10px] leading-none text-white">
+        <span className="absolute -top-1.5 -right-2 flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#FBFAED] px-[5px] font-body font-[500] text-[10px] leading-none text-[#A1A797]">
           {itemCount > 99 ? '99+' : itemCount}
         </span>
       ) : null}
@@ -57,53 +58,64 @@ export default function Navigation() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 h-20 border-b border-silver-light bg-[rgba(250,250,248,0.92)] backdrop-blur-[8px]">
-        <div className="mx-auto max-w-[1280px] px-6 h-full flex items-center justify-between">
-          {/* Logo */}
-          <BrandLogo />
-
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="link-underline font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink-soft"
+      <header className="fixed top-0 left-0 right-0 z-50">
+        <AnnouncementTicker />
+        <nav className="h-20 border-b border-[#FBFAED]/15 bg-[#A1A797]">
+          <div className="relative mx-auto flex h-full max-w-[1280px] items-center justify-between px-6">
+            {/* Levo: meni (mobil) / logo (desktop) */}
+            <div className="flex w-8 shrink-0 items-center md:w-auto">
+              <button
+                type="button"
+                className="flex h-8 w-8 flex-col items-center justify-center gap-[5px] md:hidden"
+                onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label="Otvori meni"
               >
-                {link.label}
+                <span
+                  className={`block h-[1px] w-5 bg-[#FBFAED] transition-transform duration-200 ${mobileOpen ? 'translate-y-[3px] rotate-45' : ''}`}
+                />
+                <span
+                  className={`block h-[1px] w-5 bg-[#FBFAED] transition-opacity duration-200 ${mobileOpen ? 'opacity-0' : ''}`}
+                />
+                <span
+                  className={`block h-[1px] w-5 bg-[#FBFAED] transition-transform duration-200 ${mobileOpen ? '-translate-y-[3px] -rotate-45' : ''}`}
+                />
+              </button>
+              <div className="hidden md:block">
+                <BrandLogo />
+              </div>
+            </div>
+
+            {/* Sredina: logo (mobil) */}
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center md:hidden">
+              <BrandLogo className="pointer-events-auto" />
+            </div>
+
+            {/* Desktop nav */}
+            <div className="hidden items-center gap-8 md:flex">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="link-underline font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-[#FBFAED] transition-opacity hover:opacity-70"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+
+            {/* Desno: korpa (+ prijava desktop) */}
+            <div className="flex w-8 shrink-0 items-center justify-end gap-4 md:w-auto md:gap-5">
+              <Link
+                href="/prijava"
+                className="link-underline hidden font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-[#FBFAED] transition-opacity hover:opacity-70 sm:inline-flex"
+              >
+                Prijava
               </Link>
-            ))}
+              <CartNavButton />
+            </div>
           </div>
-
-          {/* Right */}
-          <div className="flex items-center gap-4 md:gap-5">
-            <Link
-              href="/prijava"
-              className="hidden sm:inline-flex font-body font-[400] text-[11px] uppercase tracking-[0.14em] text-ink-soft hover:text-ink transition-colors link-underline"
-            >
-              Prijava
-            </Link>
-            <CartNavButton />
-
-            {/* Mobile hamburger */}
-            <button
-              className="md:hidden flex flex-col justify-center items-center w-8 h-8 gap-[5px]"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Otvori meni"
-            >
-              <span
-                className={`block w-5 h-[1px] bg-ink transition-transform duration-200 ${mobileOpen ? 'rotate-45 translate-y-[3px]' : ''}`}
-              />
-              <span
-                className={`block w-5 h-[1px] bg-ink transition-opacity duration-200 ${mobileOpen ? 'opacity-0' : ''}`}
-              />
-              <span
-                className={`block w-5 h-[1px] bg-ink transition-transform duration-200 ${mobileOpen ? '-rotate-45 -translate-y-[3px]' : ''}`}
-              />
-            </button>
-          </div>
-        </div>
-      </nav>
+        </nav>
+      </header>
 
       {/* Mobile overlay */}
       <div

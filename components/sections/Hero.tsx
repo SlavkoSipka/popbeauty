@@ -1,111 +1,60 @@
 import Image from 'next/image';
-import Badge from '@/components/ui/Badge';
-import Button from '@/components/ui/Button';
+import Link from 'next/link';
 
 export default function Hero() {
   return (
-    <section className="min-h-screen flex items-start relative">
-      <div className="mx-auto max-w-[1280px] px-6 w-full pt-8 md:pt-12 pb-0 md:pb-2">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 items-center">
-          {/* Left — Text */}
-          <div className="order-2 md:order-1">
-            <div data-reveal="true">
-              <Badge>Prirodna formulacija</Badge>
-            </div>
+    <section className="relative flex min-h-screen items-start overflow-hidden">
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/hero slika.png"
+          alt=""
+          fill
+          className="object-cover object-[center_42%]"
+          sizes="100vw"
+          priority
+        />
+      </div>
 
-            <h1
-              data-reveal="true"
-              data-reveal-delay="100"
-              className="font-display font-[300] text-[clamp(48px,6vw,88px)] leading-[1.05] text-ink mt-6 mb-6"
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/35 via-black/10 to-black/20"
+      />
+
+      <div className="relative z-20 mx-auto w-full max-w-[1280px] px-6 pt-28 pb-20 md:pt-36 md:pb-32">
+        <div className="max-w-[520px]">
+          <h1
+            data-reveal="true"
+            className="font-display font-[500] text-[clamp(36px,5vw,72px)] leading-[1.08] text-white mb-6 [text-shadow:0_0_1px_rgba(0,0,0,0.9),0_0_18px_rgba(0,0,0,0.45),0_2px_10px_rgba(0,0,0,0.5)] [-webkit-text-stroke:0.6px_rgba(255,255,255,0.85)]"
+          >
+            Koži ne treba mnogo.<br />
+            Treba joj ispravno.
+          </h1>
+
+          <p
+            data-reveal="true"
+            data-reveal-delay="100"
+            className="font-body font-[400] text-[17px] leading-[1.6] text-white max-w-[420px] mb-10 drop-shadow-[0_1px_20px_rgba(0,0,0,0.5)] md:text-[18px]"
+          >
+            Čisti botanički sastojci, transparentna formula i pristup u kom svaki sastojak ima razlog. Bez kompromisa, bez praznih obećanja.
+          </p>
+
+          <div
+            data-reveal="true"
+            data-reveal-delay="200"
+            className="flex flex-row gap-4"
+          >
+            <Link
+              href="/#proizvodi"
+              className="inline-flex min-w-[240px] items-center justify-center border border-[#A1A797] bg-[#A1A797] px-10 py-3.5 font-body font-[400] text-[12px] uppercase tracking-[0.14em] text-[#FBFAED] transition-colors duration-200 ease-in-out hover:bg-transparent hover:text-[#FBFAED] md:min-w-[260px] md:px-12 md:py-4 md:text-[13px]"
             >
-              <em className="italic">Čisto.</em><br />
-              Efektivno.<br />
-              Prirodno.
-            </h1>
-
-            <p
-              data-reveal="true"
-              data-reveal-delay="200"
-              className="font-body font-[300] text-[16px] leading-[1.8] text-silver-dark max-w-[380px] mb-10"
-            >
-              Dva seruma. Jedan ritual. Sve što vašoj koži zaista treba — čisti botanički sastojci bez kompromisa.
-            </p>
-
-            <div
-              data-reveal="true"
-              data-reveal-delay="300"
-              className="flex flex-row gap-4"
-            >
-              <Button variant="filled" href="/#proizvodi">
-                Istraži serume
-              </Button>
-              <Button variant="outlined" href="/ritual">
-                Saznaj više
-              </Button>
-            </div>
-          </div>
-
-          {/* Right — Visual */}
-          <div className="order-1 md:order-2 relative" data-reveal="true" data-reveal-delay="200">
-            <div className="relative aspect-[3/4] w-full overflow-visible rounded-2xl bg-sage-pale shadow-[0_12px_48px_-16px_rgba(28,28,26,0.1)]">
-              <div className="absolute inset-4 z-0 md:inset-5">
-                <div className="relative h-full w-full overflow-hidden rounded-lg bg-sage-pale">
-                  <Image
-                    src="/obaNaKamenu.webp"
-                    alt="Pop Beauty — dva seruma u prirodnom okruženju"
-                    fill
-                    className="object-contain object-center drop-shadow-[0_6px_28px_rgba(28,28,26,0.14)]"
-                    sizes="(max-width: 768px) 100vw, 40vw"
-                    priority
-                  />
-                  {/* Desktop: full 11-gradient vignette */}
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 z-[1] hidden md:block"
-                    style={{
-                      background: `
-                        radial-gradient(ellipse 52% 38% at 3% 10%, rgba(250, 250, 248, 0.52), transparent 72%),
-                        radial-gradient(ellipse 48% 44% at 97% 6%, rgba(232, 237, 229, 0.5), transparent 74%),
-                        radial-gradient(ellipse 56% 42% at 96% 95%, rgba(250, 250, 248, 0.48), transparent 76%),
-                        radial-gradient(ellipse 50% 40% at 4% 94%, rgba(209, 218, 201, 0.42), transparent 72%),
-                        radial-gradient(ellipse 34% 30% at 20% 4%, rgba(250, 250, 248, 0.28), transparent 64%),
-                        radial-gradient(ellipse 30% 36% at 84% 14%, rgba(250, 250, 248, 0.22), transparent 60%),
-                        radial-gradient(ellipse 42% 34% at 52% 100%, rgba(232, 237, 229, 0.4), transparent 70%),
-                        radial-gradient(ellipse 28% 32% at 0% 44%, rgba(250, 250, 248, 0.3), transparent 62%),
-                        radial-gradient(ellipse 26% 28% at 100% 58%, rgba(250, 250, 248, 0.24), transparent 58%),
-                        radial-gradient(ellipse 22% 26% at 38% 8%, rgba(232, 237, 229, 0.2), transparent 55%),
-                        radial-gradient(ellipse 24% 22% at 72% 88%, rgba(250, 250, 248, 0.26), transparent 58%)
-                      `,
-                    }}
-                  />
-                  {/* Mobile: simplified 4-gradient vignette for GPU performance */}
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 z-[1] md:hidden"
-                    style={{
-                      background: `
-                        radial-gradient(ellipse 55% 40% at 2% 8%, rgba(250, 250, 248, 0.5), transparent 70%),
-                        radial-gradient(ellipse 50% 42% at 98% 5%, rgba(232, 237, 229, 0.45), transparent 70%),
-                        radial-gradient(ellipse 55% 40% at 97% 95%, rgba(250, 250, 248, 0.45), transparent 70%),
-                        radial-gradient(ellipse 50% 38% at 3% 92%, rgba(209, 218, 201, 0.4), transparent 70%)
-                      `,
-                    }}
-                  />
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 z-[2] rounded-lg ring-1 ring-inset ring-white/20 shadow-[inset_0_0_32px_rgba(250,250,248,0.1)]"
-                  />
-                </div>
-              </div>
-              <div className="absolute -bottom-5 -left-5 z-20 h-20 w-20 bg-sage-light shadow-[0_4px_16px_rgba(28,28,26,0.1)] ring-1 ring-white/30" />
-            </div>
+              Pogledaj proizvode
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 hidden md:block md:bottom-32">
-        <div className="scroll-indicator w-[1px] h-10 bg-silver-mid" />
+      <div className="absolute bottom-24 left-1/2 z-20 hidden -translate-x-1/2 md:bottom-32 md:block">
+        <div className="scroll-indicator h-10 w-[1px] bg-white/70" />
       </div>
     </section>
   );

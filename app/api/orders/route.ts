@@ -4,6 +4,7 @@ import { sendOrderNotificationEmail } from '@/lib/emailjs-order';
 import { createAdminClient, isSupabaseAdminConfigured } from '@/lib/supabase/admin';
 import { normalizeReferralCode, parseCartLinesFromBody } from '@/lib/order-validation';
 import { computePricing } from '@/lib/pricing-engine';
+import { SHIPPING_RSD } from '@/lib/shipping';
 import type { DbProduct } from '@/lib/price';
 
 type OrderBody = {
@@ -133,9 +134,11 @@ export async function POST(request: Request) {
     referralDiscountPercent: customerDiscountPercent,
   });
 
+  const orderTotalRsd = pricing.totalRsd + SHIPPING_RSD;
+
   // ── Validate client-sent total (tolerance 1 RSD for rounding) ──
   const claimedTotal = typeof body.totalRsd === 'number' ? body.totalRsd : NaN;
-  if (!Number.isFinite(claimedTotal) || Math.abs(claimedTotal - pricing.totalRsd) > 1) {
+  if (!Number.isFinite(claimedTotal) || Math.abs(claimedTotal - orderTotalRsd) > 1) {
     return NextResponse.json(
       { error: 'Ukupan iznos se ne slaže. Osvežite stranicu.' },
       { status: 400 },
@@ -168,7 +171,7 @@ export async function POST(request: Request) {
       discount_type: pricing.discountType,
       discount_percent: pricing.discountPercent > 0 ? pricing.discountPercent : null,
       referral_discount_percent: customerDiscountPercent > 0 ? customerDiscountPercent : null,
-      total_rsd: pricing.totalRsd,
+      total_rsd: orderTotalRsd,
       referral_code: referralStored,
       creator_id: creatorId,
       commission_percent_applied: commissionPercentApplied,
@@ -202,7 +205,7 @@ export async function POST(request: Request) {
           lineTotalRsd: Number(li.line_total_rsd),
         })),
         subtotalRsd: pricing.subtotalRsd,
-        totalRsd: pricing.totalRsd,
+        totalRsd: orderTotalRsd,
         discountType: pricing.discountType,
         discountPercent: pricing.discountPercent,
         discountAmountRsd: pricing.discountAmountRsd,

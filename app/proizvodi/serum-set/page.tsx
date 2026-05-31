@@ -2,30 +2,30 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useScrollReveal } from '@/lib/animations';
 import { useCart } from '@/lib/cart-context';
-import { products } from '@/lib/data/products';
-import { useProductViewContentPixel } from '@/lib/hooks/use-product-view-content-pixel';
+import { products, serumSet } from '@/lib/data/products';
+import { useBundleViewContentPixel } from '@/lib/hooks/use-product-view-content-pixel';
 import { parsePriceStringToRsd } from '@/lib/price';
 import Button from '@/components/ui/Button';
-import ProductPrice from '@/components/product/ProductPrice';
+import BundleProductPrice from '@/components/product/BundleProductPrice';
 import ProductRatingStars from '@/components/product/ProductRatingStars';
 import ProductDeliveryInfo from '@/components/product/ProductDeliveryInfo';
 import TestimonialsSectionLazy from '@/components/sections/TestimonialsSectionLazy';
 
-const product = products[0];
-const uljaniFallbackRsd = parsePriceStringToRsd(product.price) ?? 0;
-const otherProduct = products[1];
+const uljani = products.find((p) => p.slug === serumSet.uljaniSlug)!;
+const vodeni = products.find((p) => p.slug === serumSet.vodeniSlug)!;
+const fallbackRsd =
+  (parsePriceStringToRsd(uljani.price) ?? 0) + (parsePriceStringToRsd(vodeni.price) ?? 0);
 
 type Tab = 'opis' | 'sastojci' | 'upotreba';
 
-export default function UljaniSerumPage() {
+export default function SerumSetPage() {
   useScrollReveal();
-  const { addItem } = useCart();
+  const { addBundlePair } = useCart();
   const [activeTab, setActiveTab] = useState<Tab>('opis');
 
-  useProductViewContentPixel(product.slug, product.name, uljaniFallbackRsd);
+  useBundleViewContentPixel(serumSet.name, fallbackRsd);
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'opis', label: 'Opis proizvoda' },
@@ -33,18 +33,24 @@ export default function UljaniSerumPage() {
     { key: 'upotreba', label: 'Način upotrebe' },
   ];
 
+  const addSet = () =>
+    addBundlePair(
+      { slug: uljani.slug, name: uljani.name, price: uljani.price, image: uljani.image },
+      { slug: vodeni.slug, name: vodeni.name, price: vodeni.price, image: vodeni.image },
+    );
+
   return (
     <main className="pb-[min(200px,32vh)] md:pb-0">
       {/* Hero */}
       <section className="py-[80px] md:py-[120px] section-padding">
         <div className="mx-auto max-w-[1280px] px-6">
           <div className="grid grid-cols-1 md:grid-cols-[55fr_45fr] gap-8 md:gap-16">
-            {/* Left — Images */}
+            {/* Left — Image */}
             <div>
               <div data-reveal="true" className="relative aspect-[3/4] w-full overflow-hidden bg-white">
                 <Image
-                  src={product.image}
-                  alt={product.name}
+                  src={serumSet.image}
+                  alt={serumSet.name}
                   fill
                   className="object-cover object-center scale-[1.04]"
                   sizes="(max-width: 768px) 100vw, 55vw"
@@ -60,8 +66,8 @@ export default function UljaniSerumPage() {
                 data-reveal-delay="150"
                 className="font-display font-[300] text-[clamp(36px,5vw,48px)] text-ink mb-4"
               >
-                Uljani serum za lice -<br />
-                Pop Beauty Serum
+                Serum set -<br />
+                Vodeni + Uljani serum
               </h1>
 
               <div data-reveal="true" data-reveal-delay="200">
@@ -88,7 +94,11 @@ export default function UljaniSerumPage() {
               </div>
 
               <div data-reveal="true" data-reveal-delay="300" className="mb-6">
-                <ProductPrice slug={product.slug} fallbackPrice={product.price} />
+                <BundleProductPrice
+                  uljaniSlug={serumSet.uljaniSlug}
+                  vodeniSlug={serumSet.vodeniSlug}
+                  fallbackRsd={fallbackRsd}
+                />
               </div>
 
               <div data-reveal="true" data-reveal-delay="350" className="mb-6">
@@ -96,14 +106,7 @@ export default function UljaniSerumPage() {
                   variant="nav"
                   fullWidth
                   className="h-[52px] !text-[15px] md:!text-[16px]"
-                  onClick={() =>
-                    addItem({
-                      slug: product.slug,
-                      name: product.name,
-                      price: product.price,
-                      image: product.image,
-                    })
-                  }
+                  onClick={addSet}
                 >
                   Dodaj u korpu
                 </Button>
@@ -137,13 +140,13 @@ export default function UljaniSerumPage() {
           <div data-reveal="true" data-reveal-delay="100">
             {activeTab === 'opis' && (
               <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[18px]">
-                {product.fullDescription}
+                {serumSet.fullDescription}
               </p>
             )}
 
             {activeTab === 'sastojci' && (
               <ul className="flex flex-col gap-3">
-                {product.ingredients.map((ing) => (
+                {serumSet.ingredients.map((ing) => (
                   <li key={ing.name} className="flex items-center gap-3">
                     <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#A1A797]" />
                     <span className="font-body font-[500] text-[16px] text-ink md:text-[17px]">{ing.name}</span>
@@ -154,42 +157,10 @@ export default function UljaniSerumPage() {
 
             {activeTab === 'upotreba' && (
               <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[18px]">
-                {product.howToUse}
+                {serumSet.howToUse}
               </p>
             )}
           </div>
-        </div>
-      </section>
-
-      {/* Pairing */}
-      <section className="py-[80px] md:py-[100px] section-padding">
-        <div className="mx-auto max-w-[800px] px-6">
-          <Link
-            href={`/proizvodi/${otherProduct.slug}`}
-            data-reveal="true"
-            className="group block border-2 border-[#A1A797] bg-[#A1A797]/10 p-8 md:p-12 flex flex-col md:flex-row items-center gap-8 transition-colors duration-200 hover:bg-[#A1A797]/20"
-          >
-            <div className="flex-1">
-              <span className="mb-4 inline-block border border-[#A1A797] bg-[#A1A797] px-3 py-1 font-body font-[600] text-[11px] uppercase tracking-[0.16em] text-[#FBFAED]">
-                Akcija
-              </span>
-              <h3 className="font-body font-[700] text-[22px] uppercase leading-[1.2] tracking-[0.02em] text-[#7d8473] mb-4 md:text-[26px]">
-                Poruči oba seruma i ostvari dodatan popust
-              </h3>
-              <span className="link-underline font-body font-[600] text-[12px] uppercase tracking-[0.14em] text-[#7d8473]">
-                Pogledaj →
-              </span>
-            </div>
-            <div className="relative w-full md:w-[200px] aspect-[3/4] shrink-0 overflow-hidden bg-white">
-              <Image
-                src={otherProduct.image}
-                alt={otherProduct.name}
-                fill
-                className="object-cover object-center scale-[1.04]"
-                sizes="(max-width: 768px) 100vw, 200px"
-              />
-            </div>
-          </Link>
         </div>
       </section>
 
