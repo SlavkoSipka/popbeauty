@@ -1,7 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
+import { observeRevealElements } from '@/lib/animations';
 
 const images = [
   '/WhatsApp Image 2026-05-31 at 15.12.53.jpeg',
@@ -14,7 +15,19 @@ const images = [
 ];
 
 export default function TestimonialsSection() {
+  const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const root = sectionRef.current;
+    if (root) observeRevealElements(root);
+    const unrevealed = root
+      ? root.querySelectorAll('[data-reveal]:not(.revealed)').length
+      : -1;
+    // #region agent log
+    fetch('http://127.0.0.1:7256/ingest/e48ec5c9-1222-4755-acbd-1976e3fa33d6',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'f852bb'},body:JSON.stringify({sessionId:'f852bb',location:'TestimonialsSection.tsx:mount',message:'testimonials mounted after observe',data:{unrevealedInSection:unrevealed,trackScrollWidth:trackRef.current?.scrollWidth??0},timestamp:Date.now(),hypothesisId:'H1',runId:'post-fix'})}).catch(()=>{});
+    // #endregion
+  }, []);
 
   const scrollBy = (dir: number) => {
     const el = trackRef.current;
@@ -23,7 +36,10 @@ export default function TestimonialsSection() {
   };
 
   return (
-    <section className="py-[120px] bg-white section-padding overflow-hidden">
+    <section
+      ref={sectionRef}
+      className="testimonials-section py-[120px] bg-white section-padding overflow-x-hidden"
+    >
       <div className="mx-auto max-w-[1280px] px-6">
         <div className="mb-12 flex items-end justify-between gap-6">
           <div>
@@ -69,7 +85,7 @@ export default function TestimonialsSection() {
 
       <div
         ref={trackRef}
-        className="flex snap-x snap-mandatory items-start gap-4 overflow-x-auto px-6 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-[max(1.5rem,calc((100vw-1280px)/2+1.5rem))]"
+        className="flex snap-x snap-mandatory items-start gap-4 overflow-x-auto overscroll-x-contain px-6 pb-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden md:px-[max(1.5rem,calc((100vw-1280px)/2+1.5rem))]"
       >
         {images.map((src, i) => (
           <div
