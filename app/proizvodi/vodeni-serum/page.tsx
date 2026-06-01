@@ -67,12 +67,20 @@ export default function VodeniSerumPage() {
                 <ProductRatingStars />
               </div>
 
+              <div data-reveal="true" data-reveal-delay="250" className="mb-6">
+                <ProductPrice slug={product.slug} fallbackPrice={product.price} />
+              </div>
+
               <div
                 data-reveal="true"
-                data-reveal-delay="250"
+                data-reveal-delay="300"
                 className="mb-6 flex flex-col gap-2.5"
               >
-                {['Doprinosi sjaju kože', 'Koža je mekša', 'Koža je glatka i ne zateže'].map((label) => (
+                {[
+                  'Intenzivno hidrira i osvežava kožu',
+                  'Ujednačava ten i smanjuje vidljivost pora',
+                  'Umiruje i vraća koži prirodnu napetost i sjaj',
+                ].map((label) => (
                   <div key={label} className="flex items-center gap-3">
                     <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#A1A797]">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FBFAED" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -84,10 +92,6 @@ export default function VodeniSerumPage() {
                     </span>
                   </div>
                 ))}
-              </div>
-
-              <div data-reveal="true" data-reveal-delay="300" className="mb-6">
-                <ProductPrice slug={product.slug} fallbackPrice={product.price} />
               </div>
 
               <div data-reveal="true" data-reveal-delay="350" className="mb-6">

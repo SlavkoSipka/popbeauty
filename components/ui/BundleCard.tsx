@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo } from 'react';
-import { type CartLineInput } from '@/lib/cart-context';
+import { type CartLineInput, useCart } from '@/lib/cart-context';
 import { formatRsd } from '@/lib/price';
 import { computePricing } from '@/lib/pricing-engine';
 import { usePricingData } from '@/lib/use-pricing-data';
@@ -15,6 +15,7 @@ type Props = {
 };
 
 export default function BundleCard({ uljani, vodeni, image }: Props) {
+  const { addBundlePair } = useCart();
   const { priceMap, productDiscountMap, siteDiscountPercent, bundleDiscountPercent, loaded } =
     usePricingData();
 
@@ -42,52 +43,55 @@ export default function BundleCard({ uljani, vodeni, image }: Props) {
   const total = pricing ? pricing.afterProductDiscountRsd : 0;
 
   return (
-    <Link
-      href="/proizvodi/serum-set"
-      className="group block w-full bg-white p-3 text-left transition-transform duration-300 ease-out hover:-translate-y-1 md:p-4"
-    >
-      <div className="relative aspect-[4/5] w-full overflow-hidden bg-sage-pale md:aspect-square">
-        <Image
-          src={image}
-          alt="Serum set — Uljani i Vodeni serum"
-          fill
-          className="object-cover object-center scale-[1.04] transition-transform duration-500 ease-out group-hover:scale-[1.09]"
-          sizes="(max-width: 768px) 100vw, 50vw"
-        />
-      </div>
+    <article className="group w-full bg-white p-3 text-left transition-transform duration-300 ease-out hover:-translate-y-1 md:p-4">
+      <Link href="/proizvodi/serum-set" className="block">
+        <div className="relative aspect-[4/5] w-full overflow-hidden bg-sage-pale md:aspect-square">
+          <Image
+            src={image}
+            alt="Serum set — Uljani i Vodeni serum"
+            fill
+            className="object-cover object-center scale-[1.04] transition-transform duration-500 ease-out group-hover:scale-[1.09]"
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+        </div>
 
-      <div className="flex items-start justify-between gap-4 pt-4">
-        <h3 className="font-display font-[500] text-[20px] leading-[1.15] text-ink md:text-[24px] [-webkit-text-stroke:0.4px_currentColor]">
-          Serum set
-          <br />
-          Vodeni + Uljani
-        </h3>
-        <div className="shrink-0 pt-1">
-          {pricing ? (
-            <div className="flex flex-col items-end gap-0.5">
-              {bundlePct > 0 ? (
-                <span className="mr-1 font-body font-[500] text-[13px] text-silver-dark tabular-nums line-through md:text-[14px]">
-                  {formatRsd(pricing.subtotalRsd)}
-                </span>
-              ) : null}
-              <div className="flex items-center gap-2">
-                <span className="font-body font-[500] text-[16px] text-ink tabular-nums md:text-[18px]">
-                  {formatRsd(total)}
-                </span>
+        <div className="flex items-start justify-between gap-4 pt-4">
+          <h3 className="font-display font-[500] text-[20px] leading-[1.15] text-ink md:text-[24px] [-webkit-text-stroke:0.4px_currentColor]">
+            Serum set
+            <br />
+            Vodeni + Uljani
+          </h3>
+          <div className="shrink-0 pt-1">
+            {pricing ? (
+              <div className="flex flex-col items-end gap-0.5">
                 {bundlePct > 0 ? (
-                  <span className="inline-flex items-center border border-sage-dark bg-sage-pale px-1.5 py-0.5 font-body font-[500] text-[10px] text-sage-dark tabular-nums md:text-[11px]">
-                    −{bundlePct}%
+                  <span className="mr-1 font-body font-[500] text-[13px] text-silver-dark tabular-nums line-through md:text-[14px]">
+                    {formatRsd(pricing.subtotalRsd)}
                   </span>
                 ) : null}
+                <div className="flex items-center gap-2">
+                  <span className="font-body font-[500] text-[16px] text-ink tabular-nums md:text-[18px]">
+                    {formatRsd(total)}
+                  </span>
+                  {bundlePct > 0 ? (
+                    <span className="inline-flex items-center border border-sage-dark bg-sage-pale px-1.5 py-0.5 font-body font-[500] text-[10px] text-sage-dark tabular-nums md:text-[11px]">
+                      −{bundlePct}%
+                    </span>
+                  ) : null}
+                </div>
               </div>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
-      </div>
+      </Link>
 
-      <span className="mt-4 inline-flex w-full items-center justify-center border border-[#A1A797] bg-[#A1A797] px-4 py-3.5 font-body font-[400] text-[12px] uppercase tracking-[0.14em] text-[#FBFAED] transition-colors duration-200 ease-in-out group-hover:bg-transparent group-hover:text-[#A1A797] md:text-[13px]">
+      <button
+        type="button"
+        onClick={() => addBundlePair(uljani, vodeni)}
+        className="mt-4 inline-flex w-full items-center justify-center border border-[#A1A797] bg-[#A1A797] px-4 py-3.5 font-body font-[400] text-[12px] uppercase tracking-[0.14em] text-[#FBFAED] transition-colors duration-200 ease-in-out hover:bg-transparent hover:text-[#A1A797] md:text-[13px]"
+      >
         Dodaj u korpu
-      </span>
-    </Link>
+      </button>
+    </article>
   );
 }

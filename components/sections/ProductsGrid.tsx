@@ -20,7 +20,6 @@ export default function ProductsGrid() {
           {products.map((product, i) => (
             <div key={product.slug} data-reveal="true" data-reveal-delay={String(i * 100)}>
               <ProductCard
-                number={String(i + 1).padStart(2, '0')}
                 name={product.name}
                 slug={product.slug}
                 image={product.image}
