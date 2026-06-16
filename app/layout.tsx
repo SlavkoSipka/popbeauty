@@ -104,7 +104,7 @@ export default function RootLayout({
           </Suspense>
           <Navigation />
           <CartDrawerLazy />
-          <div className="flex-1 pt-[160px]">
+          <div className="flex-1 pt-[144px]">
             {children}
           </div>
           <Footer />
