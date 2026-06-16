@@ -49,6 +49,8 @@ type CartContextValue = {
   addItem: (p: CartLineInput) => void;
   /** Tačno po 1 kom oba proizvoda — ostale stavke u korpi ostaju; ova dva slug-a se zamene. */
   addBundlePair: (a: CartLineInput, b: CartLineInput) => void;
+  /** Po 1 kom svaki prosleđeni proizvod — ti slug-ovi se zamene, ostale stavke ostaju. */
+  addBundleItems: (items: CartLineInput[]) => void;
   removeLine: (slug: string) => void;
   setQuantity: (slug: string, quantity: number) => void;
   clearCart: () => void;
@@ -139,22 +141,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
     trackAddToCart([{ slug: p.slug, name: p.name }], getLineValueRsd(p.slug, fallback));
   }, []);
 
-  const addBundlePair = useCallback((a: CartLineInput, b: CartLineInput) => {
+  const addBundleItems = useCallback((bundleItems: CartLineInput[]) => {
+    const slugs = new Set(bundleItems.map((x) => x.slug));
     setItems((prev) => {
-      const rest = prev.filter((x) => x.slug !== a.slug && x.slug !== b.slug);
-      return [...rest, { ...a, quantity: 1 }, { ...b, quantity: 1 }];
+      const rest = prev.filter((x) => !slugs.has(x.slug));
+      return [...rest, ...bundleItems.map((x) => ({ ...x, quantity: 1 }))];
     });
     setIsOpen(true);
-    const fallback =
-      parsePriceToRsd(a.price) + parsePriceToRsd(b.price);
+    const fallback = bundleItems.reduce((s, x) => s + parsePriceToRsd(x.price), 0);
     trackAddToCart(
-      [
-        { slug: a.slug, name: a.name },
-        { slug: b.slug, name: b.name },
-      ],
-      getBundleValueRsd(fallback),
+      bundleItems.map((x) => ({ slug: x.slug, name: x.name })),
+      getBundleValueRsd(bundleItems.map((x) => x.slug), fallback),
     );
   }, []);
+
+  const addBundlePair = useCallback(
+    (a: CartLineInput, b: CartLineInput) => addBundleItems([a, b]),
+    [addBundleItems],
+  );
 
   const removeLine = useCallback((slug: string) => {
     setItems((prev) => prev.filter((x) => x.slug !== slug));
@@ -189,12 +193,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       items, itemCount, isOpen, openCart, closeCart, toggleCart,
-      addItem, addBundlePair, removeLine, setQuantity, clearCart,
+      addItem, addBundlePair, addBundleItems, removeLine, setQuantity, clearCart,
       setReferral, clearReferral, referralCode, referralDiscountPercent,
     }),
     [
       items, itemCount, isOpen, openCart, closeCart, toggleCart,
-      addItem, addBundlePair, removeLine, setQuantity, clearCart,
+      addItem, addBundlePair, addBundleItems, removeLine, setQuantity, clearCart,
       setReferral, clearReferral, referralCode, referralDiscountPercent,
     ],
   );

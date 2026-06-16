@@ -4,28 +4,30 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { useScrollReveal } from '@/lib/animations';
 import { useCart } from '@/lib/cart-context';
-import { products, serumSet } from '@/lib/data/products';
+import { products, dzemMistSet } from '@/lib/data/products';
 import { useBundleViewContentPixel } from '@/lib/hooks/use-product-view-content-pixel';
 import { parsePriceStringToRsd } from '@/lib/price';
 import Button from '@/components/ui/Button';
 import BundleProductPrice from '@/components/product/BundleProductPrice';
 import ProductRatingStars from '@/components/product/ProductRatingStars';
 import ProductDeliveryInfo from '@/components/product/ProductDeliveryInfo';
+import BundleProductSections from '@/components/product/BundleProductSections';
 import TestimonialsSectionLazy from '@/components/sections/TestimonialsSectionLazy';
 
-const uljani = products.find((p) => p.slug === serumSet.uljaniSlug)!;
-const vodeni = products.find((p) => p.slug === serumSet.vodeniSlug)!;
+const dzem = products.find((p) => p.slug === dzemMistSet.slugA)!;
+const mist = products.find((p) => p.slug === dzemMistSet.slugB)!;
+const bundleProducts = [dzem, mist];
 const fallbackRsd =
-  (parsePriceStringToRsd(uljani.price) ?? 0) + (parsePriceStringToRsd(vodeni.price) ?? 0);
+  (parsePriceStringToRsd(dzem.price) ?? 0) + (parsePriceStringToRsd(mist.price) ?? 0);
 
 type Tab = 'opis' | 'sastojci' | 'upotreba';
 
-export default function SerumSetPage() {
+export default function DzemMistPage() {
   useScrollReveal();
   const { addBundlePair } = useCart();
   const [activeTab, setActiveTab] = useState<Tab>('opis');
 
-  useBundleViewContentPixel([serumSet.uljaniSlug, serumSet.vodeniSlug], serumSet.name, fallbackRsd);
+  useBundleViewContentPixel([dzemMistSet.slugA, dzemMistSet.slugB], dzemMistSet.name, fallbackRsd);
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'opis', label: 'Opis proizvoda' },
@@ -35,8 +37,8 @@ export default function SerumSetPage() {
 
   const addSet = () =>
     addBundlePair(
-      { slug: uljani.slug, name: uljani.name, price: uljani.price, image: uljani.image },
-      { slug: vodeni.slug, name: vodeni.name, price: vodeni.price, image: vodeni.image },
+      { slug: dzem.slug, name: dzem.name, price: dzem.price, image: dzem.image },
+      { slug: mist.slug, name: mist.name, price: mist.price, image: mist.image },
     );
 
   return (
@@ -49,8 +51,8 @@ export default function SerumSetPage() {
             <div>
               <div data-reveal="true" className="relative aspect-[3/4] w-full overflow-hidden bg-white">
                 <Image
-                  src={serumSet.image}
-                  alt={serumSet.name}
+                  src={dzemMistSet.image}
+                  alt={dzemMistSet.name}
                   fill
                   className="object-cover object-center scale-[1.04]"
                   sizes="(max-width: 768px) 100vw, 55vw"
@@ -66,36 +68,16 @@ export default function SerumSetPage() {
                 data-reveal-delay="150"
                 className="font-display font-[300] text-[clamp(36px,5vw,48px)] text-ink mb-4"
               >
-                Serum set -<br />
-                Vodeni + Uljani serum
+                Glow Marmelada + Glow Mist
               </h1>
 
               <div data-reveal="true" data-reveal-delay="200">
                 <ProductRatingStars />
               </div>
 
-              <div
-                data-reveal="true"
-                data-reveal-delay="250"
-                className="mb-6 flex flex-col gap-2.5"
-              >
-                {['Doprinosi sjaju kože', 'Koža je mekša', 'Koža je glatka i ne zateže'].map((label) => (
-                  <div key={label} className="flex items-center gap-3">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#A1A797]">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FBFAED" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20,6 9,17 4,12" />
-                      </svg>
-                    </span>
-                    <span className="font-body font-[400] text-[14px] text-ink md:text-[15px]">
-                      {label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
               <div data-reveal="true" data-reveal-delay="300" className="mb-6">
                 <BundleProductPrice
-                  slugs={[serumSet.uljaniSlug, serumSet.vodeniSlug]}
+                  slugs={[dzemMistSet.slugA, dzemMistSet.slugB]}
                   fallbackRsd={fallbackRsd}
                 />
               </div>
@@ -137,28 +119,11 @@ export default function SerumSetPage() {
           </div>
 
           <div data-reveal="true" data-reveal-delay="100">
-            {activeTab === 'opis' && (
-              <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[18px]">
-                {serumSet.fullDescription}
-              </p>
-            )}
-
-            {activeTab === 'sastojci' && (
-              <ul className="flex flex-col gap-3">
-                {serumSet.ingredients.map((ing) => (
-                  <li key={ing.name} className="flex items-center gap-3">
-                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#A1A797]" />
-                    <span className="font-body font-[500] text-[16px] text-ink md:text-[17px]">{ing.name}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {activeTab === 'upotreba' && (
-              <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[18px]">
-                {serumSet.howToUse}
-              </p>
-            )}
+            <BundleProductSections
+              activeTab={activeTab}
+              bundleProducts={bundleProducts}
+              intro={dzemMistSet.fullDescription}
+            />
           </div>
         </div>
       </section>

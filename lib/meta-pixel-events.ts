@@ -1,4 +1,4 @@
-import { computePricing, BUNDLE_SLUGS } from '@/lib/pricing-engine';
+import { computePricing } from '@/lib/pricing-engine';
 import { pixelTrack } from '@/lib/meta-pixel';
 import { effectiveDiscountPercent, getCachedPricing } from '@/lib/use-pricing-data';
 
@@ -11,28 +11,18 @@ export function getLineValueRsd(slug: string, fallbackRsd: number): number {
   return Math.round(base * (1 - pct / 100) * 100) / 100;
 }
 
-export function getBundleValueRsd(fallbackRsd: number): number {
+export function getBundleValueRsd(slugs: string[], fallbackRsd: number): number {
   const p = getCachedPricing();
   if (!p?.loaded) return fallbackRsd;
-  const [uljani, vodeni] = BUNDLE_SLUGS;
-  const pu = p.priceMap.get(uljani);
-  const pv = p.priceMap.get(vodeni);
-  if (pu === undefined || pv === undefined) return fallbackRsd;
+  const bases = slugs.map((s) => p.priceMap.get(s));
+  if (bases.some((b) => b === undefined)) return fallbackRsd;
   const result = computePricing({
-    lines: [
-      {
-        slug: uljani,
-        quantity: 1,
-        basePriceRsd: pu,
-        discountPercent: p.productDiscountMap.get(uljani) ?? null,
-      },
-      {
-        slug: vodeni,
-        quantity: 1,
-        basePriceRsd: pv,
-        discountPercent: p.productDiscountMap.get(vodeni) ?? null,
-      },
-    ],
+    lines: slugs.map((slug, i) => ({
+      slug,
+      quantity: 1,
+      basePriceRsd: bases[i] as number,
+      discountPercent: p.productDiscountMap.get(slug) ?? null,
+    })),
     siteDiscountPercent: p.siteDiscountPercent,
     bundleDiscountPercent: p.bundleDiscountPercent,
     referralDiscountPercent: 0,

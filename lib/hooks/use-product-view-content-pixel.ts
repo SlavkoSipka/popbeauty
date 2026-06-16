@@ -6,7 +6,6 @@ import {
   getLineValueRsd,
   trackViewContent,
 } from '@/lib/meta-pixel-events';
-import { BUNDLE_SLUGS } from '@/lib/pricing-engine';
 import { usePricingData } from '@/lib/use-pricing-data';
 
 export function useProductViewContentPixel(
@@ -25,15 +24,21 @@ export function useProductViewContentPixel(
   }, [slug, name, fallbackRsd, loaded]);
 }
 
-export function useBundleViewContentPixel(name: string, fallbackRsd: number) {
+export function useBundleViewContentPixel(
+  slugs: string[],
+  name: string,
+  fallbackRsd: number,
+) {
   const { loaded } = usePricingData();
+  const slugsKey = slugs.join(',');
 
   useEffect(() => {
     trackViewContent({
-      contentIds: [...BUNDLE_SLUGS],
+      contentIds: slugs,
       contentName: name,
-      value: getBundleValueRsd(fallbackRsd),
-      contents: BUNDLE_SLUGS.map((id) => ({ id, quantity: 1 })),
+      value: getBundleValueRsd(slugs, fallbackRsd),
+      contents: slugs.map((id) => ({ id, quantity: 1 })),
     });
-  }, [name, fallbackRsd, loaded]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slugsKey, name, fallbackRsd, loaded]);
 }

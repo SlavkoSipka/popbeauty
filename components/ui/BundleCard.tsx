@@ -9,46 +9,54 @@ import { computePricing } from '@/lib/pricing-engine';
 import { usePricingData } from '@/lib/use-pricing-data';
 
 type Props = {
-  uljani: CartLineInput;
-  vodeni: CartLineInput;
+  bundleProducts: CartLineInput[];
   image: string;
+  href: string;
+  titleTop: string;
+  titleBottom: string;
+  alt?: string;
+  badge?: string;
 };
 
-export default function BundleCard({ uljani, vodeni, image }: Props) {
-  const { addBundlePair } = useCart();
+export default function BundleCard({ bundleProducts, image, href, titleTop, titleBottom, alt, badge }: Props) {
+  const { addBundleItems } = useCart();
   const { priceMap, productDiscountMap, siteDiscountPercent, bundleDiscountPercent, loaded } =
     usePricingData();
+  const slugsKey = bundleProducts.map((p) => p.slug).join(',');
 
   const pricing = useMemo(() => {
     if (!loaded) return null;
-    const pu = priceMap.get(uljani.slug);
-    const pv = priceMap.get(vodeni.slug);
-    if (pu === undefined || pv === undefined) return null;
+    const bases = bundleProducts.map((p) => priceMap.get(p.slug));
+    if (bases.some((b) => b === undefined)) return null;
     return computePricing({
-      lines: [
-        { slug: uljani.slug, quantity: 1, basePriceRsd: pu, discountPercent: productDiscountMap.get(uljani.slug) ?? null },
-        { slug: vodeni.slug, quantity: 1, basePriceRsd: pv, discountPercent: productDiscountMap.get(vodeni.slug) ?? null },
-      ],
+      lines: bundleProducts.map((p, i) => ({
+        slug: p.slug,
+        quantity: 1,
+        basePriceRsd: bases[i] as number,
+        discountPercent: productDiscountMap.get(p.slug) ?? null,
+      })),
       siteDiscountPercent,
       bundleDiscountPercent,
       referralDiscountPercent: 0,
     });
-  }, [loaded, priceMap, productDiscountMap, siteDiscountPercent, bundleDiscountPercent, uljani.slug, vodeni.slug]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded, priceMap, productDiscountMap, siteDiscountPercent, bundleDiscountPercent, slugsKey]);
 
-  const bundlePct = pricing
-    ? pricing.discountType === 'bundle'
-      ? Math.round(pricing.discountPercent)
-      : Math.round(bundleDiscountPercent)
-    : Math.round(bundleDiscountPercent);
+  const bundlePct = pricing ? Math.round(pricing.discountPercent) : 0;
   const total = pricing ? pricing.afterProductDiscountRsd : 0;
 
   return (
     <article className="group w-full bg-white p-3 text-left transition-transform duration-300 ease-out hover:-translate-y-1 md:p-4">
-      <Link href="/proizvodi/serum-set" className="block">
+      <Link href={href} className="block">
         <div className="relative aspect-[4/5] w-full overflow-hidden bg-sage-pale md:aspect-square">
+          {badge ? (
+            <span className="absolute left-3 top-3 z-10 inline-flex items-center bg-[#A1A797] px-4 py-2 font-body font-[600] text-[12px] uppercase tracking-[0.2em] text-[#FBFAED] shadow-[0_4px_16px_rgba(28,28,26,0.22)] ring-1 ring-inset ring-white/30 md:left-4 md:top-4 md:px-5 md:py-2.5 md:text-[14px] md:tracking-[0.24em]">
+              {badge}
+            </span>
+          ) : null}
           <Image
             src={image}
-            alt="Serum set — Uljani i Vodeni serum"
+            alt={alt ?? `${titleTop} ${titleBottom}`}
             fill
             className="object-cover object-center scale-[1.04] transition-transform duration-500 ease-out group-hover:scale-[1.09]"
             sizes="(max-width: 768px) 100vw, 50vw"
@@ -57,9 +65,9 @@ export default function BundleCard({ uljani, vodeni, image }: Props) {
 
         <div className="flex items-start justify-between gap-4 pt-4">
           <h3 className="font-display font-[500] text-[20px] leading-[1.15] text-ink md:text-[24px] [-webkit-text-stroke:0.4px_currentColor]">
-            Serum set
+            {titleTop}
             <br />
-            Vodeni + Uljani
+            {titleBottom}
           </h3>
           <div className="shrink-0 pt-1">
             {pricing ? (
@@ -87,7 +95,7 @@ export default function BundleCard({ uljani, vodeni, image }: Props) {
 
       <button
         type="button"
-        onClick={() => addBundlePair(uljani, vodeni)}
+        onClick={() => addBundleItems(bundleProducts)}
         className="mt-4 inline-flex w-full items-center justify-center border border-[#A1A797] bg-[#A1A797] px-4 py-3.5 font-body font-[400] text-[12px] uppercase tracking-[0.14em] text-[#FBFAED] transition-colors duration-200 ease-in-out hover:bg-transparent hover:text-[#A1A797] md:text-[13px]"
       >
         Dodaj u korpu

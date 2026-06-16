@@ -10,6 +10,7 @@ interface ProductCardProps {
   slug: string;
   image: string;
   price: string;
+  badge?: string;
 }
 
 function splitName(name: string): [string, string] {
@@ -24,6 +25,7 @@ export default function ProductCard({
   slug,
   image,
   price,
+  badge,
 }: ProductCardProps) {
   const { addItem } = useCart();
   const [line1, line2] = splitName(name);
@@ -32,6 +34,11 @@ export default function ProductCard({
     <article className="group bg-white p-3 transition-transform duration-300 ease-out hover:-translate-y-1 md:p-4">
       <Link href={`/proizvodi/${slug}`} className="block">
         <div className="relative aspect-[4/5] w-full overflow-hidden bg-sage-pale md:aspect-square">
+          {badge ? (
+            <span className="absolute left-3 top-3 z-10 inline-flex items-center bg-[#A1A797] px-4 py-2 font-body font-[600] text-[12px] uppercase tracking-[0.2em] text-[#FBFAED] shadow-[0_4px_16px_rgba(28,28,26,0.22)] ring-1 ring-inset ring-white/30 md:left-4 md:top-4 md:px-5 md:py-2.5 md:text-[14px] md:tracking-[0.24em]">
+              {badge}
+            </span>
+          ) : null}
           <Image
             src={image}
             alt={name}

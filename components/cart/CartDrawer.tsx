@@ -5,8 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCart, type CartLine } from '@/lib/cart-context';
 import { formatRsd, unitPriceRsdForLine } from '@/lib/price';
-import { BUNDLE_SLUGS, computePricing } from '@/lib/pricing-engine';
-import { effectiveDiscountPercent, usePricingData } from '@/lib/use-pricing-data';
+import { computePricing, type LineDiscount } from '@/lib/pricing-engine';
+import { usePricingData } from '@/lib/use-pricing-data';
 
 function discountedUnitPrice(base: number, pct: number): number {
   return Math.round(base * (1 - pct / 100) * 100) / 100;
@@ -15,24 +15,16 @@ function discountedUnitPrice(base: number, pct: number): number {
 function CartLinePrice({
   line,
   priceMap,
-  productDiscountMap,
-  siteDiscountPercent,
-  bundleDiscountPercent,
-  isBundle,
+  lineDiscount,
   loaded,
 }: {
   line: CartLine;
   priceMap: Map<string, number>;
-  productDiscountMap: Map<string, number | null>;
-  siteDiscountPercent: number;
-  bundleDiscountPercent: number;
-  isBundle: boolean;
+  lineDiscount: LineDiscount | undefined;
   loaded: boolean;
 }) {
   const base = unitPriceRsdForLine(line, loaded ? priceMap : undefined);
-  const effectivePct = isBundle
-    ? bundleDiscountPercent
-    : effectiveDiscountPercent(line.slug, productDiscountMap, siteDiscountPercent);
+  const effectivePct = lineDiscount?.percent ?? 0;
 
   if (!loaded || effectivePct <= 0) {
     return (
@@ -114,10 +106,16 @@ export default function CartDrawer() {
     referralDiscountPercent,
   ]);
 
-  const isBundle = useMemo(() => {
-    const slugs = new Set(items.filter((i) => i.quantity > 0).map((i) => i.slug));
-    return BUNDLE_SLUGS.every((s) => slugs.has(s));
-  }, [items]);
+  const discountBySlug = useMemo(() => {
+    const m = new Map<string, LineDiscount>();
+    pricing?.lineDiscounts.forEach((d) => m.set(d.slug, d));
+    return m;
+  }, [pricing]);
+
+  const siteLineDiscounts = pricing?.lineDiscounts.filter((d) => d.source === 'site') ?? [];
+  const showSitePerLine =
+    siteLineDiscounts.length > 1 &&
+    new Set(siteLineDiscounts.map((d) => Math.round(d.percent))).size > 1;
 
   return (
     <>
@@ -197,10 +195,7 @@ export default function CartDrawer() {
                         <CartLinePrice
                           line={line}
                           priceMap={priceMap}
-                          productDiscountMap={productDiscountMap}
-                          siteDiscountPercent={siteDiscountPercent}
-                          bundleDiscountPercent={bundleDiscountPercent}
-                          isBundle={isBundle}
+                          lineDiscount={discountBySlug.get(line.slug)}
                           loaded={loaded}
                         />
                       </div>
@@ -256,10 +251,20 @@ export default function CartDrawer() {
                       {formatRsd(pricing.subtotalRsd)}
                     </span>
                   </div>
-                  {pricing.discountType === 'site' && pricing.lineDiscounts.length > 1 && (
-                    new Set(pricing.lineDiscounts.map((ld) => Math.round(ld.percent))).size > 1
-                  ) ? (
-                    pricing.lineDiscounts.map((ld) => {
+
+                  {pricing.bundleBreakdown.map((b) => (
+                    <div key={b.id} className="flex items-baseline justify-between gap-4">
+                      <span className="font-body font-[500] text-[13px] text-sage-dark md:text-[14px]">
+                        Paket popust −{Math.round(b.percent)}%
+                      </span>
+                      <span className="font-body font-[500] text-[15px] text-sage-dark tabular-nums md:text-[16px]">
+                        −{formatRsd(b.amountRsd)}
+                      </span>
+                    </div>
+                  ))}
+
+                  {showSitePerLine ? (
+                    siteLineDiscounts.map((ld) => {
                       const line = items.find((it) => it.slug === ld.slug);
                       const label = line?.name ?? ld.slug;
                       return (
@@ -273,18 +278,16 @@ export default function CartDrawer() {
                         </div>
                       );
                     })
-                  ) : (
+                  ) : siteLineDiscounts.length > 0 ? (
                     <div className="flex items-baseline justify-between gap-4">
                       <span className="font-body font-[500] text-[13px] text-sage-dark md:text-[14px]">
-                        {pricing.discountType === 'bundle'
-                          ? `Paket popust −${Math.round(pricing.discountPercent)}%`
-                          : `Popust −${Math.round(pricing.discountPercent)}%`}
+                        Popust −{Math.round(siteLineDiscounts[0].percent)}%
                       </span>
                       <span className="font-body font-[500] text-[15px] text-sage-dark tabular-nums md:text-[16px]">
-                        −{formatRsd(pricing.discountAmountRsd)}
+                        −{formatRsd(round2Sum(siteLineDiscounts))}
                       </span>
                     </div>
-                  )}
+                  ) : null}
                 </>
               )}
               <div className="flex items-end justify-between gap-3 pt-0.5">
@@ -308,4 +311,8 @@ export default function CartDrawer() {
       </div>
     </>
   );
+}
+
+function round2Sum(lds: LineDiscount[]): number {
+  return Math.round(lds.reduce((s, d) => s + d.amountRsd, 0) * 100) / 100;
 }

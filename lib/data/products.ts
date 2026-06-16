@@ -6,7 +6,7 @@ export interface Product {
   tagline: string;
   step: number;
   stepLabel: string;
-  type: 'Uljani' | 'Vodeni';
+  type: string;
   description: string;
   fullDescription: string;
   volume: string;
@@ -19,6 +19,14 @@ export interface Product {
   /** Puna INCI lista */
   inci: string;
   howToUse: string;
+  /** Upozorenje za upotrebu (opciono) */
+  warning?: string;
+  /** Podaci sa etikete (barkod, poreklo, rok trajanja) */
+  labelInfo?: {
+    barcode?: string;
+    countryOfOrigin?: string;
+    shelfLife?: string;
+  };
   benefits: string[];
 }
 
@@ -146,6 +154,84 @@ export const products: Product[] = [
       'Osvježava i revitalizira umoran ten',
     ],
   },
+  {
+    slug: 'dzem',
+    image: '/dzem2.webp',
+    name: 'Glow Marmelada',
+    tagline: 'Marmelada za bronzani ten',
+    step: 1,
+    stepLabel: 'Korak prvi',
+    type: 'Glow Marmelada',
+    description: 'Bogata kombinacija prirodnih biljnih ulja i butera za preplanuli izgled tokom sunčanja.',
+    fullDescription:
+      'Bogata kombinacija prirodnih biljnih ulja i butera neguje kožu i doprinosi postizanju preplanulog izgleda tokom sunčanja. Hrani i omekšava kožu, ostavljajući je glatkom, svilenkastom i blistavom.',
+    volume: '50ml',
+    price: '1.990,00 RSD',
+    ingredients: [
+      { name: 'Kokosovo ulje', benefit: '' },
+      { name: 'Bademovo ulje', benefit: '' },
+      { name: 'Beli vosak', benefit: '' },
+      { name: 'Maslinovo ulje', benefit: '' },
+      { name: 'Shea buter', benefit: '' },
+      { name: 'Macerat nevena', benefit: '' },
+      { name: 'Macerat šargarepe', benefit: '' },
+      { name: 'Ulje oraha', benefit: '' },
+      { name: 'Ulje semenki paradajza', benefit: '' },
+      { name: 'Vitamin E', benefit: '' },
+      { name: 'Miris', benefit: '' },
+      { name: 'Mica (šljokice)', benefit: '' },
+    ],
+    inci:
+      'Cocos Nucifera Oil, Prunus Amygdalus Dulcis Oil, Cera Alba, Olea Europaea Fruit Oil, Butyrospermum Parkii Butter, Helianthus Annuus Seed Oil, Calendula Officinalis Flower Extract, Daucus Carota Sativa Root Extract, Juglans Regia Seed Oil, Solanum Lycopersicum Seed Oil, Tocopherol, Parfum, Mica.',
+    howToUse:
+      'Naneti ravnomerno na čistu i suvu kožu pre izlaganja suncu. Po potrebi ponoviti nanošenje tokom sunčanja. Proizvod ne sadrži UV filtere i ne pruža zaštitu od sunčevog zračenja.',
+    warning:
+      'Izbegavati prekomerno izlaganje suncu. Proizvod nije zamena za preparate sa zaštitnim faktorom. Samo za spoljašnju upotrebu.',
+    benefits: [
+      'Ubrzava potamljivanje',
+      'Hrani i omekšava kožu',
+      'Prepun zdravih sastojaka za kožu',
+    ],
+  },
+  {
+    slug: 'mist',
+    image: '/mist2.webp',
+    name: 'Glow Mist',
+    tagline: 'Hidratantni umirujući mist za lice',
+    step: 2,
+    stepLabel: 'Korak drugi',
+    type: 'Mist',
+    description: 'Lagani hidratantni mist koji osvežava, umiruje i održava osećaj hidriranosti bez opterećivanja kože.',
+    fullDescription:
+      'Lagani hidratantni mist obogaćen aktivnim sastojcima koji pomažu u osvežavanju i umirivanju kože. Idealan za svakodnevnu upotrebu, tokom dana ili kao dodatni korak u nezi kože. Pomaže u održavanju osećaja hidriranosti i komfora, bez opterećivanja kože.',
+    volume: '100ml',
+    price: '690,00 RSD',
+    ingredients: [
+      { name: 'Voda', benefit: '' },
+      { name: 'Aloja', benefit: '' },
+      { name: 'Propanediol', benefit: '' },
+      { name: 'Niacinamid', benefit: '' },
+      { name: 'Glicerin', benefit: '' },
+      { name: 'Ekstrakt zmajevog voća', benefit: '' },
+      { name: 'Konzervans', benefit: '' },
+      { name: 'Miris', benefit: '' },
+    ],
+    inci:
+      'Aqua, Aloe Barbadensis Leaf Juice, Propanediol, Niacinamide, Glycerin, Hylocereus Undatus Extract, Benzyl Alcohol, Dehydroacetic Acid, Parfum, Sodium Gluconate.',
+    howToUse:
+      'Raspršiti ravnomerno na lice sa udaljenosti 20–30 cm, na čistu kožu ili preko šminke po potrebi. Ne utrljavati. Može se koristiti više puta dnevno.',
+    warning:
+      'Samo za spoljašnju upotrebu. Izbegavati kontakt sa očima. U slučaju iritacije, prekinuti upotrebu.',
+    labelInfo: {
+      countryOfOrigin: 'Srbija',
+      shelfLife: '24 meseca od datuma proizvodnje',
+    },
+    benefits: [
+      'Osvežava i umiruje kožu',
+      'Lagana hidratacija bez opterećivanja',
+      'Idealan za svakodnevnu upotrebu',
+    ],
+  },
 ];
 
 export interface SerumSet {
@@ -184,4 +270,49 @@ export const serumSet: SerumSet = {
   ],
   howToUse:
     'Na čistu kožu lica prvo nanesite vodeni serum — 2–3 pumpe lagano utisnite dlanovima. Zatim, kao drugi korak, nanesite 3–4 kapi uljanog seruma i lagano umasirajte pokretima prema gore. Koristite ujutro i uveče.',
+};
+
+export interface ProductBundle {
+  slug: string;
+  name: string;
+  image: string;
+  slugA: string;
+  slugB: string;
+  fullDescription: string;
+  ingredients: { name: string }[];
+  howToUse: string;
+}
+
+export const dzemMistSet: ProductBundle = {
+  slug: 'dzem-mist',
+  name: 'Glow Marmelada + Glow Mist',
+  image: '/dzem-mist1.webp',
+  slugA: 'dzem',
+  slugB: 'mist',
+  fullDescription:
+    'Paket Glow Marmelada + Glow Mist spaja dva proizvoda za kompletnu negu — marmeladu za bronzani ten i hidratantni mist za osveženje i umirenje kože. U paketu dobijaš oba proizvoda po povoljnijoj ceni.',
+  ingredients: [],
+  howToUse: '',
+};
+
+/** Veliki paket: oba seruma + Glow Marmelada + Glow Mist. */
+export interface MultiBundle {
+  slug: string;
+  name: string;
+  image: string;
+  slugs: string[];
+  fullDescription: string;
+  ingredients: { name: string }[];
+  howToUse: string;
+}
+
+export const popBeautyPaket: MultiBundle = {
+  slug: 'pop-beauty-paket',
+  name: 'Pop Beauty paket',
+  image: '/paket.webp',
+  slugs: ['uljani-serum', 'vodeni-serum', 'dzem', 'mist'],
+  fullDescription:
+    'Pop Beauty paket je kompletan ritual nege za lice — vodeni serum, uljani serum, Glow Marmelada i Glow Mist u jednom setu. Hidratacija, nega, bronzani ten i svakodnevno osveženje kože, uz najveću uštedu.',
+  ingredients: [],
+  howToUse: '',
 };

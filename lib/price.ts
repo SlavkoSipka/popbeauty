@@ -3,6 +3,25 @@ import { products } from '@/lib/data/products';
 
 const bySlug = new Map(products.map((p) => [p.slug, p]));
 
+/** Stara cena za prikaz (precrtano) — naplata i dalje ide po base_price_rsd iz baze. */
+const DISPLAY_COMPARE_AT_RSD: Record<string, number> = {
+  dzem: 2190,
+  mist: 890,
+};
+
+export function getDisplayCompareAtRsd(slug: string): number | null {
+  return DISPLAY_COMPARE_AT_RSD[slug] ?? null;
+}
+
+/** Procenat popusta za prikaz (compare-at → prodajna cena), zaokruženo. */
+export function getDisplayCompareAtDiscountPercent(
+  compareAt: number,
+  salePrice: number,
+): number {
+  if (compareAt <= salePrice) return 0;
+  return Math.round(((compareAt - salePrice) / compareAt) * 100);
+}
+
 /** Parsira prikaz tipa "2.490,00 RSD" ili "48,00 KM" u iznos u RSD (broj). */
 export function parsePriceStringToRsd(s: string): number | null {
   const t = s

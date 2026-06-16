@@ -6,30 +6,32 @@ import { computePricing } from '@/lib/pricing-engine';
 import { usePricingData } from '@/lib/use-pricing-data';
 
 type Props = {
-  uljaniSlug: string;
-  vodeniSlug: string;
+  slugs: string[];
   fallbackRsd: number;
 };
 
-export default function BundleProductPrice({ uljaniSlug, vodeniSlug, fallbackRsd }: Props) {
+export default function BundleProductPrice({ slugs, fallbackRsd }: Props) {
   const { priceMap, productDiscountMap, siteDiscountPercent, bundleDiscountPercent, loaded } =
     usePricingData();
+  const slugsKey = slugs.join(',');
 
   const pricing = useMemo(() => {
     if (!loaded) return null;
-    const pu = priceMap.get(uljaniSlug);
-    const pv = priceMap.get(vodeniSlug);
-    if (pu === undefined || pv === undefined) return null;
+    const bases = slugs.map((s) => priceMap.get(s));
+    if (bases.some((b) => b === undefined)) return null;
     return computePricing({
-      lines: [
-        { slug: uljaniSlug, quantity: 1, basePriceRsd: pu, discountPercent: productDiscountMap.get(uljaniSlug) ?? null },
-        { slug: vodeniSlug, quantity: 1, basePriceRsd: pv, discountPercent: productDiscountMap.get(vodeniSlug) ?? null },
-      ],
+      lines: slugs.map((slug, i) => ({
+        slug,
+        quantity: 1,
+        basePriceRsd: bases[i] as number,
+        discountPercent: productDiscountMap.get(slug) ?? null,
+      })),
       siteDiscountPercent,
       bundleDiscountPercent,
       referralDiscountPercent: 0,
     });
-  }, [loaded, priceMap, productDiscountMap, siteDiscountPercent, bundleDiscountPercent, uljaniSlug, vodeniSlug]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded, priceMap, productDiscountMap, siteDiscountPercent, bundleDiscountPercent, slugsKey]);
 
   if (!pricing) {
     return (
@@ -39,10 +41,7 @@ export default function BundleProductPrice({ uljaniSlug, vodeniSlug, fallbackRsd
     );
   }
 
-  const pct =
-    pricing.discountType === 'bundle'
-      ? Math.round(pricing.discountPercent)
-      : Math.round(bundleDiscountPercent);
+  const pct = Math.round(pricing.discountPercent);
   const total = pricing.afterProductDiscountRsd;
 
   if (pct > 0) {

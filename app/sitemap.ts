@@ -12,6 +12,10 @@ const PATHS: Array<{
   { path: '/ritual', changeFrequency: 'monthly', priority: 0.8 },
   { path: '/proizvodi/uljani-serum', changeFrequency: 'weekly', priority: 0.95 },
   { path: '/proizvodi/vodeni-serum', changeFrequency: 'weekly', priority: 0.95 },
+  { path: '/proizvodi/dzem', changeFrequency: 'weekly', priority: 0.9 },
+  { path: '/proizvodi/mist', changeFrequency: 'weekly', priority: 0.9 },
+  { path: '/proizvodi/dzem-mist', changeFrequency: 'weekly', priority: 0.85 },
+  { path: '/proizvodi/pop-beauty-paket', changeFrequency: 'weekly', priority: 0.85 },
   { path: '/porudzbina', changeFrequency: 'monthly', priority: 0.75 },
 ];
 

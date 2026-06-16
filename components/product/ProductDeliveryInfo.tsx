@@ -1,3 +1,8 @@
+import {
+  FREE_SHIPPING_BELGRADE_LABEL,
+  FREE_SHIPPING_THRESHOLD_LABEL,
+} from '@/lib/shipping';
+
 type Item = {
   label: string;
   icon: React.ReactNode;
@@ -37,7 +42,16 @@ const items: Item[] = [
     ),
   },
   {
-    label: 'Besplatna dostava za sve porudžbine iznad 4.000 RSD',
+    label: FREE_SHIPPING_BELGRADE_LABEL,
+    icon: (
+      <svg {...iconProps} aria-hidden>
+        <path d="M12 21s-6-4.35-6-10a6 6 0 0 1 12 0c0 5.65-6 10-6 10z" />
+        <circle cx="12" cy="11" r="2.5" />
+      </svg>
+    ),
+  },
+  {
+    label: FREE_SHIPPING_THRESHOLD_LABEL,
     icon: (
       <svg {...iconProps} aria-hidden>
         <path d="M20 12v9H4v-9" />

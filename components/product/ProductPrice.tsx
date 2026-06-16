@@ -1,6 +1,6 @@
 'use client';
 
-import { formatRsd } from '@/lib/price';
+import { formatRsd, getDisplayCompareAtDiscountPercent, getDisplayCompareAtRsd, parsePriceStringToRsd } from '@/lib/price';
 import { effectiveDiscountPercent, usePricingData } from '@/lib/use-pricing-data';
 
 type Props = {
@@ -15,8 +15,30 @@ export default function ProductPrice({ slug, fallbackPrice }: Props) {
     siteDiscountPercent,
     loaded,
   } = usePricingData();
+  const compareAt = getDisplayCompareAtRsd(slug);
 
   if (!loaded) {
+    if (compareAt != null) {
+      const sale = parsePriceStringToRsd(fallbackPrice);
+      if (sale != null) {
+        const pct = getDisplayCompareAtDiscountPercent(compareAt, sale);
+        return (
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="font-body font-[500] text-[24px] text-ink tabular-nums leading-none">
+              {formatRsd(sale)}
+            </span>
+            <span className="font-body font-[500] text-[18px] text-silver-dark line-through tabular-nums">
+              {formatRsd(compareAt)}
+            </span>
+            {pct > 0 ? (
+              <span className="inline-flex items-center border border-sage-dark bg-sage-pale px-2 py-1 font-body font-[600] text-[13px] text-sage-dark tabular-nums">
+                −{pct}%
+              </span>
+            ) : null}
+          </div>
+        );
+      }
+    }
     return (
       <span className="font-body font-[500] text-[24px] text-ink tabular-nums leading-none">{fallbackPrice}</span>
     );
@@ -26,6 +48,25 @@ export default function ProductPrice({ slug, fallbackPrice }: Props) {
   if (basePrice === undefined) {
     return (
       <span className="font-body font-[500] text-[24px] text-ink tabular-nums leading-none">{fallbackPrice}</span>
+    );
+  }
+
+  if (compareAt != null && compareAt > basePrice) {
+    const pct = getDisplayCompareAtDiscountPercent(compareAt, basePrice);
+    return (
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="font-body font-[500] text-[24px] text-ink tabular-nums leading-none">
+          {formatRsd(basePrice)}
+        </span>
+        <span className="font-body font-[500] text-[18px] text-silver-dark line-through tabular-nums">
+          {formatRsd(compareAt)}
+        </span>
+        {pct > 0 ? (
+          <span className="inline-flex items-center border border-sage-dark bg-sage-pale px-2 py-1 font-body font-[600] text-[13px] text-sage-dark tabular-nums">
+            −{pct}%
+          </span>
+        ) : null}
+      </div>
     );
   }
 
