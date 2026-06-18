@@ -1,4 +1,5 @@
 import { computePricing } from '@/lib/pricing-engine';
+import { getBundleComponentSlugs } from '@/lib/bundles';
 import { pixelTrack } from '@/lib/meta-pixel';
 import { effectiveDiscountPercent, getCachedPricing } from '@/lib/use-pricing-data';
 
@@ -11,13 +12,15 @@ export function getLineValueRsd(slug: string, fallbackRsd: number): number {
   return Math.round(base * (1 - pct / 100) * 100) / 100;
 }
 
-export function getBundleValueRsd(slugs: string[], fallbackRsd: number): number {
+export function getBundleValueRsd(bundleId: string, fallbackRsd: number): number {
   const p = getCachedPricing();
   if (!p?.loaded) return fallbackRsd;
-  const bases = slugs.map((s) => p.priceMap.get(s));
+  const meta = getBundleComponentSlugs(bundleId);
+  if (meta.length === 0) return fallbackRsd;
+  const bases = meta.map((s) => p.priceMap.get(s));
   if (bases.some((b) => b === undefined)) return fallbackRsd;
   const result = computePricing({
-    lines: slugs.map((slug, i) => ({
+    lines: meta.map((slug, i) => ({
       slug,
       quantity: 1,
       basePriceRsd: bases[i] as number,

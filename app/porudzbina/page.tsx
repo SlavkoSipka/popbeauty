@@ -6,7 +6,13 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useScrollReveal } from '@/lib/animations';
 import { useCart } from '@/lib/cart-context';
-import { displayUnitPriceForLine, formatRsd, lineSubtotalRsd } from '@/lib/price';
+import {
+  expandCartToPricingLines,
+  getBundleFallbackPriceRsd,
+  getBundleLinePrice,
+  isBundleSlug,
+} from '@/lib/bundles';
+import { displayUnitPriceForLine, formatRsd, lineSubtotalRsd, parsePriceStringToRsd } from '@/lib/price';
 import { SHIPPING_CARRIER, SHIPPING_RSD } from '@/lib/shipping';
 import { computePricing, type PricingResult } from '@/lib/pricing-engine';
 import { usePricingData } from '@/lib/use-pricing-data';
@@ -47,28 +53,70 @@ export default function PorudzbinaPage() {
 
   const empty = items.length === 0;
 
+  const pricingOpts = useMemo(
+    () => ({
+      getBasePrice: (slug: string) => priceMap.get(slug) ?? 0,
+      getDiscountPercent: (slug: string) => productDiscountMap.get(slug) ?? null,
+    }),
+    [priceMap, productDiscountMap],
+  );
+
   const pricing: PricingResult | null = useMemo(() => {
     if (!loaded || items.length === 0) return null;
     return computePricing({
-      lines: items.map((l) => ({
-        slug: l.slug,
-        quantity: l.quantity,
-        basePriceRsd: priceMap.get(l.slug) ?? 0,
-        discountPercent: productDiscountMap.get(l.slug) ?? null,
-      })),
+      lines: expandCartToPricingLines(items, pricingOpts),
       siteDiscountPercent,
       bundleDiscountPercent,
       referralDiscountPercent: referralDiscountPercent ?? 0,
+      autoDetectBundles: false,
     });
   }, [
     items,
-    priceMap,
-    productDiscountMap,
+    pricingOpts,
     siteDiscountPercent,
     bundleDiscountPercent,
     loaded,
     referralDiscountPercent,
   ]);
+
+  function checkoutLineUnitLabel(line: (typeof items)[number]): string {
+    if (isBundleSlug(line.slug)) {
+      if (loaded) {
+        const bundlePrice = getBundleLinePrice(line.slug, 1, {
+          ...pricingOpts,
+          siteDiscountPercent,
+          bundleDiscountPercent,
+        });
+        if (bundlePrice) return formatRsd(bundlePrice.unitPriceRsd);
+      }
+      const fallback =
+        parsePriceStringToRsd(line.price) ?? getBundleFallbackPriceRsd(line.slug);
+      return formatRsd(fallback);
+    }
+    return loaded
+      ? displayUnitPriceForLine(line, priceMap)
+      : displayUnitPriceForLine(line);
+  }
+
+  function checkoutLineSubtotal(line: (typeof items)[number]): string {
+    if (isBundleSlug(line.slug)) {
+      if (loaded) {
+        const bundlePrice = getBundleLinePrice(line.slug, line.quantity, {
+          ...pricingOpts,
+          siteDiscountPercent,
+          bundleDiscountPercent,
+        });
+        if (bundlePrice) return formatRsd(bundlePrice.afterDiscountRsd);
+      }
+      const fallback =
+        (parsePriceStringToRsd(line.price) ?? getBundleFallbackPriceRsd(line.slug)) *
+        line.quantity;
+      return formatRsd(fallback);
+    }
+    return loaded
+      ? formatRsd(lineSubtotalRsd(line, priceMap))
+      : formatRsd(lineSubtotalRsd(line));
+  }
 
   const totalForApi = (pricing?.totalRsd ?? 0) + SHIPPING_RSD;
   const productsTotal = pricing?.totalRsd ?? 0;
@@ -467,16 +515,11 @@ export default function PorudzbinaPage() {
                           {line.name}
                         </p>
                         <p className="font-body font-[400] text-[12px] text-ink-soft mt-0.5 md:text-[13px]">
-                          {loaded
-                            ? displayUnitPriceForLine(line, priceMap)
-                            : displayUnitPriceForLine(line)}{' '}
-                          × {line.quantity}
+                          {checkoutLineUnitLabel(line)} × {line.quantity}
                         </p>
                       </div>
                       <p className="font-body font-[500] text-[13px] text-ink tabular-nums shrink-0 md:text-[14px]">
-                        {loaded
-                          ? formatRsd(lineSubtotalRsd(line, priceMap))
-                          : formatRsd(lineSubtotalRsd(line))}
+                        {checkoutLineSubtotal(line)}
                       </p>
                     </li>
                   ))}

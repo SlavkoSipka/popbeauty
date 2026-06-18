@@ -27,10 +27,10 @@ type Tab = 'opis' | 'sastojci' | 'upotreba';
 
 export default function PopBeautyPaketPage() {
   useScrollReveal();
-  const { addBundleItems } = useCart();
+  const { addBundle } = useCart();
   const [activeTab, setActiveTab] = useState<Tab>('opis');
 
-  useBundleViewContentPixel(popBeautyPaket.slugs, popBeautyPaket.name, fallbackRsd);
+  useBundleViewContentPixel(popBeautyPaket.slug, popBeautyPaket.name, fallbackRsd);
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'opis', label: 'Opis proizvoda' },
@@ -38,10 +38,7 @@ export default function PopBeautyPaketPage() {
     { key: 'upotreba', label: 'Način upotrebe' },
   ];
 
-  const addSet = () =>
-    addBundleItems(
-      setProducts.map((p) => ({ slug: p.slug, name: p.name, price: p.price, image: p.image })),
-    );
+  const addSet = () => addBundle(popBeautyPaket.slug);
 
   return (
     <main className="pb-[min(200px,32vh)] md:pb-0">

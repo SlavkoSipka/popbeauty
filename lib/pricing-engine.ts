@@ -52,6 +52,11 @@ export type PricingLine = {
   basePriceRsd: number;
   /** Override popusta za ovaj proizvod (u %). NULL/undefined = koristi siteDiscountPercent. */
   discountPercent?: number | null;
+  /**
+   * Eksplicitni paket kom linija pripada (npr. 'serum-set').
+   * Koristi se kada je autoDetectBundles=false: samo tagovane linije dobijaju paketni popust.
+   */
+  bundleId?: string;
 };
 
 export type PricingInput = {
@@ -62,6 +67,12 @@ export type PricingInput = {
   referralDiscountPercent: number;
   /** Promo kod iz discount_codes (0 = nema). Primenjuje se na iznos posle referral popusta. */
   promoDiscountPercent?: number;
+  /**
+   * Automatska detekcija paketa iz pojedinačnih linija (default true).
+   * Kada je false, paketni popust se primenjuje SAMO na linije sa eksplicitnim `bundleId`,
+   * a pojedinačno dodati proizvodi nikad ne dobijaju paketni popust.
+   */
+  autoDetectBundles?: boolean;
 };
 
 export type LineDiscount = {
@@ -137,16 +148,11 @@ export function computePricing(input: PricingInput): PricingResult {
 
   const lineDiscounts: LineDiscount[] = [];
   const bundleBreakdown: BundleBreakdown[] = [];
-  const bundledSlugs = new Set<string>();
+  const autoDetect = input.autoDetectBundles !== false;
+  /** Linije koje je zauzeo neki paket — izuzete su iz per-line site popusta. */
+  const excludedFromSite = new Set<PricingLine>();
 
-  // ── 1) Paketni popusti (svaki kompletan paket, skopiran na svoje linije) ──
-  for (const def of BUNDLE_DEFINITIONS) {
-    const complete = def.slugs.every((s) => qtyOf(s) > 0);
-    if (!complete) continue;
-    // Preklapanje: ako je neki slug ovog paketa već zauzet drugim (ranijim) paketom, preskoči.
-    if (def.slugs.some((s) => bundledSlugs.has(s))) continue;
-
-    const defLines = def.slugs.map((s) => lineBySlug.get(s)!);
+  const applyBundle = (def: BundleDefinition, defLines: PricingLine[]) => {
     const scopedSubtotal = round2(defLines.reduce((sum, l) => sum + l.basePriceRsd * l.quantity, 0));
 
     let bundleAmount = 0;
@@ -154,7 +160,7 @@ export function computePricing(input: PricingInput): PricingResult {
 
     if (def.kind === 'fixed' && def.fixedTotalRsd != null) {
       // n kompletnih kompleta; višak komada ostaje na punoj ceni.
-      const n = Math.min(...def.slugs.map((s) => qtyOf(s)));
+      const n = Math.min(...defLines.map((l) => (l.quantity > 0 ? l.quantity : 0)));
       const setBase = round2(defLines.reduce((sum, l) => sum + l.basePriceRsd, 0));
       const totalSetDiscount = round2(Math.max(0, n * (setBase - def.fixedTotalRsd)));
       bundleAmount = totalSetDiscount;
@@ -196,15 +202,49 @@ export function computePricing(input: PricingInput): PricingResult {
         percent: scopedSubtotal > 0 ? round2((bundleAmount / scopedSubtotal) * 100) : 0,
       });
     }
-    // Linije ovog paketa su obrađene (čak i ako je popust 0 — paket je kompletan).
-    def.slugs.forEach((s) => bundledSlugs.add(s));
+  };
+
+  // ── 1) Paketni popusti ──
+  if (autoDetect) {
+    // Auto-detekcija: svaki kompletan paket pronađen u korpi (legacy / admin).
+    const bundledSlugs = new Set<string>();
+    for (const def of BUNDLE_DEFINITIONS) {
+      const complete = def.slugs.every((s) => qtyOf(s) > 0);
+      if (!complete) continue;
+      if (def.slugs.some((s) => bundledSlugs.has(s))) continue;
+      const defLines = def.slugs.map((s) => lineBySlug.get(s)!);
+      applyBundle(def, defLines);
+      def.slugs.forEach((s) => bundledSlugs.add(s));
+    }
+    for (const l of lines) {
+      if (bundledSlugs.has(l.slug)) excludedFromSite.add(l);
+    }
+  } else {
+    // Eksplicitni paketi: samo linije sa `bundleId` ulaze u paketni popust.
+    const groups = new Map<string, PricingLine[]>();
+    for (const l of lines) {
+      if (l.quantity <= 0 || !l.bundleId) continue;
+      const g = groups.get(l.bundleId) ?? [];
+      g.push(l);
+      groups.set(l.bundleId, g);
+      excludedFromSite.add(l);
+    }
+    for (const [bundleId, groupLines] of groups) {
+      const def = BUNDLE_DEFINITIONS.find((d) => d.id === bundleId);
+      if (!def) continue;
+      const defLines = def.slugs
+        .map((s) => groupLines.find((l) => l.slug === s))
+        .filter((l): l is PricingLine => Boolean(l));
+      if (defLines.length !== def.slugs.length) continue;
+      applyBundle(def, defLines);
+    }
   }
 
   // ── 2) Per-line site/override popust za linije van paketa ──
   let siteMaxPct = 0;
   for (const l of lines) {
     if (l.quantity <= 0) continue;
-    if (bundledSlugs.has(l.slug)) continue;
+    if (excludedFromSite.has(l)) continue;
     const override = l.discountPercent;
     const pct = clampPct(override != null ? Number(override) : sitePct);
     if (pct <= 0) continue;

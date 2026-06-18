@@ -25,20 +25,18 @@ export function useProductViewContentPixel(
 }
 
 export function useBundleViewContentPixel(
-  slugs: string[],
+  bundleId: string,
   name: string,
   fallbackRsd: number,
 ) {
   const { loaded } = usePricingData();
-  const slugsKey = slugs.join(',');
 
   useEffect(() => {
     trackViewContent({
-      contentIds: slugs,
+      contentIds: [bundleId],
       contentName: name,
-      value: getBundleValueRsd(slugs, fallbackRsd),
-      contents: slugs.map((id) => ({ id, quantity: 1 })),
+      value: getBundleValueRsd(bundleId, fallbackRsd),
+      contents: [{ id: bundleId, quantity: 1 }],
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slugsKey, name, fallbackRsd, loaded]);
+  }, [bundleId, name, fallbackRsd, loaded]);
 }

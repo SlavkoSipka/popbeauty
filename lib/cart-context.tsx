@@ -10,6 +10,11 @@ import {
   type ReactNode,
 } from 'react';
 import {
+  getBundleFallbackPriceRsd,
+  getBundleMeta,
+  getBundleComponentSlugs,
+} from '@/lib/bundles';
+import {
   getBundleValueRsd,
   getLineValueRsd,
   trackAddToCart,
@@ -47,10 +52,8 @@ type CartContextValue = {
   closeCart: () => void;
   toggleCart: () => void;
   addItem: (p: CartLineInput) => void;
-  /** Tačno po 1 kom oba proizvoda — ostale stavke u korpi ostaju; ova dva slug-a se zamene. */
-  addBundlePair: (a: CartLineInput, b: CartLineInput) => void;
-  /** Po 1 kom svaki prosleđeni proizvod — ti slug-ovi se zamene, ostale stavke ostaju. */
-  addBundleItems: (items: CartLineInput[]) => void;
+  /** Dodaje paket kao jednu stavku u korpi. */
+  addBundle: (bundleId: string) => void;
   removeLine: (slug: string) => void;
   setQuantity: (slug: string, quantity: number) => void;
   clearCart: () => void;
@@ -141,24 +144,38 @@ export function CartProvider({ children }: { children: ReactNode }) {
     trackAddToCart([{ slug: p.slug, name: p.name }], getLineValueRsd(p.slug, fallback));
   }, []);
 
-  const addBundleItems = useCallback((bundleItems: CartLineInput[]) => {
-    const slugs = new Set(bundleItems.map((x) => x.slug));
+  const addBundle = useCallback((bundleId: string) => {
+    const meta = getBundleMeta(bundleId);
+    if (!meta) return;
+
+    const componentSlugs = new Set(getBundleComponentSlugs(bundleId));
+    const fallbackRsd = getBundleFallbackPriceRsd(bundleId);
+
     setItems((prev) => {
-      const rest = prev.filter((x) => !slugs.has(x.slug));
-      return [...rest, ...bundleItems.map((x) => ({ ...x, quantity: 1 }))];
+      const rest = prev.filter((x) => !componentSlugs.has(x.slug));
+      const i = rest.findIndex((x) => x.slug === bundleId);
+      if (i >= 0) {
+        const next = [...rest];
+        next[i] = { ...next[i], quantity: next[i].quantity + 1 };
+        return next;
+      }
+      return [
+        ...rest,
+        {
+          slug: bundleId,
+          name: meta.name,
+          price: `${fallbackRsd}`,
+          image: meta.image,
+          quantity: 1,
+        },
+      ];
     });
     setIsOpen(true);
-    const fallback = bundleItems.reduce((s, x) => s + parsePriceToRsd(x.price), 0);
     trackAddToCart(
-      bundleItems.map((x) => ({ slug: x.slug, name: x.name })),
-      getBundleValueRsd(bundleItems.map((x) => x.slug), fallback),
+      [{ slug: bundleId, name: meta.name }],
+      getBundleValueRsd(bundleId, fallbackRsd),
     );
   }, []);
-
-  const addBundlePair = useCallback(
-    (a: CartLineInput, b: CartLineInput) => addBundleItems([a, b]),
-    [addBundleItems],
-  );
 
   const removeLine = useCallback((slug: string) => {
     setItems((prev) => prev.filter((x) => x.slug !== slug));
@@ -193,12 +210,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       items, itemCount, isOpen, openCart, closeCart, toggleCart,
-      addItem, addBundlePair, addBundleItems, removeLine, setQuantity, clearCart,
+      addItem, addBundle, removeLine, setQuantity, clearCart,
       setReferral, clearReferral, referralCode, referralDiscountPercent,
     }),
     [
       items, itemCount, isOpen, openCart, closeCart, toggleCart,
-      addItem, addBundlePair, addBundleItems, removeLine, setQuantity, clearCart,
+      addItem, addBundle, removeLine, setQuantity, clearCart,
       setReferral, clearReferral, referralCode, referralDiscountPercent,
     ],
   );

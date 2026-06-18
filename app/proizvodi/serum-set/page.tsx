@@ -22,10 +22,10 @@ type Tab = 'opis' | 'sastojci' | 'upotreba';
 
 export default function SerumSetPage() {
   useScrollReveal();
-  const { addBundlePair } = useCart();
+  const { addBundle } = useCart();
   const [activeTab, setActiveTab] = useState<Tab>('opis');
 
-  useBundleViewContentPixel([serumSet.uljaniSlug, serumSet.vodeniSlug], serumSet.name, fallbackRsd);
+  useBundleViewContentPixel(serumSet.slug, serumSet.name, fallbackRsd);
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'opis', label: 'Opis proizvoda' },
@@ -33,11 +33,7 @@ export default function SerumSetPage() {
     { key: 'upotreba', label: 'Način upotrebe' },
   ];
 
-  const addSet = () =>
-    addBundlePair(
-      { slug: uljani.slug, name: uljani.name, price: uljani.price, image: uljani.image },
-      { slug: vodeni.slug, name: vodeni.name, price: vodeni.price, image: vodeni.image },
-    );
+  const addSet = () => addBundle(serumSet.slug);
 
   return (
     <main className="pb-[min(200px,32vh)] md:pb-0">

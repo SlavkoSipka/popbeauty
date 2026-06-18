@@ -3,14 +3,6 @@ import ProductCard from '@/components/ui/ProductCard';
 import BundleCard from '@/components/ui/BundleCard';
 import { products, serumSet, dzemMistSet, popBeautyPaket } from '@/lib/data/products';
 
-function toLines(slugs: string[]) {
-  const lines = slugs
-    .map((slug) => products.find((x) => x.slug === slug))
-    .filter((p): p is NonNullable<typeof p> => Boolean(p))
-    .map((p) => ({ slug: p.slug, name: p.name, price: p.price, image: p.image }));
-  return lines.length === slugs.length ? lines : null;
-}
-
 function productCard(slug: string, badge?: string): ReactNode {
   const p = products.find((x) => x.slug === slug);
   if (!p) return null;
@@ -26,10 +18,6 @@ function productCard(slug: string, badge?: string): ReactNode {
 }
 
 export default function ProductsGrid() {
-  const serumLines = toLines([serumSet.uljaniSlug, serumSet.vodeniSlug]);
-  const dzemMistLines = toLines([dzemMistSet.slugA, dzemMistSet.slugB]);
-  const paketLines = toLines(popBeautyPaket.slugs);
-
   const items: { key: string; node: ReactNode }[] = [];
 
   const dzem = productCard('dzem', 'NOVO');
@@ -38,22 +26,20 @@ export default function ProductsGrid() {
   const mist = productCard('mist', 'NOVO');
   if (mist) items.push({ key: 'mist', node: mist });
 
-  if (dzemMistLines) {
-    items.push({
-      key: 'dzem-mist',
-      node: (
-        <BundleCard
-          image={dzemMistSet.image}
-          href={`/proizvodi/${dzemMistSet.slug}`}
-          titleTop="Glow Marmelada"
-          titleBottom="+ Glow Mist"
-          alt="Glow Marmelada + Glow Mist set"
-          bundleProducts={dzemMistLines}
-          badge="NOVO"
-        />
-      ),
-    });
-  }
+  items.push({
+    key: 'dzem-mist',
+    node: (
+      <BundleCard
+        bundleId={dzemMistSet.slug}
+        image={dzemMistSet.image}
+        href={`/proizvodi/${dzemMistSet.slug}`}
+        titleTop="Glow Marmelada"
+        titleBottom="+ Glow Mist"
+        alt="Glow Marmelada + Glow Mist set"
+        badge="NOVO"
+      />
+    ),
+  });
 
   const uljani = productCard('uljani-serum');
   if (uljani) items.push({ key: 'uljani-serum', node: uljani });
@@ -61,37 +47,33 @@ export default function ProductsGrid() {
   const vodeni = productCard('vodeni-serum');
   if (vodeni) items.push({ key: 'vodeni-serum', node: vodeni });
 
-  if (serumLines) {
-    items.push({
-      key: 'serum-set',
-      node: (
-        <BundleCard
-          image={serumSet.image}
-          href={`/proizvodi/${serumSet.slug}`}
-          titleTop="Serum set"
-          titleBottom="Vodeni + Uljani"
-          alt="Serum set — Uljani i Vodeni serum"
-          bundleProducts={serumLines}
-        />
-      ),
-    });
-  }
+  items.push({
+    key: 'serum-set',
+    node: (
+      <BundleCard
+        bundleId={serumSet.slug}
+        image={serumSet.image}
+        href={`/proizvodi/${serumSet.slug}`}
+        titleTop="Serum set"
+        titleBottom="Vodeni + Uljani"
+        alt="Serum set — Uljani i Vodeni serum"
+      />
+    ),
+  });
 
-  if (paketLines) {
-    items.push({
-      key: 'pop-beauty-paket',
-      node: (
-        <BundleCard
-          image={popBeautyPaket.image}
-          href={`/proizvodi/${popBeautyPaket.slug}`}
-          titleTop="Pop Beauty"
-          titleBottom="paket"
-          alt="Pop Beauty paket — sva 4 proizvoda"
-          bundleProducts={paketLines}
-        />
-      ),
-    });
-  }
+  items.push({
+    key: 'pop-beauty-paket',
+    node: (
+      <BundleCard
+        bundleId={popBeautyPaket.slug}
+        image={popBeautyPaket.image}
+        href={`/proizvodi/${popBeautyPaket.slug}`}
+        titleTop="Pop Beauty"
+        titleBottom="paket"
+        alt="Pop Beauty paket — sva 4 proizvoda"
+      />
+    ),
+  });
 
   return (
     <section id="proizvodi" className="scroll-mt-20 py-[120px] section-padding">

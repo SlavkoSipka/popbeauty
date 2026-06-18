@@ -1,4 +1,10 @@
 import type { CartLine } from '@/lib/cart-context';
+import {
+  expandOrderLinesForPricing,
+  getBundleMeta,
+  mergeOrderLinesForPacking,
+  type ExpandableOrderLine,
+} from '@/lib/bundles';
 import { products } from '@/lib/data/products';
 import type { DbProduct } from '@/lib/price';
 
@@ -12,11 +18,14 @@ export type ParsedOrderLine = {
   image: string;
   /** Per-proizvod override popusta u %. NULL = koristi se site popust. */
   discountPercent: number | null;
+  isBundle?: boolean;
+  bundleId?: string;
 };
 
 /**
  * Parse + validate cart lines from the request body.
  * Uses DB products as source of truth; falls back to static catalog.
+ * Bundle slug-ovi su validni (nisu u DB products).
  */
 export function parseCartLinesFromBody(
   raw: unknown,
@@ -36,12 +45,26 @@ export function parseCartLinesFromBody(
     const quantity = (row as { quantity?: unknown }).quantity;
     if (typeof slug !== 'string') return null;
 
+    const q = typeof quantity === 'number' ? quantity : Number(quantity);
+    if (!Number.isInteger(q) || q < 1 || q > 99) return null;
+
+    const bundleMeta = getBundleMeta(slug);
+    if (bundleMeta) {
+      out.push({
+        slug,
+        name: bundleMeta.name,
+        quantity: q,
+        basePriceRsd: 0,
+        image: bundleMeta.image,
+        discountPercent: null,
+        isBundle: true,
+      });
+      continue;
+    }
+
     const dbP = dbBySlug?.get(slug);
     const staticP = fallbackBySlug.get(slug);
     if (!dbP && !staticP) return null;
-
-    const q = typeof quantity === 'number' ? quantity : Number(quantity);
-    if (!Number.isInteger(q) || q < 1 || q > 99) return null;
 
     const rawDisc = dbP?.discount_percent;
     out.push({
@@ -55,6 +78,42 @@ export function parseCartLinesFromBody(
   }
 
   return out;
+}
+
+function buildProductLookup(dbProducts?: DbProduct[]) {
+  const dbBySlug = dbProducts
+    ? new Map(dbProducts.map((p) => [p.slug, p]))
+    : null;
+  return (slug: string) => {
+    const dbP = dbBySlug?.get(slug);
+    const staticP = fallbackBySlug.get(slug);
+    if (!dbP && !staticP) return null;
+    const rawDisc = dbP?.discount_percent;
+    return {
+      name: dbP?.name ?? staticP!.name,
+      basePriceRsd: dbP?.base_price_rsd ?? 0,
+      image: dbP?.image_path ?? staticP!.image,
+      discountPercent: rawDisc == null ? null : Number(rawDisc),
+    };
+  };
+}
+
+/**
+ * Bundle stavke → zasebne tagovane komponente za server pricing
+ * (uz `computePricing({ autoDetectBundles: false })`).
+ */
+export function expandParsedOrderLines(
+  lines: ParsedOrderLine[],
+  dbProducts?: DbProduct[],
+): ExpandableOrderLine[] {
+  return expandOrderLinesForPricing(lines, buildProductLookup(dbProducts));
+}
+
+/** Expandovane linije spojene po slug-u za `line_items` (pakovanje). */
+export function packingLinesFromExpanded(
+  expanded: ExpandableOrderLine[],
+): ExpandableOrderLine[] {
+  return mergeOrderLinesForPacking(expanded);
 }
 
 /** For backward compat — builds CartLine[] from parsed lines. */

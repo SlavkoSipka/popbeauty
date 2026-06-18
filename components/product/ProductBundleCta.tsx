@@ -20,7 +20,7 @@ type Props = {
  * nikad ne bi registrovao i ostao bi na opacity 0.
  */
 export default function ProductBundleCta({ lineUljani, lineVodeni, className }: Props) {
-  const { addBundlePair } = useCart();
+  const { addBundle } = useCart();
   const {
     priceMap,
     productDiscountMap,
@@ -75,7 +75,7 @@ export default function ProductBundleCta({ lineUljani, lineVodeni, className }: 
     <div className={`opacity-100 ${className ?? 'mb-6'}`}>
       <button
         type="button"
-        onClick={() => addBundlePair(lineUljani, lineVodeni)}
+        onClick={() => addBundle('serum-set')}
         className="group flex w-full min-h-[52px] flex-col items-center justify-center gap-1.5 border-2 border-[#1C1C1A] bg-[#E8EDE5] px-4 py-3.5 text-center text-[#1C1C1A] transition-colors duration-200 hover:bg-[#1C1C1A] hover:text-white"
       >
         <span className="font-body font-[400] text-[11px] uppercase tracking-[0.14em] group-hover:text-white">

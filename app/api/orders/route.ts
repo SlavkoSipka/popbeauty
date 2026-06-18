@@ -2,7 +2,12 @@ import { after } from 'next/server';
 import { NextResponse } from 'next/server';
 import { sendOrderNotificationEmail } from '@/lib/emailjs-order';
 import { createAdminClient, isSupabaseAdminConfigured } from '@/lib/supabase/admin';
-import { normalizeReferralCode, parseCartLinesFromBody } from '@/lib/order-validation';
+import {
+  normalizeReferralCode,
+  parseCartLinesFromBody,
+  expandParsedOrderLines,
+  packingLinesFromExpanded,
+} from '@/lib/order-validation';
 import { computePricing } from '@/lib/pricing-engine';
 import { SHIPPING_RSD } from '@/lib/shipping';
 import type { DbProduct } from '@/lib/price';
@@ -78,8 +83,13 @@ export async function POST(request: Request) {
   const bundleDiscountPercent = Number(settings?.bundle_discount_percent ?? 10);
 
   // ── Parse + validate cart lines against DB products ──
-  const lines = parseCartLinesFromBody(body.lineItems, dbProducts as DbProduct[]);
-  if (!lines) {
+  const cartLines = parseCartLinesFromBody(body.lineItems, dbProducts as DbProduct[]);
+  if (!cartLines) {
+    return NextResponse.json({ error: 'Korpa je prazna ili neispravna.' }, { status: 400 });
+  }
+
+  const lines = expandParsedOrderLines(cartLines, dbProducts as DbProduct[]);
+  if (lines.length === 0) {
     return NextResponse.json({ error: 'Korpa je prazna ili neispravna.' }, { status: 400 });
   }
 
@@ -121,17 +131,19 @@ export async function POST(request: Request) {
       row.customer_discount_percent != null ? Number(row.customer_discount_percent) : 15;
   }
 
-  // ── Run pricing engine ──
+  // ── Run pricing engine (paketni popust samo za eksplicitne pakete) ──
   const pricing = computePricing({
     lines: lines.map((l) => ({
       slug: l.slug,
       quantity: l.quantity,
       basePriceRsd: l.basePriceRsd,
       discountPercent: l.discountPercent,
+      bundleId: l.bundleId,
     })),
     siteDiscountPercent,
     bundleDiscountPercent: Number.isFinite(bundleDiscountPercent) ? bundleDiscountPercent : 10,
     referralDiscountPercent: customerDiscountPercent,
+    autoDetectBundles: false,
   });
 
   const orderTotalRsd = pricing.totalRsd + SHIPPING_RSD;
@@ -145,8 +157,8 @@ export async function POST(request: Request) {
     );
   }
 
-  // ── Build line_items JSON ──
-  const lineItemsJson = lines.map((line) => ({
+  // ── Build line_items JSON (spojeno po slug-u za pakovanje) ──
+  const lineItemsJson = packingLinesFromExpanded(lines).map((line) => ({
     slug: line.slug,
     name: line.name,
     quantity: line.quantity,

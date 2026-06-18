@@ -24,10 +24,10 @@ type Tab = 'opis' | 'sastojci' | 'upotreba';
 
 export default function DzemMistPage() {
   useScrollReveal();
-  const { addBundlePair } = useCart();
+  const { addBundle } = useCart();
   const [activeTab, setActiveTab] = useState<Tab>('opis');
 
-  useBundleViewContentPixel([dzemMistSet.slugA, dzemMistSet.slugB], dzemMistSet.name, fallbackRsd);
+  useBundleViewContentPixel(dzemMistSet.slug, dzemMistSet.name, fallbackRsd);
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'opis', label: 'Opis proizvoda' },
@@ -35,11 +35,7 @@ export default function DzemMistPage() {
     { key: 'upotreba', label: 'Način upotrebe' },
   ];
 
-  const addSet = () =>
-    addBundlePair(
-      { slug: dzem.slug, name: dzem.name, price: dzem.price, image: dzem.image },
-      { slug: mist.slug, name: mist.name, price: mist.price, image: mist.image },
-    );
+  const addSet = () => addBundle(dzemMistSet.slug);
 
   return (
     <main className="pb-[min(200px,32vh)] md:pb-0">

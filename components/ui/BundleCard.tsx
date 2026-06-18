@@ -3,13 +3,14 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo } from 'react';
-import { type CartLineInput, useCart } from '@/lib/cart-context';
+import { useCart } from '@/lib/cart-context';
 import { formatRsd } from '@/lib/price';
 import { computePricing } from '@/lib/pricing-engine';
+import { getBundleComponentSlugs } from '@/lib/bundles';
 import { usePricingData } from '@/lib/use-pricing-data';
 
 type Props = {
-  bundleProducts: CartLineInput[];
+  bundleId: string;
   image: string;
   href: string;
   titleTop: string;
@@ -18,29 +19,28 @@ type Props = {
   badge?: string;
 };
 
-export default function BundleCard({ bundleProducts, image, href, titleTop, titleBottom, alt, badge }: Props) {
-  const { addBundleItems } = useCart();
+export default function BundleCard({ bundleId, image, href, titleTop, titleBottom, alt, badge }: Props) {
+  const { addBundle } = useCart();
   const { priceMap, productDiscountMap, siteDiscountPercent, bundleDiscountPercent, loaded } =
     usePricingData();
-  const slugsKey = bundleProducts.map((p) => p.slug).join(',');
+  const componentSlugs = getBundleComponentSlugs(bundleId);
 
   const pricing = useMemo(() => {
-    if (!loaded) return null;
-    const bases = bundleProducts.map((p) => priceMap.get(p.slug));
+    if (!loaded || componentSlugs.length === 0) return null;
+    const bases = componentSlugs.map((s) => priceMap.get(s));
     if (bases.some((b) => b === undefined)) return null;
     return computePricing({
-      lines: bundleProducts.map((p, i) => ({
-        slug: p.slug,
+      lines: componentSlugs.map((slug, i) => ({
+        slug,
         quantity: 1,
         basePriceRsd: bases[i] as number,
-        discountPercent: productDiscountMap.get(p.slug) ?? null,
+        discountPercent: productDiscountMap.get(slug) ?? null,
       })),
       siteDiscountPercent,
       bundleDiscountPercent,
       referralDiscountPercent: 0,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loaded, priceMap, productDiscountMap, siteDiscountPercent, bundleDiscountPercent, slugsKey]);
+  }, [loaded, priceMap, productDiscountMap, siteDiscountPercent, bundleDiscountPercent, bundleId, componentSlugs]);
 
   const bundlePct = pricing ? Math.round(pricing.discountPercent) : 0;
   const total = pricing ? pricing.afterProductDiscountRsd : 0;
@@ -95,7 +95,7 @@ export default function BundleCard({ bundleProducts, image, href, titleTop, titl
 
       <button
         type="button"
-        onClick={() => addBundleItems(bundleProducts)}
+        onClick={() => addBundle(bundleId)}
         className="mt-4 inline-flex w-full items-center justify-center border border-[#A1A797] bg-[#A1A797] px-4 py-3.5 font-body font-[400] text-[12px] uppercase tracking-[0.14em] text-[#FBFAED] transition-colors duration-200 ease-in-out hover:bg-transparent hover:text-[#A1A797] md:text-[13px]"
       >
         Dodaj u korpu

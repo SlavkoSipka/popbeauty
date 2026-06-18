@@ -4,7 +4,13 @@ import { useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart, type CartLine } from '@/lib/cart-context';
-import { formatRsd, unitPriceRsdForLine } from '@/lib/price';
+import {
+  expandCartToPricingLines,
+  getBundleFallbackPriceRsd,
+  getBundleLinePrice,
+  isBundleSlug,
+} from '@/lib/bundles';
+import { formatRsd, parsePriceStringToRsd, unitPriceRsdForLine } from '@/lib/price';
 import { computePricing, type LineDiscount } from '@/lib/pricing-engine';
 import { usePricingData } from '@/lib/use-pricing-data';
 
@@ -15,14 +21,71 @@ function discountedUnitPrice(base: number, pct: number): number {
 function CartLinePrice({
   line,
   priceMap,
+  productDiscountMap,
+  siteDiscountPercent,
+  bundleDiscountPercent,
   lineDiscount,
   loaded,
 }: {
   line: CartLine;
   priceMap: Map<string, number>;
+  productDiscountMap: Map<string, number | null>;
+  siteDiscountPercent: number;
+  bundleDiscountPercent: number;
   lineDiscount: LineDiscount | undefined;
   loaded: boolean;
 }) {
+  if (isBundleSlug(line.slug)) {
+    const fallbackUnit =
+      parsePriceStringToRsd(line.price) ?? getBundleFallbackPriceRsd(line.slug);
+    const bundlePrice =
+      loaded
+        ? getBundleLinePrice(line.slug, 1, {
+            getBasePrice: (slug) => priceMap.get(slug) ?? 0,
+            getDiscountPercent: (slug) => productDiscountMap.get(slug) ?? null,
+            siteDiscountPercent,
+            bundleDiscountPercent,
+          })
+        : null;
+    const unit = bundlePrice?.unitPriceRsd ?? fallbackUnit;
+    const showDiscount =
+      bundlePrice != null && bundlePrice.discountPercent > 0.5 && bundlePrice.subtotalRsd > unit;
+
+    if (!showDiscount) {
+      return (
+        <div className="mt-1.5 flex flex-col gap-0.5">
+          <p className="font-body font-[400] text-[15px] text-ink tabular-nums md:text-[16px]">
+            {formatRsd(unit)}
+          </p>
+          {line.quantity > 1 ? (
+            <p className="font-body font-[500] text-[13px] text-ink-soft tabular-nums md:text-[14px]">
+              × {line.quantity} = {formatRsd(unit * line.quantity)}
+            </p>
+          ) : null}
+        </div>
+      );
+    }
+
+    const displayPct = Math.round(bundlePrice.discountPercent);
+    return (
+      <div className="mt-1.5 flex flex-col gap-1">
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <p className="font-body font-[400] text-[15px] text-ink tabular-nums md:text-[16px]">
+            {formatRsd(unit)}
+          </p>
+          <span className="inline-flex items-center border border-sage-dark bg-sage-pale px-1.5 py-0.5 font-body font-[500] text-[10px] text-sage-dark tabular-nums md:text-[11px]">
+            −{displayPct}%
+          </span>
+        </div>
+        {line.quantity > 1 ? (
+          <p className="font-body font-[500] text-[13px] text-ink-soft tabular-nums md:text-[14px]">
+            × {line.quantity} = {formatRsd(unit * line.quantity)}
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+
   const base = unitPriceRsdForLine(line, loaded ? priceMap : undefined);
   const effectivePct = lineDiscount?.percent ?? 0;
 
@@ -83,23 +146,26 @@ export default function CartDrawer() {
     return () => window.removeEventListener('keydown', onKey);
   }, [isOpen, closeCart]);
 
+  const pricingOpts = useMemo(
+    () => ({
+      getBasePrice: (slug: string) => priceMap.get(slug) ?? 0,
+      getDiscountPercent: (slug: string) => productDiscountMap.get(slug) ?? null,
+    }),
+    [priceMap, productDiscountMap],
+  );
+
   const pricing = useMemo(() => {
     if (!loaded || items.length === 0) return null;
     return computePricing({
-      lines: items.map((l) => ({
-        slug: l.slug,
-        quantity: l.quantity,
-        basePriceRsd: priceMap.get(l.slug) ?? 0,
-        discountPercent: productDiscountMap.get(l.slug) ?? null,
-      })),
+      lines: expandCartToPricingLines(items, pricingOpts),
       siteDiscountPercent,
       bundleDiscountPercent,
       referralDiscountPercent: referralDiscountPercent ?? 0,
+      autoDetectBundles: false,
     });
   }, [
     items,
-    priceMap,
-    productDiscountMap,
+    pricingOpts,
     siteDiscountPercent,
     bundleDiscountPercent,
     loaded,
@@ -108,7 +174,12 @@ export default function CartDrawer() {
 
   const discountBySlug = useMemo(() => {
     const m = new Map<string, LineDiscount>();
-    pricing?.lineDiscounts.forEach((d) => m.set(d.slug, d));
+    // Samo site/per-line popusti — paketni popusti pripadaju bundle stavkama
+    // (one se prikazuju preko getBundleLinePrice), pa ne smeju "procuriti"
+    // na pojedinačno dodat isti proizvod.
+    pricing?.lineDiscounts
+      .filter((d) => d.source === 'site')
+      .forEach((d) => m.set(d.slug, d));
     return m;
   }, [pricing]);
 
@@ -195,6 +266,9 @@ export default function CartDrawer() {
                         <CartLinePrice
                           line={line}
                           priceMap={priceMap}
+                          productDiscountMap={productDiscountMap}
+                          siteDiscountPercent={siteDiscountPercent}
+                          bundleDiscountPercent={bundleDiscountPercent}
                           lineDiscount={discountBySlug.get(line.slug)}
                           loaded={loaded}
                         />
