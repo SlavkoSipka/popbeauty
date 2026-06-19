@@ -46,11 +46,11 @@ export default function BundleCard({ bundleId, image, href, titleTop, titleBotto
   const total = pricing ? pricing.afterProductDiscountRsd : 0;
 
   return (
-    <article className="group w-full bg-white p-3 text-left transition-transform duration-300 ease-out hover:-translate-y-1 md:p-4">
+    <article className="group w-full bg-white p-3 text-left transition-transform duration-300 ease-out hover:-translate-y-1 md:p-4 lg:p-3">
       <Link href={href} className="block">
-        <div className="relative aspect-[4/5] w-full overflow-hidden bg-sage-pale md:aspect-square">
+        <div className="relative aspect-[4/5] w-full overflow-hidden bg-sage-pale md:aspect-square lg:aspect-[5/6]">
           {badge ? (
-            <span className="absolute left-3 top-3 z-10 inline-flex items-center bg-[#A1A797] px-4 py-2 font-body font-[600] text-[12px] uppercase tracking-[0.2em] text-[#FBFAED] shadow-[0_4px_16px_rgba(28,28,26,0.22)] ring-1 ring-inset ring-white/30 md:left-4 md:top-4 md:px-5 md:py-2.5 md:text-[14px] md:tracking-[0.24em]">
+            <span className="absolute left-3 top-3 z-10 inline-flex items-center bg-[#A1A797] px-4 py-2 font-body font-[600] text-[12px] uppercase tracking-[0.2em] text-[#FBFAED] shadow-[0_4px_16px_rgba(28,28,26,0.22)] ring-1 ring-inset ring-white/30 md:left-4 md:top-4 md:px-5 md:py-2.5 md:text-[14px] md:tracking-[0.24em] lg:left-3 lg:top-3 lg:px-3 lg:py-1.5 lg:text-[11px]">
               {badge}
             </span>
           ) : null}
@@ -59,12 +59,12 @@ export default function BundleCard({ bundleId, image, href, titleTop, titleBotto
             alt={alt ?? `${titleTop} ${titleBottom}`}
             fill
             className="object-cover object-center scale-[1.04] transition-transform duration-500 ease-out group-hover:scale-[1.09]"
-            sizes="(max-width: 768px) 100vw, 50vw"
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         </div>
 
-        <div className="flex items-start justify-between gap-4 pt-4">
-          <h3 className="font-display font-[500] text-[20px] leading-[1.15] text-ink md:text-[24px] [-webkit-text-stroke:0.4px_currentColor]">
+        <div className="flex items-start justify-between gap-4 pt-4 lg:pt-3">
+          <h3 className="font-display font-[500] text-[20px] leading-[1.15] text-ink md:text-[24px] lg:text-[20px] [-webkit-text-stroke:0.4px_currentColor]">
             {titleTop}
             <br />
             {titleBottom}
@@ -73,12 +73,12 @@ export default function BundleCard({ bundleId, image, href, titleTop, titleBotto
             {pricing ? (
               <div className="flex flex-col items-end gap-0.5">
                 {bundlePct > 0 ? (
-                  <span className="mr-1 font-body font-[500] text-[13px] text-silver-dark tabular-nums line-through md:text-[14px]">
+                  <span className="mr-1 font-body font-[500] text-[13px] text-silver-dark tabular-nums line-through md:text-[14px] lg:text-[13px]">
                     {formatRsd(pricing.subtotalRsd)}
                   </span>
                 ) : null}
                 <div className="flex items-center gap-2">
-                  <span className="font-body font-[500] text-[16px] text-ink tabular-nums md:text-[18px]">
+                  <span className="font-body font-[500] text-[16px] text-ink tabular-nums md:text-[18px] lg:text-[16px]">
                     {formatRsd(total)}
                   </span>
                   {bundlePct > 0 ? (
@@ -96,7 +96,7 @@ export default function BundleCard({ bundleId, image, href, titleTop, titleBotto
       <button
         type="button"
         onClick={() => addBundle(bundleId)}
-        className="mt-4 inline-flex w-full items-center justify-center border border-[#A1A797] bg-[#A1A797] px-4 py-3.5 font-body font-[400] text-[12px] uppercase tracking-[0.14em] text-[#FBFAED] transition-colors duration-200 ease-in-out hover:bg-transparent hover:text-[#A1A797] md:text-[13px]"
+        className="mt-4 inline-flex w-full items-center justify-center border border-[#A1A797] bg-[#A1A797] px-4 py-3.5 font-body font-[400] text-[12px] uppercase tracking-[0.14em] text-[#FBFAED] transition-colors duration-200 ease-in-out hover:bg-transparent hover:text-[#A1A797] md:text-[13px] lg:mt-3 lg:py-3 lg:text-[12px]"
       >
         Dodaj u korpu
       </button>

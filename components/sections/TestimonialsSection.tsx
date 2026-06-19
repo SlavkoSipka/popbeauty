@@ -12,6 +12,18 @@ const images = [
   '/WhatsApp Image 2026-05-31 at 15.13.37.jpeg',
   '/WhatsApp Image 2026-05-31 at 15.13.50.jpeg',
   '/WhatsApp Image 2026-05-31 at 15.14.01.jpeg',
+  '/WhatsApp Image 2026-06-06 at 19.48.20.jpeg',
+  '/WhatsApp Image 2026-06-06 at 19.48.21.jpeg',
+  '/WhatsApp Image 2026-06-06 at 19.48.21 (1).jpeg',
+  '/WhatsApp Image 2026-06-06 at 19.48.21 (2).jpeg',
+  '/WhatsApp Image 2026-06-06 at 19.48.21 (3).jpeg',
+  '/WhatsApp Image 2026-06-06 at 19.48.21 (4).jpeg',
+  '/WhatsApp Image 2026-06-06 at 19.48.21 (5).jpeg',
+  '/WhatsApp Image 2026-06-06 at 19.48.21 (6).jpeg',
+  '/WhatsApp Image 2026-06-06 at 19.48.21 (7).jpeg',
+  '/WhatsApp Image 2026-06-06 at 19.48.21 (8).jpeg',
+  '/WhatsApp Image 2026-06-06 at 19.48.21 (9).jpeg',
+  '/WhatsApp Image 2026-06-06 at 19.48.21 (10).jpeg',
 ];
 
 export default function TestimonialsSection() {

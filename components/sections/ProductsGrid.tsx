@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import ProductCard from '@/components/ui/ProductCard';
 import BundleCard from '@/components/ui/BundleCard';
+import IngredientsSection from '@/components/sections/IngredientsSection';
 import { products, serumSet, dzemMistSet, popBeautyPaket } from '@/lib/data/products';
 
 function productCard(slug: string, badge?: string): ReactNode {
@@ -75,6 +76,9 @@ export default function ProductsGrid() {
     ),
   });
 
+  const firstItems = items.slice(0, 3);
+  const restItems = items.slice(3);
+
   return (
     <section id="proizvodi" className="scroll-mt-20 py-[84px] section-padding">
       <div className="mx-auto max-w-[1280px] px-6">
@@ -88,8 +92,20 @@ export default function ProductsGrid() {
           </h2>
         </div>
 
-        <div className="flex flex-col gap-6 md:grid md:grid-cols-2 md:gap-6">
-          {items.map((item, i) => (
+        <div className="flex flex-col gap-6 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 lg:gap-5">
+          {firstItems.map((item, i) => (
+            <div key={item.key} data-reveal="true" data-reveal-delay={String(i * 100)}>
+              {item.node}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <IngredientsSection embedded />
+
+      <div className="mx-auto max-w-[1280px] px-6">
+        <div className="flex flex-col gap-6 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 lg:gap-5">
+          {restItems.map((item, i) => (
             <div key={item.key} data-reveal="true" data-reveal-delay={String(i * 100)}>
               {item.node}
             </div>

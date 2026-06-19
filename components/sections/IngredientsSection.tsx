@@ -1,6 +1,12 @@
-export default function IngredientsSection() {
+type Props = {
+  embedded?: boolean;
+};
+
+export default function IngredientsSection({ embedded = false }: Props) {
+  const Tag = embedded ? 'div' : 'section';
+
   return (
-    <section className="relative overflow-hidden bg-[#A1A797] py-[84px] section-padding">
+    <Tag className="relative overflow-hidden bg-[#A1A797] py-[84px] section-padding">
       {/* Dekorativni vizual — list/grančica */}
       <svg
         aria-hidden
@@ -57,6 +63,6 @@ export default function IngredientsSection() {
           </p>
         </div>
       </div>
-    </section>
+    </Tag>
   );
 }

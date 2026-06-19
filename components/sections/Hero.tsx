@@ -4,13 +4,21 @@ import Link from 'next/link';
 export default function Hero() {
   return (
     <section className="relative flex min-h-screen items-start overflow-hidden">
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <Image
           src="/hero slika.png"
           alt=""
           fill
-          className="object-cover object-[center_42%] lg:object-bottom"
-          sizes="100vw"
+          className="object-cover object-[center_42%] lg:hidden"
+          sizes="(max-width: 1023px) 100vw, 0px"
+          priority
+        />
+        <Image
+          src="/Gemini_Generated_Image_8bvz9n8bvz9n8bvz.webp"
+          alt=""
+          fill
+          className="hidden lg:block object-cover object-bottom"
+          sizes="(min-width: 1024px) 100vw, 0px"
           priority
         />
       </div>

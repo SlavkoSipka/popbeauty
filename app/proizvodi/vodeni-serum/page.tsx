@@ -49,6 +49,7 @@ export default function VodeniSerumPage() {
                   className="object-cover object-center scale-[1.04]"
                   sizes="(max-width: 768px) 100vw, 55vw"
                   priority
+                  loading="eager"
                 />
               </div>
             </div>
