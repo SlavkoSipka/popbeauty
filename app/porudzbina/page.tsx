@@ -12,7 +12,7 @@ import {
   getBundleLinePrice,
   isBundleSlug,
 } from '@/lib/bundles';
-import { displayUnitPriceForLine, formatRsd, lineSubtotalRsd, parsePriceStringToRsd } from '@/lib/price';
+import { discountedUnitPriceRsd, formatRsd, parsePriceStringToRsd, unitPriceRsdForLine } from '@/lib/price';
 import { SHIPPING_CARRIER, shippingForProductsTotalRsd } from '@/lib/shipping';
 import { computePricing, type PricingResult } from '@/lib/pricing-engine';
 import { usePricingData } from '@/lib/use-pricing-data';
@@ -93,9 +93,12 @@ export default function PorudzbinaPage() {
         parsePriceStringToRsd(line.price) ?? getBundleFallbackPriceRsd(line.slug);
       return formatRsd(fallback);
     }
-    return loaded
-      ? displayUnitPriceForLine(line, priceMap)
-      : displayUnitPriceForLine(line);
+    const base = unitPriceRsdForLine(line, loaded ? priceMap : undefined);
+    const lineDiscount = pricing?.lineDiscounts.find((d) => d.slug === line.slug);
+    if (loaded && lineDiscount && lineDiscount.percent > 0) {
+      return formatRsd(discountedUnitPriceRsd(base, lineDiscount.percent));
+    }
+    return formatRsd(base);
   }
 
   function checkoutLineSubtotal(line: (typeof items)[number]): string {
@@ -113,9 +116,12 @@ export default function PorudzbinaPage() {
         line.quantity;
       return formatRsd(fallback);
     }
-    return loaded
-      ? formatRsd(lineSubtotalRsd(line, priceMap))
-      : formatRsd(lineSubtotalRsd(line));
+    const base = unitPriceRsdForLine(line, loaded ? priceMap : undefined);
+    const lineDiscount = pricing?.lineDiscounts.find((d) => d.slug === line.slug);
+    if (loaded && lineDiscount && lineDiscount.percent > 0) {
+      return formatRsd(discountedUnitPriceRsd(base, lineDiscount.percent) * line.quantity);
+    }
+    return formatRsd(base * line.quantity);
   }
 
   const productsTotal = pricing?.totalRsd ?? 0;

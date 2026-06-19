@@ -77,6 +77,12 @@ export function lineSubtotalRsd(
   return unitPriceRsdForLine(line, dbPrices) * line.quantity;
 }
 
+/** Jedinična cena posle popusta (%). */
+export function discountedUnitPriceRsd(base: number, percent: number): number {
+  if (percent <= 0) return base;
+  return Math.round(base * (1 - percent / 100) * 100) / 100;
+}
+
 export function cartTotalRsd(
   items: CartLine[],
   dbPrices?: Map<string, number>,
