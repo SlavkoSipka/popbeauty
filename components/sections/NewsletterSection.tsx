@@ -45,11 +45,11 @@ export default function NewsletterSection() {
   };
 
   return (
-    <section className="py-[100px] bg-ink section-padding">
+    <section className="py-[72px] bg-ink section-padding">
       <div className="mx-auto max-w-[600px] px-6 text-center">
         <h2
           data-reveal="true"
-          className="font-display font-[300] italic text-[clamp(32px,4vw,42px)] text-white mb-4"
+          className="font-display font-[300] italic text-[clamp(32px,4vw,36px)] text-white mb-4"
         >
           Ostanite u toku
         </h2>

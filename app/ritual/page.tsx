@@ -35,7 +35,7 @@ export default function RitualPage() {
   return (
     <main>
       {/* Intro */}
-      <section className="py-[120px] section-padding">
+      <section className="py-[84px] section-padding">
         <div className="mx-auto max-w-[700px] px-6 text-center">
           <span
             data-reveal="true"
@@ -46,7 +46,7 @@ export default function RitualPage() {
           <h1
             data-reveal="true"
             data-reveal-delay="100"
-            className="font-display font-[300] text-[clamp(36px,5vw,56px)] leading-[1.1] text-ink mb-8"
+            className="font-display font-[300] text-[clamp(36px,5vw,44px)] leading-[1.1] text-ink mb-8"
           >
             Dvostepeni ritual za zdravu kožu
           </h1>
@@ -62,26 +62,26 @@ export default function RitualPage() {
       </section>
 
       {/* Steps */}
-      <section className="py-[120px] bg-sage-pale section-padding relative overflow-hidden">
+      <section className="py-[84px] bg-sage-pale section-padding relative overflow-hidden">
         <div className="mx-auto max-w-[1280px] px-6">
           <h2
             data-reveal="true"
-            className="font-display font-[300] text-[clamp(28px,4vw,40px)] text-ink-soft text-center mb-20"
+            className="font-display font-[300] text-[clamp(28px,4vw,34px)] text-ink-soft text-center mb-20 md:mb-14"
           >
             Jutarnji ritual
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-10">
             {products.map((p, i) => (
               <div key={p.slug} data-reveal="true" data-reveal-delay={String(i * 150)} className="relative">
-                <span className="absolute -top-8 right-0 font-display font-[300] text-[160px] leading-none text-sage-light select-none pointer-events-none opacity-40">
+                <span className="absolute -top-8 right-0 font-display font-[300] text-[160px] lg:text-[120px] leading-none text-sage-light select-none pointer-events-none opacity-40">
                   {String(i + 1).padStart(2, '0')}
                 </span>
-                <div className="relative z-10 bg-white border border-silver-light p-8 md:p-10">
+                <div className="relative z-10 bg-white border border-silver-light p-8 md:p-8">
                   <span className="block font-body font-[400] text-[10px] uppercase tracking-[0.16em] text-sage-dark mb-2">
                     {p.stepLabel}
                   </span>
-                  <h3 className="font-display font-[400] text-[28px] text-ink mb-4">{p.name}</h3>
+                  <h3 className="font-display font-[400] text-[28px] md:text-[24px] text-ink mb-4">{p.name}</h3>
                   <p className="font-body font-[300] text-[14px] leading-[1.7] text-silver-dark mb-6">
                     {p.slug === 'uljani-serum'
                       ? 'Nanesite 3-4 kapi na čistu kožu. Lagano umasirajte pokretima prema gore. Sačekajte 30 sekundi da se upije.'
@@ -105,11 +105,11 @@ export default function RitualPage() {
       </section>
 
       {/* Evening note */}
-      <section className="py-[80px] section-padding">
+      <section className="py-[64px] section-padding">
         <div className="mx-auto max-w-[700px] px-6 text-center">
           <h2
             data-reveal="true"
-            className="font-display font-[300] text-[clamp(28px,4vw,40px)] text-ink-soft mb-6"
+            className="font-display font-[300] text-[clamp(28px,4vw,34px)] text-ink-soft mb-6"
           >
             Večernji ritual
           </h2>
@@ -126,11 +126,11 @@ export default function RitualPage() {
       </section>
 
       {/* FAQ */}
-      <section className="py-[120px] bg-off-white section-padding">
+      <section className="py-[84px] bg-off-white section-padding">
         <div className="mx-auto max-w-[700px] px-6">
           <h2
             data-reveal="true"
-            className="font-display font-[300] text-[clamp(28px,4vw,40px)] text-ink-soft text-center mb-16"
+            className="font-display font-[300] text-[clamp(28px,4vw,34px)] text-ink-soft text-center mb-16 md:mb-12"
           >
             Česta pitanja
           </h2>

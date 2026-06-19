@@ -38,7 +38,7 @@ function StatItem({ stat, active }: { stat: Stat; active: boolean }) {
   const value = useCountUp(stat.target, active);
   return (
     <div className="flex flex-col items-center text-center">
-      <span className="font-display font-[400] text-[clamp(44px,7vw,72px)] leading-none text-[#FBFAED] tabular-nums">
+      <span className="font-display font-[400] text-[clamp(44px,7vw,56px)] leading-none text-[#FBFAED] tabular-nums">
         {stat.prefix}{value}{stat.suffix}
       </span>
       <span className="mt-3 font-body font-[400] text-[12px] uppercase tracking-[0.14em] text-[#FBFAED]/80 md:text-[13px]">
@@ -69,8 +69,8 @@ export default function StatsSection() {
   }, []);
 
   return (
-    <section ref={ref} className="bg-[#A1A797] py-16 md:py-24">
-      <div className="mx-auto grid max-w-[700px] grid-cols-2 gap-8 px-6 md:gap-16">
+    <section ref={ref} className="bg-[#A1A797] py-16 md:py-16">
+      <div className="mx-auto grid max-w-[700px] grid-cols-2 gap-8 px-6 md:gap-12">
         {stats.map((stat) => (
           <StatItem key={stat.label} stat={stat} active={active} />
         ))}

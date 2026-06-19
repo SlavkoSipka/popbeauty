@@ -32,10 +32,10 @@ export default function TestimonialsSection() {
   return (
     <section
       ref={sectionRef}
-      className="testimonials-section py-[120px] bg-white section-padding overflow-x-hidden"
+      className="testimonials-section py-[84px] bg-white section-padding overflow-x-hidden"
     >
       <div className="mx-auto max-w-[1280px] px-6">
-        <div className="mb-12 flex items-end justify-between gap-6">
+        <div className="mb-12 md:mb-8 flex items-end justify-between gap-6">
           <div>
             <span
               data-reveal="true"
@@ -46,7 +46,7 @@ export default function TestimonialsSection() {
             <h2
               data-reveal="true"
               data-reveal-delay="100"
-              className="font-display font-[500] text-[clamp(32px,4vw,48px)] leading-[1.15] text-ink-soft"
+              className="font-display font-[500] text-[clamp(32px,4vw,40px)] leading-[1.15] text-ink-soft"
             >
               Šta kažu naše korisnice
             </h2>
@@ -86,7 +86,7 @@ export default function TestimonialsSection() {
             key={src}
             data-reveal="true"
             data-reveal-delay={String(Math.min(i, 4) * 80)}
-            className="relative w-[240px] shrink-0 snap-start overflow-hidden border border-silver-light bg-off-white md:w-[280px]"
+            className="relative w-[240px] shrink-0 snap-start overflow-hidden border border-silver-light bg-off-white md:w-[260px]"
           >
             <Image
               src={src}

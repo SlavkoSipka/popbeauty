@@ -38,9 +38,9 @@ export default function SerumSetPage() {
   return (
     <main className="pb-[min(200px,32vh)] md:pb-0">
       {/* Hero */}
-      <section className="py-[80px] md:py-[120px] section-padding">
+      <section className="py-[80px] md:py-[84px] section-padding">
         <div className="mx-auto max-w-[1280px] px-6">
-          <div className="grid grid-cols-1 md:grid-cols-[55fr_45fr] gap-8 md:gap-16">
+          <div className="grid grid-cols-1 md:grid-cols-[55fr_45fr] gap-8 md:gap-10">
             {/* Left — Image */}
             <div>
               <div data-reveal="true" className="relative aspect-[3/4] w-full overflow-hidden bg-white">
@@ -60,7 +60,7 @@ export default function SerumSetPage() {
               <h1
                 data-reveal="true"
                 data-reveal-delay="150"
-                className="font-display font-[300] text-[clamp(36px,5vw,48px)] text-ink mb-4"
+                className="font-display font-[300] text-[clamp(36px,5vw,40px)] text-ink mb-4"
               >
                 Serum set -<br />
                 Vodeni + Uljani serum
@@ -114,7 +114,7 @@ export default function SerumSetPage() {
       </section>
 
       {/* Tabs */}
-      <section className="py-[80px] md:py-[120px] bg-white section-padding">
+      <section className="py-[80px] md:py-[84px] bg-white section-padding">
         <div className="mx-auto max-w-[800px] px-6">
           <div data-reveal="true" className="flex flex-wrap gap-6 border-b border-silver-light mb-12 md:gap-10">
             {tabs.map((tab) => (
@@ -134,7 +134,7 @@ export default function SerumSetPage() {
 
           <div data-reveal="true" data-reveal-delay="100">
             {activeTab === 'opis' && (
-              <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[18px]">
+              <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[16px]">
                 {serumSet.fullDescription}
               </p>
             )}
@@ -144,14 +144,14 @@ export default function SerumSetPage() {
                 {serumSet.ingredients.map((ing) => (
                   <li key={ing.name} className="flex items-center gap-3">
                     <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#A1A797]" />
-                    <span className="font-body font-[500] text-[16px] text-ink md:text-[17px]">{ing.name}</span>
+                    <span className="font-body font-[500] text-[16px] text-ink md:text-[16px]">{ing.name}</span>
                   </li>
                 ))}
               </ul>
             )}
 
             {activeTab === 'upotreba' && (
-              <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[18px]">
+              <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[16px]">
                 {serumSet.howToUse}
               </p>
             )}

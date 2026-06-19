@@ -76,13 +76,13 @@ export default function ProductsGrid() {
   });
 
   return (
-    <section id="proizvodi" className="scroll-mt-20 py-[120px] section-padding">
+    <section id="proizvodi" className="scroll-mt-20 py-[84px] section-padding">
       <div className="mx-auto max-w-[1280px] px-6">
         <div className="text-left mb-8 md:mb-10">
           <h2
             data-reveal="true"
             data-reveal-delay="100"
-            className="font-display font-[500] text-[clamp(32px,4vw,48px)] text-ink-soft"
+            className="font-display font-[500] text-[clamp(32px,4vw,40px)] text-ink-soft"
           >
             Naši proizvodi
           </h2>

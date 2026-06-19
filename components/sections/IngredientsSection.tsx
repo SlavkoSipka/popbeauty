@@ -1,10 +1,10 @@
 export default function IngredientsSection() {
   return (
-    <section className="relative overflow-hidden bg-[#A1A797] py-[120px] section-padding">
+    <section className="relative overflow-hidden bg-[#A1A797] py-[84px] section-padding">
       {/* Dekorativni vizual — list/grančica */}
       <svg
         aria-hidden
-        className="pointer-events-none absolute -right-10 -top-10 h-[280px] w-[280px] text-[#FBFAED]/10 md:-right-4 md:h-[420px] md:w-[420px]"
+        className="pointer-events-none absolute -right-10 -top-10 h-[280px] w-[280px] text-[#FBFAED]/10 md:-right-4 md:h-[320px] md:w-[320px]"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -42,14 +42,14 @@ export default function IngredientsSection() {
           <h2
             data-reveal="true"
             data-reveal-delay="100"
-            className="font-display font-[500] text-[clamp(34px,4.5vw,48px)] leading-[1.15] text-[#FBFAED] mb-6"
+            className="font-display font-[500] text-[clamp(34px,4.5vw,40px)] leading-[1.15] text-[#FBFAED] mb-6"
           >
             Svaka kap ima razlog
           </h2>
           <p
             data-reveal="true"
             data-reveal-delay="200"
-            className="font-body font-[400] text-[16px] leading-[1.7] text-[#FBFAED] max-w-[460px] md:text-[17px]"
+            className="font-body font-[400] text-[16px] leading-[1.7] text-[#FBFAED] max-w-[460px] md:text-[16px]"
           >
             Ne biramo sastojke po trendovima. Svaki aktivni sastojak u našim formulama
             je tu jer ima dokazano djelovanje, čist izvor i specifičnu ulogu u

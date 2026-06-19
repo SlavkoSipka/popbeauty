@@ -9,7 +9,7 @@ import {
   packingLinesFromExpanded,
 } from '@/lib/order-validation';
 import { computePricing } from '@/lib/pricing-engine';
-import { SHIPPING_RSD } from '@/lib/shipping';
+import { shippingForProductsTotalRsd } from '@/lib/shipping';
 import type { DbProduct } from '@/lib/price';
 
 type OrderBody = {
@@ -146,7 +146,8 @@ export async function POST(request: Request) {
     autoDetectBundles: false,
   });
 
-  const orderTotalRsd = pricing.totalRsd + SHIPPING_RSD;
+  const shippingRsd = shippingForProductsTotalRsd(pricing.totalRsd);
+  const orderTotalRsd = pricing.totalRsd + shippingRsd;
 
   // ── Validate client-sent total (tolerance 1 RSD for rounding) ──
   const claimedTotal = typeof body.totalRsd === 'number' ? body.totalRsd : NaN;
@@ -180,6 +181,7 @@ export async function POST(request: Request) {
       note,
       line_items: lineItemsJson,
       subtotal_rsd: pricing.subtotalRsd,
+      shipping_rsd: shippingRsd,
       discount_type: pricing.discountType,
       discount_percent: pricing.discountPercent > 0 ? pricing.discountPercent : null,
       referral_discount_percent: customerDiscountPercent > 0 ? customerDiscountPercent : null,

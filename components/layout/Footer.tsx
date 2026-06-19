@@ -15,8 +15,8 @@ const CONTACT_PHONE_DIGITS = '381613091583';
 export default function Footer() {
   return (
     <footer className="bg-off-white border-t border-silver-light">
-      <div className="mx-auto max-w-[1280px] px-6 pt-20 pb-10">
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-3 md:gap-10 lg:gap-16 md:items-start">
+      <div className="mx-auto max-w-[1280px] px-6 pt-20 lg:pt-14 pb-10">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-3 md:gap-10 lg:gap-12 md:items-start">
           {/* Brand */}
           <div className="md:max-w-[320px]">
             <BrandLogo variant="footer" className="mb-4" />
@@ -127,7 +127,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom */}
-        <div className="mt-16 pt-6 border-t border-silver-light flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="mt-16 lg:mt-10 pt-6 border-t border-silver-light flex flex-col sm:flex-row justify-between items-center gap-4">
           <span className="font-body font-[300] text-[11px] text-silver-dark">
             © {new Date().getFullYear()} Pop Beauty. Sva prava zadržana.
           </span>

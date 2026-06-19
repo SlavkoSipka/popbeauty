@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { commissionEarnedRsd } from '@/lib/commission';
+import { SHIPPING_RSD } from '@/lib/shipping';
 import {
   ORDER_STATUSES,
   ORDER_STATUS_LABELS,
@@ -34,6 +35,7 @@ export type AdminOrderRow = {
   line_items: unknown;
   total_rsd: number | string;
   subtotal_rsd: number | string | null;
+  shipping_rsd?: number | string | null;
   discount_type: string | null;
   discount_percent: number | string | null;
   referral_discount_percent: number | string | null;
@@ -67,8 +69,18 @@ function canonicalStatusForFilter(raw: string): string {
   return legacy[raw] ?? raw;
 }
 
+/**
+ * Iznos proizvoda bez poštarine. Za stare porudžbine (shipping_rsd == null)
+ * pretpostavljamo da je poštarina uvek bila dodata (SHIPPING_RSD).
+ */
+function productsTotalRsd(o: AdminOrderRow): number {
+  const total = Number(o.total_rsd) || 0;
+  const shipping = o.shipping_rsd != null ? Number(o.shipping_rsd) : SHIPPING_RSD;
+  return total - shipping;
+}
+
 function OrderDetails({ o, fmtMoney }: { o: AdminOrderRow; fmtMoney: (n: number) => string }) {
-  const total = Number(o.total_rsd);
+  const productsTotal = productsTotalRsd(o);
   return (
     <div className="space-y-2 text-[11px] text-silver-dark">
       <p>
@@ -120,8 +132,8 @@ function OrderDetails({ o, fmtMoney }: { o: AdminOrderRow; fmtMoney: (n: number)
             </p>
           )}
           <p>
-            Plaćeno (ukupno):{' '}
-            <span className="text-ink font-[400]">{fmtMoney(total)} RSD</span>
+            Cena (bez poštarine):{' '}
+            <span className="text-ink font-[400]">{fmtMoney(productsTotal)} RSD</span>
           </p>
         </div>
       )}
@@ -277,6 +289,7 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
       <div className="md:hidden space-y-3">
         {filteredOrders.map((o) => {
           const total = Number(o.total_rsd);
+          const productsTotal = productsTotalRsd(o);
           const earned = commissionEarnedRsd(total, o.commission_percent_applied);
           return (
             <div key={o.id} className="border border-silver-light bg-white p-4 space-y-3 font-body text-[12px]">
@@ -293,7 +306,7 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
                   </p>
                 </div>
                 <p className="text-ink font-[400] tabular-nums whitespace-nowrap">
-                  {fmtMoney(total)} RSD
+                  {fmtMoney(productsTotal)} RSD
                 </p>
               </div>
 
@@ -389,6 +402,7 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
           <tbody>
             {filteredOrders.map((o) => {
               const total = Number(o.total_rsd);
+              const productsTotal = productsTotalRsd(o);
               const earned = commissionEarnedRsd(total, o.commission_percent_applied);
               return (
                 <tr key={o.id} className="border-b border-silver-light align-top">
@@ -420,7 +434,7 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
                     </div>
                   </td>
                   <td className="px-3 py-3 text-ink tabular-nums whitespace-nowrap">
-                    {fmtMoney(total)} RSD
+                    {fmtMoney(productsTotal)} RSD
                   </td>
                   <td className="px-3 py-3 text-silver-dark font-mono text-[11px]">
                     {o.referral_code ?? '—'}

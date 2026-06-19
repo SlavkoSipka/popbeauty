@@ -4,6 +4,7 @@ import {
   ORDER_LIST_COLUMNS,
   ORDER_LIST_COLUMNS_MINIMAL,
   ORDER_LIST_COLUMNS_NO_PRODUCT_DISCOUNTS,
+  ORDER_LIST_COLUMNS_WITH_SHIPPING,
   ORDER_LIST_LIMIT,
 } from '@/lib/supabase/query-limits';
 
@@ -16,6 +17,7 @@ export async function fetchOrdersForAdminList(supabase: SupabaseClient): Promise
   error: { message: string } | null;
 }> {
   const attempts = [
+    ORDER_LIST_COLUMNS_WITH_SHIPPING,
     ORDER_LIST_COLUMNS,
     ORDER_LIST_COLUMNS_NO_PRODUCT_DISCOUNTS,
     ORDER_LIST_COLUMNS_MINIMAL,

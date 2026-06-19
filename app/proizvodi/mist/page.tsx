@@ -36,9 +36,9 @@ export default function MistPage() {
   return (
     <main className="pb-[min(200px,32vh)] md:pb-0">
       {/* Hero */}
-      <section className="py-[80px] md:py-[120px] section-padding">
+      <section className="py-[80px] md:py-[84px] section-padding">
         <div className="mx-auto max-w-[1280px] px-6">
-          <div className="grid grid-cols-1 md:grid-cols-[55fr_45fr] gap-8 md:gap-16">
+          <div className="grid grid-cols-1 md:grid-cols-[55fr_45fr] gap-8 md:gap-10">
             {/* Left — Images */}
             <div>
               <div data-reveal="true" className="relative aspect-[3/4] w-full overflow-hidden bg-white">
@@ -58,7 +58,7 @@ export default function MistPage() {
               <h1
                 data-reveal="true"
                 data-reveal-delay="150"
-                className="font-display font-[300] text-[clamp(36px,5vw,48px)] text-ink mb-4"
+                className="font-display font-[300] text-[clamp(36px,5vw,40px)] text-ink mb-4"
               >
                 {product.name}
               </h1>
@@ -117,7 +117,7 @@ export default function MistPage() {
       </section>
 
       {/* Tabs */}
-      <section className="py-[80px] md:py-[120px] bg-white section-padding">
+      <section className="py-[80px] md:py-[84px] bg-white section-padding">
         <div className="mx-auto max-w-[800px] px-6">
           <div data-reveal="true" className="flex flex-wrap gap-6 border-b border-silver-light mb-12 md:gap-10">
             {tabs.map((tab) => (
@@ -141,7 +141,7 @@ export default function MistPage() {
                 <h2 className="font-body font-[600] text-[14px] uppercase tracking-[0.14em] text-ink mb-4 md:text-[15px]">
                   Hidratantni umirujući mist za lice
                 </h2>
-                <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[18px]">
+                <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[16px]">
                   {product.fullDescription}
                 </p>
                 <ProductLabelInfo volume={product.volume} labelInfo={product.labelInfo} />
@@ -168,7 +168,7 @@ export default function MistPage() {
                     {product.ingredients.map((ing) => (
                       <li key={ing.name} className="flex items-center gap-3">
                         <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#A1A797]" />
-                        <span className="font-body font-[500] text-[16px] text-ink md:text-[17px]">{ing.name}</span>
+                        <span className="font-body font-[500] text-[16px] text-ink md:text-[16px]">{ing.name}</span>
                       </li>
                     ))}
                   </ul>
@@ -178,7 +178,7 @@ export default function MistPage() {
 
             {activeTab === 'upotreba' && (
               <div className="flex flex-col gap-8">
-                <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[18px]">
+                <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[16px]">
                   {product.howToUse}
                 </p>
                 {product.warning ? (
@@ -186,7 +186,7 @@ export default function MistPage() {
                     <h3 className="font-body font-[600] text-[13px] uppercase tracking-[0.12em] text-ink mb-3 md:text-[14px]">
                       Upozorenje
                     </h3>
-                    <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[18px]">
+                    <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[16px]">
                       {product.warning}
                     </p>
                   </div>
@@ -198,7 +198,7 @@ export default function MistPage() {
       </section>
 
       {/* Pairing */}
-      <section className="py-[80px] md:py-[100px] section-padding">
+      <section className="py-[80px] md:py-[72px] section-padding">
         <div className="mx-auto max-w-[800px] px-6">
           <Link
             href={`/proizvodi/${dzemMistSet.slug}`}
@@ -209,7 +209,7 @@ export default function MistPage() {
               <span className="mb-4 inline-block border border-[#A1A797] bg-[#A1A797] px-3 py-1 font-body font-[600] text-[11px] uppercase tracking-[0.16em] text-[#FBFAED]">
                 Akcija
               </span>
-              <h3 className="font-body font-[700] text-[22px] uppercase leading-[1.2] tracking-[0.02em] text-[#7d8473] mb-4 md:text-[26px]">
+              <h3 className="font-body font-[700] text-[22px] uppercase leading-[1.2] tracking-[0.02em] text-[#7d8473] mb-4 md:text-[22px]">
                 Poruči Glow Marmeladu i Glow Mist zajedno i uštedi
               </h3>
               <span className="link-underline font-body font-[600] text-[12px] uppercase tracking-[0.14em] text-[#7d8473]">

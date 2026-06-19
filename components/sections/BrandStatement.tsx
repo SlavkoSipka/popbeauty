@@ -1,6 +1,6 @@
 export default function BrandStatement() {
   return (
-    <section className="pt-[72px] pb-[120px] md:pt-[96px] md:pb-[160px] section-padding">
+    <section className="pt-[72px] pb-[120px] md:pt-[72px] md:pb-[112px] section-padding">
       <div className="mx-auto max-w-[680px] px-6 text-left">
         <span
           data-reveal="true"
@@ -12,7 +12,7 @@ export default function BrandStatement() {
         <div
           data-reveal="true"
           data-reveal-delay="100"
-          className="font-body font-[300] text-[16px] leading-[1.65] text-ink-soft space-y-5 md:text-[17px]"
+          className="font-body font-[300] text-[16px] leading-[1.65] text-ink-soft space-y-5 md:text-[16px]"
         >
           <p>
             Zdravo, ja sam <span className="font-[500] text-ink">Teodora</span> — osnivačica Pop Beauty.

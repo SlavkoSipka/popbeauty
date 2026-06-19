@@ -60,7 +60,7 @@ export default function Navigation() {
     <>
       <header className="fixed top-0 left-0 right-0 z-50">
         <AnnouncementTicker />
-        <nav className="h-20 border-b border-[#FBFAED]/15 bg-[#A1A797]">
+        <nav className="h-20 lg:h-16 border-b border-[#FBFAED]/15 bg-[#A1A797]">
           <div className="relative mx-auto flex h-full max-w-[1280px] items-center justify-between px-6">
             {/* Levo: meni (mobil) / logo (desktop) */}
             <div className="flex w-8 shrink-0 items-center md:w-auto">

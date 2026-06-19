@@ -13,7 +13,7 @@ import {
   isBundleSlug,
 } from '@/lib/bundles';
 import { displayUnitPriceForLine, formatRsd, lineSubtotalRsd, parsePriceStringToRsd } from '@/lib/price';
-import { SHIPPING_CARRIER, SHIPPING_RSD } from '@/lib/shipping';
+import { SHIPPING_CARRIER, shippingForProductsTotalRsd } from '@/lib/shipping';
 import { computePricing, type PricingResult } from '@/lib/pricing-engine';
 import { usePricingData } from '@/lib/use-pricing-data';
 import { pixelTrack } from '@/lib/meta-pixel';
@@ -118,8 +118,10 @@ export default function PorudzbinaPage() {
       : formatRsd(lineSubtotalRsd(line));
   }
 
-  const totalForApi = (pricing?.totalRsd ?? 0) + SHIPPING_RSD;
   const productsTotal = pricing?.totalRsd ?? 0;
+  const shippingRsd = shippingForProductsTotalRsd(productsTotal);
+  const freeShipping = shippingRsd === 0;
+  const totalForApi = productsTotal + shippingRsd;
 
   const initiateFiredRef = useRef(false);
   useEffect(() => {
@@ -228,7 +230,7 @@ export default function PorudzbinaPage() {
 
   return (
     <main>
-      <section className="py-10 max-md:pt-16 md:py-[120px] section-padding">
+      <section className="py-10 max-md:pt-16 md:py-[84px] section-padding">
         <div className="mx-auto max-w-[960px] px-4 md:px-6">
           <h1 className="sr-only">Porudžbina i dostava</h1>
           {empty ? (
@@ -259,7 +261,9 @@ export default function PorudzbinaPage() {
                     Podaci za dostavu
                   </h2>
                   <p className="font-body font-[400] text-[14px] text-ink-soft md:text-[15px]">
-                    Poštarina {formatRsd(SHIPPING_RSD)} ({SHIPPING_CARRIER}) sabira se sa iznosom porudžbine.
+                    {freeShipping
+                      ? `Besplatna poštarina za ovu porudžbinu (${SHIPPING_CARRIER}).`
+                      : `Poštarina ${formatRsd(shippingRsd)} (${SHIPPING_CARRIER}) sabira se sa iznosom porudžbine.`}
                   </p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-6">
@@ -591,9 +595,15 @@ export default function PorudzbinaPage() {
                     <span className="font-body font-[500] text-[13px] text-ink md:text-[14px]">
                       Poštarina ({SHIPPING_CARRIER})
                     </span>
-                    <span className="font-body font-[500] text-[14px] text-ink tabular-nums md:text-[15px]">
-                      {formatRsd(SHIPPING_RSD)}
-                    </span>
+                    {freeShipping ? (
+                      <span className="font-body font-[600] text-[14px] text-sage-dark tabular-nums md:text-[15px]">
+                        Besplatno
+                      </span>
+                    ) : (
+                      <span className="font-body font-[500] text-[14px] text-ink tabular-nums md:text-[15px]">
+                        {formatRsd(shippingRsd)}
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-end justify-between gap-2 pt-2 border-t-2 border-ink/10 md:pt-3">
                     <span className="font-body font-[600] text-[13px] uppercase tracking-[0.08em] text-ink md:text-[14px]">

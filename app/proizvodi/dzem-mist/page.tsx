@@ -40,9 +40,9 @@ export default function DzemMistPage() {
   return (
     <main className="pb-[min(200px,32vh)] md:pb-0">
       {/* Hero */}
-      <section className="py-[80px] md:py-[120px] section-padding">
+      <section className="py-[80px] md:py-[84px] section-padding">
         <div className="mx-auto max-w-[1280px] px-6">
-          <div className="grid grid-cols-1 md:grid-cols-[55fr_45fr] gap-8 md:gap-16">
+          <div className="grid grid-cols-1 md:grid-cols-[55fr_45fr] gap-8 md:gap-10">
             {/* Left — Image */}
             <div>
               <div data-reveal="true" className="relative aspect-[3/4] w-full overflow-hidden bg-white">
@@ -62,7 +62,7 @@ export default function DzemMistPage() {
               <h1
                 data-reveal="true"
                 data-reveal-delay="150"
-                className="font-display font-[300] text-[clamp(36px,5vw,48px)] text-ink mb-4"
+                className="font-display font-[300] text-[clamp(36px,5vw,40px)] text-ink mb-4"
               >
                 Glow Marmelada + Glow Mist
               </h1>
@@ -96,7 +96,7 @@ export default function DzemMistPage() {
       </section>
 
       {/* Tabs */}
-      <section className="py-[80px] md:py-[120px] bg-white section-padding">
+      <section className="py-[80px] md:py-[84px] bg-white section-padding">
         <div className="mx-auto max-w-[800px] px-6">
           <div data-reveal="true" className="flex flex-wrap gap-6 border-b border-silver-light mb-12 md:gap-10">
             {tabs.map((tab) => (

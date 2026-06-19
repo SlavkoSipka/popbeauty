@@ -25,10 +25,10 @@ export default function ONamaPage() {
       </section>
 
       {/* Story sections */}
-      <section className="py-[120px] section-padding">
+      <section className="py-[84px] section-padding">
         <div className="mx-auto max-w-[1280px] px-6">
           {/* Block 1 — Teodora's story */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-32">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-10 items-center mb-32 md:mb-20">
             <div>
               <span
                 data-reveal="true"
@@ -39,7 +39,7 @@ export default function ONamaPage() {
               <h2
                 data-reveal="true"
                 data-reveal-delay="100"
-                className="font-display font-[300] text-[clamp(28px,4vw,40px)] leading-[1.3] text-ink mb-6"
+                className="font-display font-[300] text-[clamp(28px,4vw,34px)] leading-[1.3] text-ink mb-6"
               >
                 Jer sam prvo to napravila za sebe.
               </h2>
@@ -99,12 +99,12 @@ export default function ONamaPage() {
           {/* Transformacija — posle */}
           <div
             data-reveal="true"
-            className="mb-32 border-t border-silver-light pt-16 md:pt-20"
+            className="mb-32 md:mb-20 border-t border-silver-light pt-16 md:pt-14"
           >
             <span className="block font-body font-[300] text-[11px] uppercase tracking-[0.2em] text-silver-dark mb-6">
               Moja transformacija
             </span>
-            <h2 className="font-display font-[300] text-[clamp(28px,4vw,40px)] leading-[1.3] text-ink mb-6 max-w-[720px]">
+            <h2 className="font-display font-[300] text-[clamp(28px,4vw,34px)] leading-[1.3] text-ink mb-6 max-w-[720px]">
               Danas je ogledalo prijatelj, ne sudija.
             </h2>
             <p className="font-body font-[300] text-[15px] leading-[1.8] text-silver-dark mb-4 max-w-[720px]">
@@ -143,7 +143,7 @@ export default function ONamaPage() {
           </div>
 
           {/* Block 2 — Testing & community */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-32">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-10 items-center mb-32 md:mb-20">
             <div
               data-reveal="true"
               className="order-2 md:order-1 relative aspect-[4/3] overflow-hidden bg-off-white"
@@ -166,7 +166,7 @@ export default function ONamaPage() {
               <h2
                 data-reveal="true"
                 data-reveal-delay="100"
-                className="font-display font-[300] text-[clamp(28px,4vw,40px)] leading-[1.3] text-ink mb-6"
+                className="font-display font-[300] text-[clamp(28px,4vw,34px)] leading-[1.3] text-ink mb-6"
               >
                 Svaka formula je prošla pravi test.
               </h2>
@@ -192,7 +192,7 @@ export default function ONamaPage() {
           </div>
 
           {/* Block 3 — Philosophy */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-32">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-10 items-center mb-32 md:mb-20">
             <div>
               <span
                 data-reveal="true"
@@ -203,7 +203,7 @@ export default function ONamaPage() {
               <h2
                 data-reveal="true"
                 data-reveal-delay="100"
-                className="font-display font-[300] text-[clamp(28px,4vw,40px)] leading-[1.3] text-ink mb-6"
+                className="font-display font-[300] text-[clamp(28px,4vw,34px)] leading-[1.3] text-ink mb-6"
               >
                 Manje koraka, više brige.
               </h2>
@@ -242,14 +242,14 @@ export default function ONamaPage() {
           </div>
 
           {/* Values */}
-          <div className="border-t border-silver-light pt-20">
+          <div className="border-t border-silver-light pt-20 md:pt-14">
             <h2
               data-reveal="true"
-              className="font-display font-[300] text-[clamp(28px,4vw,40px)] text-ink-soft text-center mb-16"
+              className="font-display font-[300] text-[clamp(28px,4vw,34px)] text-ink-soft text-center mb-16 md:mb-12"
             >
               Naše vrednosti
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
               {[
                 {
                   title: 'Iskrenost',
@@ -265,7 +265,7 @@ export default function ONamaPage() {
                 },
               ].map((v, i) => (
                 <div key={v.title} data-reveal="true" data-reveal-delay={String(i * 100)}>
-                  <h3 className="font-display font-[400] text-[24px] text-ink mb-4">{v.title}</h3>
+                  <h3 className="font-display font-[400] text-[24px] md:text-[20px] text-ink mb-4">{v.title}</h3>
                   <p className="font-body font-[300] text-[14px] leading-[1.7] text-silver-dark">{v.text}</p>
                 </div>
               ))}
@@ -279,7 +279,7 @@ export default function ONamaPage() {
         <div className="mx-auto max-w-[600px] px-6">
           <h2
             data-reveal="true"
-            className="font-display font-[300] italic text-[clamp(28px,4vw,40px)] text-ink mb-6"
+            className="font-display font-[300] italic text-[clamp(28px,4vw,34px)] text-ink mb-6"
           >
             Upoznajte naš ritual
           </h2>

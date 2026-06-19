@@ -13,7 +13,7 @@ export default function BundleProductSections({ activeTab, bundleProducts, intro
     return (
       <div className="flex flex-col gap-10">
         {intro ? (
-          <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[18px]">
+          <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[16px]">
             {intro}
           </p>
         ) : null}
@@ -25,7 +25,7 @@ export default function BundleProductSections({ activeTab, bundleProducts, intro
             <p className="mb-4 font-body font-[400] text-[13px] uppercase tracking-[0.1em] text-silver-dark md:text-[14px]">
               {product.tagline}
             </p>
-            <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[18px]">
+            <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[16px]">
               {product.fullDescription}
             </p>
           </div>
@@ -61,7 +61,7 @@ export default function BundleProductSections({ activeTab, bundleProducts, intro
                   {product.ingredients.map((ing) => (
                     <li key={ing.name} className="flex items-center gap-3">
                       <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#A1A797]" />
-                      <span className="font-body font-[500] text-[16px] text-ink md:text-[17px]">
+                      <span className="font-body font-[500] text-[16px] text-ink md:text-[16px]">
                         {ing.name}
                       </span>
                     </li>
@@ -82,7 +82,7 @@ export default function BundleProductSections({ activeTab, bundleProducts, intro
           <h2 className="font-body font-[600] text-[14px] uppercase tracking-[0.14em] text-ink md:text-[15px]">
             {product.name}
           </h2>
-          <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[18px]">
+          <p className="font-body font-[400] text-[16px] leading-[1.9] text-ink md:text-[16px]">
             {product.howToUse}
           </p>
           {product.warning ? (
