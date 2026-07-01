@@ -29,6 +29,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get('q')?.trim() ?? '';
   const status = searchParams.get('status')?.trim() ?? 'all';
+  const loadAll = searchParams.get('all') === '1';
   const offset = Math.max(0, Number(searchParams.get('offset') ?? 0) || 0);
   const limitRaw = Number(searchParams.get('limit') ?? 0) || 0;
   const isSearch = q.length > 0;
@@ -39,9 +40,10 @@ export async function GET(request: Request) {
   const { data, error, hasMore } = await fetchOrdersForAdminList(supabase, {
     search: q || undefined,
     status: status !== 'all' ? status : undefined,
-    offset,
-    limit,
+    offset: loadAll ? 0 : offset,
+    limit: loadAll ? undefined : limit,
     includeLineItems: isSearch,
+    fetchAll: loadAll,
   });
 
   if (error || !data) {

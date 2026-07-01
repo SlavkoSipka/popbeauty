@@ -280,14 +280,16 @@ function OrderAdminNotesField({
 export default function AdminPorudzbineClient({ initialOrders, initialHasMore }: Props) {
   const [orders, setOrders] = useState(initialOrders);
   const [hasMore, setHasMore] = useState(initialHasMore);
+  const [allLoaded, setAllLoaded] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadingAll, setLoadingAll] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const statusFilterMountRef = useRef(true);
 
   useEffect(() => {
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
@@ -300,11 +302,11 @@ export default function AdminPorudzbineClient({ initialOrders, initialHasMore }:
   }, [searchInput]);
 
   const fetchOrders = useCallback(
-    async (opts: { q: string; offset: number; append: boolean }) => {
+    async (opts: { q: string; all?: boolean }) => {
       const params = new URLSearchParams();
       if (opts.q) params.set('q', opts.q);
       if (statusFilter !== 'all') params.set('status', statusFilter);
-      if (opts.offset > 0) params.set('offset', String(opts.offset));
+      if (opts.all) params.set('all', '1');
 
       const res = await fetch(`/api/admin/orders?${params.toString()}`);
       const data = (await res.json()) as {
@@ -318,8 +320,9 @@ export default function AdminPorudzbineClient({ initialOrders, initialHasMore }:
       }
 
       const rows = data.orders ?? [];
-      setOrders((prev) => (opts.append ? [...prev, ...rows] : rows));
+      setOrders(rows);
       setHasMore(Boolean(data.hasMore));
+      if (opts.all) setAllLoaded(true);
     },
     [statusFilter],
   );
@@ -334,9 +337,10 @@ export default function AdminPorudzbineClient({ initialOrders, initialHasMore }:
     }
 
     setIsSearching(true);
+    setAllLoaded(false);
     void (async () => {
       try {
-        await fetchOrders({ q: searchQuery, offset: 0, append: false });
+        await fetchOrders({ q: searchQuery });
       } catch (err) {
         if (!cancelled) {
           setFetchError(err instanceof Error ? err.message : 'Pretraga nije uspela.');
@@ -355,7 +359,34 @@ export default function AdminPorudzbineClient({ initialOrders, initialHasMore }:
     if (searchQuery) return;
     setOrders(initialOrders);
     setHasMore(initialHasMore);
+    setAllLoaded(false);
   }, [initialOrders, initialHasMore, searchQuery]);
+
+  useEffect(() => {
+    if (searchQuery) return;
+
+    if (statusFilterMountRef.current) {
+      statusFilterMountRef.current = false;
+      return;
+    }
+
+    let cancelled = false;
+    setAllLoaded(false);
+    setFetchError(null);
+    void (async () => {
+      try {
+        await fetchOrders({ q: '' });
+      } catch (err) {
+        if (!cancelled) {
+          setFetchError(err instanceof Error ? err.message : 'Učitavanje nije uspelo.');
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [statusFilter, searchQuery, fetchOrders]);
 
   const filteredOrders = useMemo(() => {
     if (searchQuery) return orders;
@@ -363,16 +394,29 @@ export default function AdminPorudzbineClient({ initialOrders, initialHasMore }:
     return orders.filter((o) => canonicalStatusForFilter(o.status) === statusFilter);
   }, [orders, statusFilter, searchQuery]);
 
-  const loadMore = async () => {
-    if (loadingMore || !hasMore) return;
-    setLoadingMore(true);
+  const listedTotalRsd = useMemo(
+    () => filteredOrders.reduce((sum, o) => sum + productsTotalRsd(o), 0),
+    [filteredOrders],
+  );
+
+  const listedTotalLabel = useMemo(() => {
+    if (searchQuery) return 'Ukupno (pretraga)';
+    if (statusFilter !== 'all') {
+      return `Ukupno (${ORDER_STATUS_LABELS[statusFilter as OrderStatus] ?? statusFilter})`;
+    }
+    return 'Ukupno (prikazano)';
+  }, [searchQuery, statusFilter]);
+
+  const loadAll = async () => {
+    if (loadingAll || allLoaded) return;
+    setLoadingAll(true);
     setFetchError(null);
     try {
-      await fetchOrders({ q: searchQuery, offset: orders.length, append: true });
+      await fetchOrders({ q: searchQuery, all: true });
     } catch (err) {
       setFetchError(err instanceof Error ? err.message : 'Učitavanje nije uspelo.');
     } finally {
-      setLoadingMore(false);
+      setLoadingAll(false);
     }
   };
 
@@ -423,10 +467,13 @@ export default function AdminPorudzbineClient({ initialOrders, initialHasMore }:
       <p className="font-body font-[300] text-[12px] md:text-[13px] text-silver-dark mb-4 md:mb-5 max-w-[720px] leading-relaxed">
         Plaćanje je <strong className="font-[400] text-ink">pouzećem</strong>. Pregled pošiljki,
         kupac, kontakt, adresa, stavke korpe, referral i status. Broj telefona je link za poziv.
-        {!searchQuery ? (
+        {!searchQuery && !allLoaded ? (
           <span className="block mt-2 text-silver-mid">
-            Prikazano je poslednjih {orders.length} porudžbina. Koristi pretragu za starije ili
-            učitaj još.
+            Prikazano je poslednjih {orders.length} porudžbina
+            {statusFilter !== 'all'
+              ? ` sa statusom „${ORDER_STATUS_LABELS[statusFilter as OrderStatus] ?? statusFilter}"`
+              : ''}
+            . Klikni „Učitaj sve porudžbine“ za kompletan spisak.
           </span>
         ) : null}
       </p>
@@ -481,24 +528,37 @@ export default function AdminPorudzbineClient({ initialOrders, initialHasMore }:
         </select>
         {statusFilter !== 'all' && !searchQuery && (
           <span className="font-body font-[300] text-[11px] text-silver-mid">
-            Prikazano: {filteredOrders.length} od {orders.length}
+            Prikazano: {filteredOrders.length}
+            {!allLoaded && hasMore ? ' (nije sve učitano)' : null}
           </span>
         )}
       </div>
 
-      {hasMore ? (
+      {filteredOrders.length > 0 ? (
+        <div className="mb-5 md:mb-6 border border-silver-light bg-off-white px-4 py-3 md:px-5 md:py-4">
+          <p className="font-body font-[400] text-[10px] uppercase tracking-[0.12em] text-silver-dark">
+            {listedTotalLabel}
+          </p>
+          <p className="mt-1 font-display font-[300] text-[22px] md:text-[26px] text-ink tabular-nums">
+            {fmtMoney(listedTotalRsd)} RSD
+          </p>
+          <p className="mt-1 font-body font-[300] text-[11px] text-silver-mid">
+            {filteredOrders.length}{' '}
+            {filteredOrders.length === 1 ? 'porudžbina' : 'porudžbina'} · bez poštarine
+            {!allLoaded && hasMore ? ' · nije sve učitano' : null}
+          </p>
+        </div>
+      ) : null}
+
+      {!allLoaded && (hasMore || searchQuery) ? (
         <div className="mb-5 md:mb-6">
           <button
             type="button"
-            onClick={() => void loadMore()}
-            disabled={loadingMore}
+            onClick={() => void loadAll()}
+            disabled={loadingAll}
             className="border border-silver-light bg-white px-4 py-2 font-body text-[12px] text-ink hover:border-sage-mid disabled:opacity-50"
           >
-            {loadingMore
-              ? 'Učitavanje…'
-              : searchQuery
-                ? 'Učitaj još rezultata pretrage'
-                : 'Učitaj starije porudžbine'}
+            {loadingAll ? 'Učitavanje…' : 'Učitaj sve porudžbine'}
           </button>
         </div>
       ) : null}
