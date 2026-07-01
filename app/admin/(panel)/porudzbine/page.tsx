@@ -1,5 +1,5 @@
 import AdminPorudzbineClient from '@/components/admin/AdminPorudzbineClient';
-import { ORDER_LIST_LIMIT } from '@/lib/supabase/query-limits';
+import { ORDER_LIST_INITIAL_LIMIT } from '@/lib/supabase/query-limits';
 import { fetchOrdersForAdminList } from '@/lib/supabase/admin-orders-fetch';
 import { requireAdminServer } from '@/lib/supabase/panel-server';
 
@@ -8,7 +8,11 @@ export const dynamic = 'force-dynamic';
 export default async function AdminPorudzbinePage() {
   const supabase = await requireAdminServer();
 
-  const { data, error } = await fetchOrdersForAdminList(supabase);
+  const { data, error, hasMore } = await fetchOrdersForAdminList(supabase, {
+    limit: ORDER_LIST_INITIAL_LIMIT,
+    offset: 0,
+    includeLineItems: false,
+  });
 
   if (error || !data) {
     return (
@@ -23,8 +27,10 @@ export default async function AdminPorudzbinePage() {
     );
   }
 
-  const rows = data ?? [];
-  const listTruncated = rows.length >= ORDER_LIST_LIMIT;
-
-  return <AdminPorudzbineClient initialOrders={rows} listTruncated={listTruncated} />;
+  return (
+    <AdminPorudzbineClient
+      initialOrders={data ?? []}
+      initialHasMore={hasMore}
+    />
+  );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { commissionEarnedRsd } from '@/lib/commission';
 import { SHIPPING_RSD } from '@/lib/shipping';
@@ -51,10 +51,13 @@ export type AdminOrderRow = {
 
 type Props = {
   initialOrders: AdminOrderRow[];
-  listTruncated: boolean;
+  initialHasMore: boolean;
 };
 
 type StatusFilter = 'all' | OrderStatus;
+
+const ORDER_DETAILS_COLUMNS =
+  'line_items, subtotal_rsd, discount_type, discount_percent, referral_discount_percent, promo_code, promo_discount_percent, promo_discount_rsd, shipping_rsd';
 
 /** Mapira stare engleske statuse na srpske radi filtera. */
 function canonicalStatusForFilter(raw: string): string {
@@ -79,7 +82,19 @@ function productsTotalRsd(o: AdminOrderRow): number {
   return total - shipping;
 }
 
-function OrderDetails({ o, fmtMoney }: { o: AdminOrderRow; fmtMoney: (n: number) => string }) {
+function OrderDetails({
+  o,
+  fmtMoney,
+  onRequestDetails,
+  detailsLoaded,
+  detailsLoading,
+}: {
+  o: AdminOrderRow;
+  fmtMoney: (n: number) => string;
+  onRequestDetails: () => void;
+  detailsLoaded: boolean;
+  detailsLoading: boolean;
+}) {
   const productsTotal = productsTotalRsd(o);
   return (
     <div className="space-y-2 text-[11px] text-silver-dark">
@@ -87,16 +102,28 @@ function OrderDetails({ o, fmtMoney }: { o: AdminOrderRow; fmtMoney: (n: number)
         {o.address_line}, {o.postal_code} {o.city}
       </p>
       {o.note ? <p>Napomena: {o.note}</p> : null}
-      <ul className="list-disc pl-4 space-y-1 text-ink">
-        {Array.isArray(o.line_items)
-          ? (o.line_items as LineItem[]).map((li, i) => (
-              <li key={i}>
-                {li.name ?? li.slug} × {li.quantity} —{' '}
-                {li.line_total_rsd != null ? `${fmtMoney(Number(li.line_total_rsd))} RSD` : ''}
-              </li>
-            ))
-          : null}
-      </ul>
+      {!detailsLoaded && !detailsLoading ? (
+        <button
+          type="button"
+          onClick={onRequestDetails}
+          className="font-body text-[11px] text-ink underline underline-offset-2"
+        >
+          Učitaj stavke korpe
+        </button>
+      ) : null}
+      {detailsLoading ? (
+        <p className="text-[10px] text-silver-mid">Učitavanje stavki…</p>
+      ) : null}
+      {detailsLoaded && Array.isArray(o.line_items) ? (
+        <ul className="list-disc pl-4 space-y-1 text-ink">
+          {(o.line_items as LineItem[]).map((li, i) => (
+            <li key={i}>
+              {li.name ?? li.slug} × {li.quantity} —{' '}
+              {li.line_total_rsd != null ? `${fmtMoney(Number(li.line_total_rsd))} RSD` : ''}
+            </li>
+          ))}
+        </ul>
+      ) : null}
       {(o.subtotal_rsd != null ||
         o.discount_type ||
         o.referral_discount_percent != null ||
@@ -138,6 +165,60 @@ function OrderDetails({ o, fmtMoney }: { o: AdminOrderRow; fmtMoney: (n: number)
         </div>
       )}
     </div>
+  );
+}
+
+function OrderDetailsExpander({
+  o,
+  fmtMoney,
+  patchOrder,
+  className,
+}: {
+  o: AdminOrderRow;
+  fmtMoney: (n: number) => string;
+  patchOrder: (id: string, patch: Partial<AdminOrderRow>) => void;
+  className?: string;
+}) {
+  const hasLineItems = Array.isArray(o.line_items);
+  const [loading, setLoading] = useState(false);
+
+  const loadDetails = useCallback(async () => {
+    if (hasLineItems || loading) return;
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('orders')
+      .select(ORDER_DETAILS_COLUMNS)
+      .eq('id', o.id)
+      .maybeSingle();
+    setLoading(false);
+    if (!error && data) {
+      patchOrder(o.id, data as Partial<AdminOrderRow>);
+    }
+  }, [hasLineItems, loading, o.id, patchOrder]);
+
+  const onToggle = (e: React.SyntheticEvent<HTMLDetailsElement>) => {
+    if ((e.target as HTMLDetailsElement).open) {
+      void loadDetails();
+    }
+  };
+
+  return (
+    <details className={className ?? 'cursor-pointer'} onToggle={onToggle}>
+      <summary className="font-body text-[11px] text-ink underline underline-offset-2">
+        Adresa i stavke
+      </summary>
+      <div className="mt-3 pl-1 max-w-[320px]">
+        <OrderDetails
+          o={o}
+          fmtMoney={fmtMoney}
+          onRequestDetails={() => void loadDetails()}
+          detailsLoaded={hasLineItems}
+          detailsLoading={loading}
+        />
+      </div>
+    </details>
   );
 }
 
@@ -196,17 +277,104 @@ function OrderAdminNotesField({
   );
 }
 
-export default function AdminPorudzbineClient({ initialOrders, listTruncated }: Props) {
+export default function AdminPorudzbineClient({ initialOrders, initialHasMore }: Props) {
   const [orders, setOrders] = useState(initialOrders);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => {
+      setSearchQuery(searchInput.trim());
+    }, 300);
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  }, [searchInput]);
+
+  const fetchOrders = useCallback(
+    async (opts: { q: string; offset: number; append: boolean }) => {
+      const params = new URLSearchParams();
+      if (opts.q) params.set('q', opts.q);
+      if (statusFilter !== 'all') params.set('status', statusFilter);
+      if (!opts.q && opts.offset > 0) params.set('offset', String(opts.offset));
+
+      const res = await fetch(`/api/admin/orders?${params.toString()}`);
+      const data = (await res.json()) as {
+        orders?: AdminOrderRow[];
+        hasMore?: boolean;
+        error?: string;
+      };
+
+      if (!res.ok) {
+        throw new Error(data.error ?? 'Učitavanje nije uspelo.');
+      }
+
+      const rows = data.orders ?? [];
+      setOrders((prev) => (opts.append ? [...prev, ...rows] : rows));
+      setHasMore(Boolean(data.hasMore));
+    },
+    [statusFilter],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    setFetchError(null);
+
+    if (!searchQuery) {
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    void (async () => {
+      try {
+        await fetchOrders({ q: searchQuery, offset: 0, append: false });
+      } catch (err) {
+        if (!cancelled) {
+          setFetchError(err instanceof Error ? err.message : 'Pretraga nije uspela.');
+        }
+      } finally {
+        if (!cancelled) setIsSearching(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchQuery, statusFilter, fetchOrders]);
+
+  useEffect(() => {
+    if (searchQuery) return;
+    setOrders(initialOrders);
+    setHasMore(initialHasMore);
+  }, [initialOrders, initialHasMore, searchQuery]);
 
   const filteredOrders = useMemo(() => {
+    if (searchQuery) return orders;
     if (statusFilter === 'all') return orders;
-    return orders.filter(
-      (o) => canonicalStatusForFilter(o.status) === statusFilter,
-    );
-  }, [orders, statusFilter]);
+    return orders.filter((o) => canonicalStatusForFilter(o.status) === statusFilter);
+  }, [orders, statusFilter, searchQuery]);
+
+  const loadMore = async () => {
+    if (searchQuery || loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    setFetchError(null);
+    try {
+      await fetchOrders({ q: '', offset: orders.length, append: true });
+    } catch (err) {
+      setFetchError(err instanceof Error ? err.message : 'Učitavanje nije uspelo.');
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const updateStatus = async (id: string, status: string) => {
     const supabase = getSupabaseBrowserClient();
@@ -221,6 +389,10 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
 
   const patchAdminNotes = (id: string, admin_notes: string | null) => {
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, admin_notes } : o)));
+  };
+
+  const patchOrder = (id: string, patch: Partial<AdminOrderRow>) => {
+    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, ...patch } : o)));
   };
 
   const fmtMoney = (n: number) =>
@@ -248,15 +420,44 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
       <h2 className="font-display font-[300] text-[20px] md:text-[24px] text-ink mb-2">
         Sve porudžbine
       </h2>
-      <p className="font-body font-[300] text-[12px] md:text-[13px] text-silver-dark mb-6 md:mb-8 max-w-[720px] leading-relaxed">
+      <p className="font-body font-[300] text-[12px] md:text-[13px] text-silver-dark mb-4 md:mb-5 max-w-[720px] leading-relaxed">
         Plaćanje je <strong className="font-[400] text-ink">pouzećem</strong>. Pregled pošiljki,
         kupac, kontakt, adresa, stavke korpe, referral i status. Broj telefona je link za poziv.
-        {listTruncated ? (
+        {!searchQuery ? (
           <span className="block mt-2 text-silver-mid">
-            Prikazano je poslednjih {orders.length} porudžbina.
+            Prikazano je poslednjih {orders.length} porudžbina. Koristi pretragu za starije ili
+            učitaj još.
           </span>
         ) : null}
       </p>
+
+      <div className="mb-5 md:mb-6 space-y-3">
+        <label htmlFor="admin-orders-search" className="sr-only">
+          Pretraga porudžbina
+        </label>
+        <input
+          id="admin-orders-search"
+          type="search"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          placeholder="Pretraga: ime, telefon, email, adresa, grad, cena, proizvod…"
+          className="w-full border border-silver-light bg-white px-3 py-2.5 font-body text-[13px] text-ink placeholder:text-silver-mid focus:border-sage-mid focus:outline-none"
+        />
+        {isSearching ? (
+          <p className="font-body font-[300] text-[11px] text-silver-mid">Pretraga…</p>
+        ) : null}
+        {fetchError ? (
+          <p className="font-body font-[300] text-[11px] text-red-800" role="alert">
+            {fetchError}
+          </p>
+        ) : null}
+        {searchQuery && !isSearching ? (
+          <p className="font-body font-[300] text-[11px] text-silver-mid">
+            Rezultata: {filteredOrders.length}
+            {filteredOrders.length === 0 ? ' — probaj drugi pojam.' : null}
+          </p>
+        ) : null}
+      </div>
 
       <div className="mb-5 md:mb-6 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
         <label
@@ -278,12 +479,25 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
             </option>
           ))}
         </select>
-        {statusFilter !== 'all' && (
+        {statusFilter !== 'all' && !searchQuery && (
           <span className="font-body font-[300] text-[11px] text-silver-mid">
             Prikazano: {filteredOrders.length} od {orders.length}
           </span>
         )}
       </div>
+
+      {!searchQuery && hasMore ? (
+        <div className="mb-5 md:mb-6">
+          <button
+            type="button"
+            onClick={() => void loadMore()}
+            disabled={loadingMore}
+            className="border border-silver-light bg-white px-4 py-2 font-body text-[12px] text-ink hover:border-sage-mid disabled:opacity-50"
+          >
+            {loadingMore ? 'Učitavanje…' : 'Učitaj starije porudžbine'}
+          </button>
+        </div>
+      ) : null}
 
       {/* ── Mobile: card layout ── */}
       <div className="md:hidden space-y-3">
@@ -352,14 +566,12 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
                 />
               </div>
 
-              <details className="cursor-pointer">
-                <summary className="font-body text-[11px] text-ink underline underline-offset-2">
-                  Adresa i stavke
-                </summary>
-                <div className="mt-3">
-                  <OrderDetails o={o} fmtMoney={fmtMoney} />
-                </div>
-              </details>
+              <OrderDetailsExpander
+                o={o}
+                fmtMoney={fmtMoney}
+                patchOrder={patchOrder}
+                className="cursor-pointer"
+              />
             </div>
           );
         })}
@@ -444,14 +656,7 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
                   </td>
                   <td className="px-3 py-3">{statusSelect(o)}</td>
                   <td className="px-3 py-3">
-                    <details className="cursor-pointer">
-                      <summary className="font-body text-[11px] text-ink underline underline-offset-2">
-                        Adresa i stavke
-                      </summary>
-                      <div className="mt-3 pl-1 max-w-[320px]">
-                        <OrderDetails o={o} fmtMoney={fmtMoney} />
-                      </div>
-                    </details>
+                    <OrderDetailsExpander o={o} fmtMoney={fmtMoney} patchOrder={patchOrder} />
                   </td>
                   <td className="px-3 py-3 align-top min-w-[220px] max-w-[280px]">
                     <OrderAdminNotesField
@@ -473,7 +678,9 @@ export default function AdminPorudzbineClient({ initialOrders, listTruncated }: 
         </p>
       ) : filteredOrders.length === 0 ? (
         <p className="mt-8 font-body font-[300] text-[14px] text-silver-dark text-center border border-dashed border-silver-light py-12">
-          Nema porudžbina sa izabranim statusom. Izaberite drugi filter ili „Sve porudžbine“.
+          {searchQuery
+            ? 'Nema rezultata za tu pretragu.'
+            : 'Nema porudžbina sa izabranim statusom. Izaberite drugi filter ili „Sve porudžbine“.'}
         </p>
       ) : null}
     </div>
