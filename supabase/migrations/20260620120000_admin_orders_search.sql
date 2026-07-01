@@ -69,21 +69,11 @@ BEGIN
       public.normalize_search_text(
         coalesce(o.customer_first_name, '') || ' ' ||
         coalesce(o.customer_last_name, '') || ' ' ||
-        coalesce(o.customer_email, '') || ' ' ||
         coalesce(o.customer_phone, '') || ' ' ||
+        o.total_rsd::text || ' ' ||
         coalesce(o.address_line, '') || ' ' ||
         coalesce(o.city, '') || ' ' ||
-        coalesce(o.postal_code, '') || ' ' ||
-        coalesce(o.note, '') || ' ' ||
-        coalesce(o.admin_notes, '') || ' ' ||
-        coalesce(o.referral_code, '') || ' ' ||
-        coalesce(o.promo_code, '') || ' ' ||
-        coalesce(o.status, '') || ' ' ||
-        o.id::text || ' ' ||
-        o.line_items::text || ' ' ||
-        o.total_rsd::text || ' ' ||
-        coalesce(o.subtotal_rsd, 0)::text || ' ' ||
-        coalesce(o.shipping_rsd, 0)::text
+        coalesce(o.postal_code, '')
       ) LIKE '%' || public.normalize_search_text(t) || '%'
     )
     FROM unnest(tokens) AS t
@@ -103,4 +93,4 @@ GRANT EXECUTE ON FUNCTION public.search_admin_orders(text, text, integer, intege
 GRANT EXECUTE ON FUNCTION public.search_admin_orders(text, text, integer, integer) TO service_role;
 
 COMMENT ON FUNCTION public.search_admin_orders IS
-  'Pretraga porudžbina za admin panel — svi tokeni moraju da se nađu; ignoriše velika/mala slova i č/ć/š/đ.';
+  'Pretraga po imenu, prezimenu, telefonu, iznosu, ulici, gradu i poštanskom broju.';
