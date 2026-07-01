@@ -304,7 +304,7 @@ export default function AdminPorudzbineClient({ initialOrders, initialHasMore }:
       const params = new URLSearchParams();
       if (opts.q) params.set('q', opts.q);
       if (statusFilter !== 'all') params.set('status', statusFilter);
-      if (!opts.q && opts.offset > 0) params.set('offset', String(opts.offset));
+      if (opts.offset > 0) params.set('offset', String(opts.offset));
 
       const res = await fetch(`/api/admin/orders?${params.toString()}`);
       const data = (await res.json()) as {
@@ -364,11 +364,11 @@ export default function AdminPorudzbineClient({ initialOrders, initialHasMore }:
   }, [orders, statusFilter, searchQuery]);
 
   const loadMore = async () => {
-    if (searchQuery || loadingMore || !hasMore) return;
+    if (loadingMore || !hasMore) return;
     setLoadingMore(true);
     setFetchError(null);
     try {
-      await fetchOrders({ q: '', offset: orders.length, append: true });
+      await fetchOrders({ q: searchQuery, offset: orders.length, append: true });
     } catch (err) {
       setFetchError(err instanceof Error ? err.message : 'Učitavanje nije uspelo.');
     } finally {
@@ -486,7 +486,7 @@ export default function AdminPorudzbineClient({ initialOrders, initialHasMore }:
         )}
       </div>
 
-      {!searchQuery && hasMore ? (
+      {hasMore ? (
         <div className="mb-5 md:mb-6">
           <button
             type="button"
@@ -494,7 +494,11 @@ export default function AdminPorudzbineClient({ initialOrders, initialHasMore }:
             disabled={loadingMore}
             className="border border-silver-light bg-white px-4 py-2 font-body text-[12px] text-ink hover:border-sage-mid disabled:opacity-50"
           >
-            {loadingMore ? 'Učitavanje…' : 'Učitaj starije porudžbine'}
+            {loadingMore
+              ? 'Učitavanje…'
+              : searchQuery
+                ? 'Učitaj još rezultata pretrage'
+                : 'Učitaj starije porudžbine'}
           </button>
         </div>
       ) : null}

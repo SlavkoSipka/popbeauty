@@ -6,14 +6,14 @@ import {
   ORDER_SEARCH_LIMIT,
 } from '@/lib/supabase/query-limits';
 
-async function requireAdminApi() {
+export async function GET(request: Request) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { supabase: null, error: NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 }) };
+    return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
   }
 
   const { data: adminRow } = await supabase
@@ -23,44 +23,40 @@ async function requireAdminApi() {
     .maybeSingle();
 
   if (!adminRow) {
-    return { supabase: null, error: NextResponse.json({ error: 'Nemate admin pristup.' }, { status: 403 }) };
+    return NextResponse.json({ error: 'Nemate admin pristup.' }, { status: 403 });
   }
-
-  return { supabase, error: null };
-}
-
-export async function GET(request: Request) {
-  const auth = await requireAdminApi();
-  if (auth.error) return auth.error;
-  const supabase = auth.supabase!;
 
   const { searchParams } = new URL(request.url);
   const q = searchParams.get('q')?.trim() ?? '';
   const status = searchParams.get('status')?.trim() ?? 'all';
   const offset = Math.max(0, Number(searchParams.get('offset') ?? 0) || 0);
   const limitRaw = Number(searchParams.get('limit') ?? 0) || 0;
-  const limit = q
+  const isSearch = q.length > 0;
+  const limit = isSearch
     ? Math.min(Math.max(1, limitRaw || ORDER_SEARCH_LIMIT), ORDER_SEARCH_LIMIT)
     : Math.min(Math.max(1, limitRaw || ORDER_LIST_INITIAL_LIMIT), ORDER_LIST_INITIAL_LIMIT);
 
   const { data, error, hasMore } = await fetchOrdersForAdminList(supabase, {
     search: q || undefined,
     status: status !== 'all' ? status : undefined,
-    offset: q ? 0 : offset,
+    offset,
     limit,
-    includeLineItems: q.length > 0,
+    includeLineItems: isSearch,
   });
 
   if (error || !data) {
-    return NextResponse.json(
-      { error: error?.message ?? 'Učitavanje nije uspelo.' },
-      { status: 500 },
-    );
+    const message = error?.message ?? 'Učitavanje nije uspelo.';
+    const hint =
+      isSearch &&
+      (message.includes('search_admin_orders') || message.includes('Could not find the function'))
+        ? ' Pokreni migraciju supabase/migrations/20260620120000_admin_orders_search.sql u Supabase SQL Editoru.'
+        : '';
+    return NextResponse.json({ error: `${message}${hint}` }, { status: 500 });
   }
 
   return NextResponse.json({
     orders: data,
     hasMore,
-    search: q.length > 0,
+    search: isSearch,
   });
 }

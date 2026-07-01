@@ -4,8 +4,8 @@ export const ORDER_LIST_LIMIT = 500;
 /** Po stranici na admin listi porudžbina (brži prvi prikaz). */
 export const ORDER_LIST_INITIAL_LIMIT = 50;
 
-/** Maks. rezultata pretrage porudžbina. */
-export const ORDER_SEARCH_LIMIT = 150;
+/** Maks. rezultata pretrage porudžbina (cela baza). */
+export const ORDER_SEARCH_LIMIT = 500;
 
 /**
  * Glavni SELECT za admin listu porudžbina.

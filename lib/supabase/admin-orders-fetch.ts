@@ -1,9 +1,4 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import {
-  buildOrdersOrFilter,
-  orderMatchesAllTokens,
-  orderSearchTokens,
-} from '@/lib/admin-order-search';
 import type { AdminOrderRow } from '@/components/admin/AdminPorudzbineClient';
 import {
   ORDER_LIST_COLUMNS,
@@ -49,62 +44,81 @@ function columnAttempts(includeLineItems: boolean): readonly string[] {
   ];
 }
 
+async function fetchOrdersViaSearchRpc(
+  supabase: SupabaseClient,
+  options: {
+    search: string;
+    status?: string;
+    limit: number;
+    offset: number;
+  },
+): Promise<FetchAdminOrdersResult> {
+  const { data, error } = await supabase.rpc('search_admin_orders', {
+    p_query: options.search,
+    p_status: options.status && options.status !== 'all' ? options.status : null,
+    p_limit: options.limit,
+    p_offset: options.offset,
+  });
+
+  if (error) {
+    return { data: null, error: { message: error.message }, hasMore: false };
+  }
+
+  const rows = (data ?? []) as unknown as AdminOrderRow[];
+  return {
+    data: rows,
+    error: null,
+    hasMore: rows.length >= options.limit,
+  };
+}
+
 /**
  * Učitava porudžbine za admin panel; ako novije kolone ne postoje u bazi,
  * automatski koristi uži SELECT (bez pada cele stranice).
+ * Pretraga ide preko RPC `search_admin_orders` (cela tabela).
  */
 export async function fetchOrdersForAdminList(
   supabase: SupabaseClient,
   options: FetchAdminOrdersOptions = {},
 ): Promise<FetchAdminOrdersResult> {
   const search = options.search?.trim() ?? '';
-  const includeLineItems = options.includeLineItems ?? search.length > 0;
   const isSearch = search.length > 0;
   const limit = options.limit ?? (isSearch ? ORDER_SEARCH_LIMIT : ORDER_LIST_INITIAL_LIMIT);
   const offset = options.offset ?? 0;
   const status = options.status?.trim();
+  const includeLineItems = options.includeLineItems ?? isSearch;
+
+  if (isSearch) {
+    return fetchOrdersViaSearchRpc(supabase, {
+      search,
+      status,
+      limit,
+      offset,
+    });
+  }
 
   const attempts = columnAttempts(includeLineItems);
-  const orFilter = isSearch ? buildOrdersOrFilter(search) : null;
-  const tokens = isSearch ? orderSearchTokens(search) : [];
-
   let lastError: { message: string } | null = null;
 
   for (const columns of attempts) {
     let query = supabase
       .from('orders')
       .select(columns as never)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
     if (status && status !== 'all') {
       query = query.eq('status', status);
     }
 
-    if (orFilter) {
-      query = query.or(orFilter);
-    }
-
-    // Pretraga: uvek 0..limit-1; paginacija: range.
-    if (isSearch) {
-      query = query.range(0, Math.max(0, limit - 1));
-    } else {
-      query = query.range(offset, offset + limit - 1);
-    }
-
     const { data, error } = await query;
 
     if (!error) {
-      let rows = (data ?? []) as unknown as AdminOrderRow[];
-      if (tokens.length > 1) {
-        rows = rows.filter((o) => orderMatchesAllTokens(o, tokens));
-      }
-
-      const hasMore = !isSearch && rows.length >= limit;
-
+      const rows = (data ?? []) as unknown as AdminOrderRow[];
       return {
         data: rows,
         error: null,
-        hasMore,
+        hasMore: rows.length >= limit,
       };
     }
 
