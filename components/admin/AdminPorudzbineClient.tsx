@@ -5,6 +5,11 @@ import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { commissionEarnedRsd } from '@/lib/commission';
 import { SHIPPING_RSD } from '@/lib/shipping';
 import {
+  ORDER_LIST_INITIAL_LIMIT,
+  ORDER_LIST_PAGE_SIZE,
+  ORDER_SEARCH_LIMIT,
+} from '@/lib/supabase/query-limits';
+import {
   ORDER_STATUSES,
   ORDER_STATUS_LABELS,
   formatOrderStatusLabel,
@@ -301,30 +306,50 @@ export default function AdminPorudzbineClient({ initialOrders, initialHasMore }:
     };
   }, [searchInput]);
 
-  const fetchOrders = useCallback(
-    async (opts: { q: string; all?: boolean }) => {
+  const fetchOrdersPage = useCallback(
+    async (opts: { q: string; offset: number; limit: number }) => {
       const params = new URLSearchParams();
       if (opts.q) params.set('q', opts.q);
       if (statusFilter !== 'all') params.set('status', statusFilter);
-      if (opts.all) params.set('all', '1');
+      if (opts.offset > 0) params.set('offset', String(opts.offset));
+      params.set('limit', String(opts.limit));
 
       const res = await fetch(`/api/admin/orders?${params.toString()}`);
-      const data = (await res.json()) as {
-        orders?: AdminOrderRow[];
-        hasMore?: boolean;
-        error?: string;
-      };
+      const text = await res.text();
+      if (!text.trim()) {
+        throw new Error('Prazan odgovor servera. Pokušaj ponovo.');
+      }
+
+      let data: { orders?: AdminOrderRow[]; hasMore?: boolean; error?: string };
+      try {
+        data = JSON.parse(text) as typeof data;
+      } catch {
+        throw new Error('Server nije vratio validan odgovor. Pokušaj ponovo.');
+      }
 
       if (!res.ok) {
         throw new Error(data.error ?? 'Učitavanje nije uspelo.');
       }
 
-      const rows = data.orders ?? [];
-      setOrders(rows);
-      setHasMore(Boolean(data.hasMore));
-      if (opts.all) setAllLoaded(true);
+      return {
+        rows: data.orders ?? [],
+        hasMore: Boolean(data.hasMore),
+      };
     },
     [statusFilter],
+  );
+
+  const fetchOrders = useCallback(
+    async (opts: { q: string }) => {
+      const { rows, hasMore } = await fetchOrdersPage({
+        q: opts.q,
+        offset: 0,
+        limit: ORDER_LIST_INITIAL_LIMIT,
+      });
+      setOrders(rows);
+      setHasMore(hasMore);
+    },
+    [fetchOrdersPage],
   );
 
   useEffect(() => {
@@ -412,7 +437,31 @@ export default function AdminPorudzbineClient({ initialOrders, initialHasMore }:
     setLoadingAll(true);
     setFetchError(null);
     try {
-      await fetchOrders({ q: searchQuery, all: true });
+      let accumulated = [...orders];
+      let offset = orders.length;
+      let more = hasMore;
+      const batchSize = searchQuery ? ORDER_SEARCH_LIMIT : ORDER_LIST_PAGE_SIZE;
+      let batches = 0;
+      const maxBatches = 30;
+
+      while (more && batches < maxBatches) {
+        const { rows, hasMore: nextHasMore } = await fetchOrdersPage({
+          q: searchQuery,
+          offset,
+          limit: batchSize,
+        });
+        accumulated = [...accumulated, ...rows];
+        offset += rows.length;
+        more = nextHasMore && rows.length > 0;
+        batches += 1;
+        setOrders(accumulated);
+        setHasMore(more);
+      }
+
+      setAllLoaded(!more);
+      if (more) {
+        setFetchError('Učitano je maksimum porudžbina. Koristi pretragu za starije.');
+      }
     } catch (err) {
       setFetchError(err instanceof Error ? err.message : 'Učitavanje nije uspelo.');
     } finally {

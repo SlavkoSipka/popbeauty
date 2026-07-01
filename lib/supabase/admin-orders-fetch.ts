@@ -19,8 +19,6 @@ export type FetchAdminOrdersOptions = {
   status?: string;
   /** Uključi line_items (pretraga po nazivima proizvoda). Default: true kad ima search. */
   includeLineItems?: boolean;
-  /** Učitaj sve redove koji odgovaraju filteru (paginacija u pozadini). */
-  fetchAll?: boolean;
 };
 
 export type FetchAdminOrdersResult = {
@@ -83,10 +81,6 @@ export async function fetchOrdersForAdminList(
   supabase: SupabaseClient,
   options: FetchAdminOrdersOptions = {},
 ): Promise<FetchAdminOrdersResult> {
-  if (options.fetchAll) {
-    return fetchAllOrdersForAdminList(supabase, options);
-  }
-
   const search = options.search?.trim() ?? '';
   const isSearch = search.length > 0;
   const limit =
@@ -141,48 +135,5 @@ export async function fetchOrdersForAdminList(
     data: null,
     error: lastError,
     hasMore: false,
-  };
-}
-
-const FETCH_ALL_PAGE_SIZE = 200;
-const FETCH_ALL_MAX_ROWS = 5000;
-
-/**
- * Učitava sve porudžbine koje odgovaraju filteru (status, pretraga), stranicu po stranicu.
- */
-export async function fetchAllOrdersForAdminList(
-  supabase: SupabaseClient,
-  options: Omit<FetchAdminOrdersOptions, 'limit' | 'offset' | 'fetchAll'> = {},
-): Promise<FetchAdminOrdersResult> {
-  const search = options.search?.trim() ?? '';
-  const isSearch = search.length > 0;
-  const pageSize = isSearch ? ORDER_SEARCH_LIMIT : FETCH_ALL_PAGE_SIZE;
-  const all: AdminOrderRow[] = [];
-  let offset = 0;
-
-  while (all.length < FETCH_ALL_MAX_ROWS) {
-    const batch = await fetchOrdersForAdminList(supabase, {
-      ...options,
-      limit: pageSize,
-      offset,
-    });
-
-    if (batch.error || !batch.data) {
-      return batch;
-    }
-
-    all.push(...batch.data);
-
-    if (!batch.hasMore || batch.data.length === 0) {
-      break;
-    }
-
-    offset += batch.data.length;
-  }
-
-  return {
-    data: all,
-    error: null,
-    hasMore: all.length >= FETCH_ALL_MAX_ROWS,
   };
 }

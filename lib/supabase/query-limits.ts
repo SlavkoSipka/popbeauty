@@ -4,6 +4,9 @@ export const ORDER_LIST_LIMIT = 500;
 /** Po stranici na admin listi porudžbina (brži prvi prikaz). */
 export const ORDER_LIST_INITIAL_LIMIT = 50;
 
+/** Veličina stranice pri „učitaj sve“ (batch na klijentu). */
+export const ORDER_LIST_PAGE_SIZE = 200;
+
 /** Maks. rezultata pretrage porudžbina (cela baza). */
 export const ORDER_SEARCH_LIMIT = 500;
 

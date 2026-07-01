@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { fetchOrdersForAdminList } from '@/lib/supabase/admin-orders-fetch';
 import {
   ORDER_LIST_INITIAL_LIMIT,
+  ORDER_LIST_LIMIT,
   ORDER_SEARCH_LIMIT,
 } from '@/lib/supabase/query-limits';
 
@@ -29,21 +30,19 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get('q')?.trim() ?? '';
   const status = searchParams.get('status')?.trim() ?? 'all';
-  const loadAll = searchParams.get('all') === '1';
   const offset = Math.max(0, Number(searchParams.get('offset') ?? 0) || 0);
   const limitRaw = Number(searchParams.get('limit') ?? 0) || 0;
   const isSearch = q.length > 0;
-  const limit = isSearch
-    ? Math.min(Math.max(1, limitRaw || ORDER_SEARCH_LIMIT), ORDER_SEARCH_LIMIT)
-    : Math.min(Math.max(1, limitRaw || ORDER_LIST_INITIAL_LIMIT), ORDER_LIST_INITIAL_LIMIT);
+  const defaultLimit = isSearch ? ORDER_SEARCH_LIMIT : ORDER_LIST_INITIAL_LIMIT;
+  const maxLimit = isSearch ? ORDER_SEARCH_LIMIT : ORDER_LIST_LIMIT;
+  const limit = Math.min(Math.max(1, limitRaw || defaultLimit), maxLimit);
 
   const { data, error, hasMore } = await fetchOrdersForAdminList(supabase, {
     search: q || undefined,
     status: status !== 'all' ? status : undefined,
-    offset: loadAll ? 0 : offset,
-    limit: loadAll ? undefined : limit,
+    offset,
+    limit,
     includeLineItems: isSearch,
-    fetchAll: loadAll,
   });
 
   if (error || !data) {
