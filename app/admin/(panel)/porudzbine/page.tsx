@@ -11,7 +11,6 @@ export default async function AdminPorudzbinePage() {
   const { data, error, hasMore } = await fetchOrdersForAdminList(supabase, {
     limit: ORDER_LIST_INITIAL_LIMIT,
     offset: 0,
-    includeLineItems: false,
   });
 
   if (error || !data) {

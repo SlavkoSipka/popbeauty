@@ -42,7 +42,6 @@ export async function GET(request: Request) {
     status: status !== 'all' ? status : undefined,
     offset,
     limit,
-    includeLineItems: isSearch,
   });
 
   if (error || !data) {

@@ -88,7 +88,7 @@ export async function fetchOrdersForAdminList(
     (isSearch ? ORDER_SEARCH_LIMIT : ORDER_LIST_INITIAL_LIMIT);
   const offset = options.offset ?? 0;
   const status = options.status?.trim();
-  const includeLineItems = options.includeLineItems ?? isSearch;
+  const includeLineItems = options.includeLineItems ?? true;
 
   if (isSearch) {
     return fetchOrdersViaSearchRpc(supabase, {

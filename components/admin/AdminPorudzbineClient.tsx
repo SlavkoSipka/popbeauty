@@ -61,9 +61,6 @@ type Props = {
 
 type StatusFilter = 'all' | OrderStatus;
 
-const ORDER_DETAILS_COLUMNS =
-  'line_items, subtotal_rsd, discount_type, discount_percent, referral_discount_percent, promo_code, promo_discount_percent, promo_discount_rsd, shipping_rsd';
-
 /** Mapira stare engleske statuse na srpske radi filtera. */
 function canonicalStatusForFilter(raw: string): string {
   if ((ORDER_STATUSES as readonly string[]).includes(raw)) return raw;
@@ -90,15 +87,9 @@ function productsTotalRsd(o: AdminOrderRow): number {
 function OrderDetails({
   o,
   fmtMoney,
-  onRequestDetails,
-  detailsLoaded,
-  detailsLoading,
 }: {
   o: AdminOrderRow;
   fmtMoney: (n: number) => string;
-  onRequestDetails: () => void;
-  detailsLoaded: boolean;
-  detailsLoading: boolean;
 }) {
   const productsTotal = productsTotalRsd(o);
   return (
@@ -107,19 +98,7 @@ function OrderDetails({
         {o.address_line}, {o.postal_code} {o.city}
       </p>
       {o.note ? <p>Napomena: {o.note}</p> : null}
-      {!detailsLoaded && !detailsLoading ? (
-        <button
-          type="button"
-          onClick={onRequestDetails}
-          className="font-body text-[11px] text-ink underline underline-offset-2"
-        >
-          Učitaj stavke korpe
-        </button>
-      ) : null}
-      {detailsLoading ? (
-        <p className="text-[10px] text-silver-mid">Učitavanje stavki…</p>
-      ) : null}
-      {detailsLoaded && Array.isArray(o.line_items) ? (
+      {Array.isArray(o.line_items) ? (
         <ul className="list-disc pl-4 space-y-1 text-ink">
           {(o.line_items as LineItem[]).map((li, i) => (
             <li key={i}>
@@ -176,52 +155,19 @@ function OrderDetails({
 function OrderDetailsExpander({
   o,
   fmtMoney,
-  patchOrder,
   className,
 }: {
   o: AdminOrderRow;
   fmtMoney: (n: number) => string;
-  patchOrder: (id: string, patch: Partial<AdminOrderRow>) => void;
   className?: string;
 }) {
-  const hasLineItems = Array.isArray(o.line_items);
-  const [loading, setLoading] = useState(false);
-
-  const loadDetails = useCallback(async () => {
-    if (hasLineItems || loading) return;
-    const supabase = getSupabaseBrowserClient();
-    if (!supabase) return;
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('orders')
-      .select(ORDER_DETAILS_COLUMNS)
-      .eq('id', o.id)
-      .maybeSingle();
-    setLoading(false);
-    if (!error && data) {
-      patchOrder(o.id, data as Partial<AdminOrderRow>);
-    }
-  }, [hasLineItems, loading, o.id, patchOrder]);
-
-  const onToggle = (e: React.SyntheticEvent<HTMLDetailsElement>) => {
-    if ((e.target as HTMLDetailsElement).open) {
-      void loadDetails();
-    }
-  };
-
   return (
-    <details className={className ?? 'cursor-pointer'} onToggle={onToggle}>
+    <details className={className ?? 'cursor-pointer'}>
       <summary className="font-body text-[11px] text-ink underline underline-offset-2">
         Adresa i stavke
       </summary>
       <div className="mt-3 pl-1 max-w-[320px]">
-        <OrderDetails
-          o={o}
-          fmtMoney={fmtMoney}
-          onRequestDetails={() => void loadDetails()}
-          detailsLoaded={hasLineItems}
-          detailsLoading={loading}
-        />
+        <OrderDetails o={o} fmtMoney={fmtMoney} />
       </div>
     </details>
   );
@@ -484,10 +430,6 @@ export default function AdminPorudzbineClient({ initialOrders, initialHasMore }:
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, admin_notes } : o)));
   };
 
-  const patchOrder = (id: string, patch: Partial<AdminOrderRow>) => {
-    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, ...patch } : o)));
-  };
-
   const fmtMoney = (n: number) =>
     new Intl.NumberFormat('sr-RS', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
       n
@@ -679,12 +621,7 @@ export default function AdminPorudzbineClient({ initialOrders, initialHasMore }:
                 />
               </div>
 
-              <OrderDetailsExpander
-                o={o}
-                fmtMoney={fmtMoney}
-                patchOrder={patchOrder}
-                className="cursor-pointer"
-              />
+              <OrderDetailsExpander o={o} fmtMoney={fmtMoney} className="cursor-pointer" />
             </div>
           );
         })}
@@ -769,7 +706,7 @@ export default function AdminPorudzbineClient({ initialOrders, initialHasMore }:
                   </td>
                   <td className="px-3 py-3">{statusSelect(o)}</td>
                   <td className="px-3 py-3">
-                    <OrderDetailsExpander o={o} fmtMoney={fmtMoney} patchOrder={patchOrder} />
+                    <OrderDetailsExpander o={o} fmtMoney={fmtMoney} />
                   </td>
                   <td className="px-3 py-3 align-top min-w-[220px] max-w-[280px]">
                     <OrderAdminNotesField
