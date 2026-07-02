@@ -7,7 +7,8 @@ export const FREE_SHIPPING_THRESHOLD_RSD = 7000;
 export const FREE_SHIPPING_THRESHOLD_LABEL =
   'Besplatna dostava za sve porudžbine iznad 7.000 RSD';
 
-export const FREE_SHIPPING_BELGRADE_LABEL = 'Besplatna dostava na teritoriji Beograda';
+export const FREE_SHIPPING_BELGRADE_LABEL =
+  'Besplatna dostava na teritoriji Beograda. Moguće lično preuzimanje u Beogradu (Stari grad, Mirijevo).';
 
 /** Poštarina za dati iznos proizvoda (posle popusta). 0 = besplatna iznad praga. */
 export function shippingForProductsTotalRsd(productsTotalRsd: number): number {
